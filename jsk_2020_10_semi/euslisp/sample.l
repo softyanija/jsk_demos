@@ -17,6 +17,7 @@
 
 ;; use (mapcar #'(lambda (x) (send x :name)) (send *scene* :spots)) to get list of spots
 (send *fetch* :move-to (send *scene* :spot "/eng2/7f/room73B2-fetch-dock-front") :world)
+
 (when (send *ri* :simulation-modep)
   (send *ri* :robot :move-to (send *fetch* :copy-worldcoords) :world))
 
@@ -26,6 +27,7 @@
       (send (geo::make-bounding-box
              (flatten (send-all (send *fetch* :bodies) :vertices)))
             :grow 2.0))
+
 (send *irtviewer* :look1 (send *fetch* :worldpos) -170 40)
 (send *irtviewer* :draw-objects)
 

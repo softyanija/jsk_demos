@@ -43,6 +43,8 @@
   (send *co* :delete-object-by-id "shelf"))
 |#
 
+
+
 (send *fetch* :reset-pose)
 (send *ri* :angle-vector (send *fetch* :angle-vector) 4000)
 (send *ri* :wait-interpolation)
@@ -51,20 +53,14 @@
 (send *ri* :angle-vector (send *fetch* :angle-vector) 3000)
 (send *ri* :wait-interpolation)
 
-(send *fetch* :rarm :inverse-kinematics (send (send *fetch* :copy-worldcoords) :transform (make-coords :pos #f(600 250 680) :rpy (float-vector 0 0 pi/2))) :rotation-axis t :debug-view t)
-(send *fetch* :head :look-at #f(500 250 500))
+(send *fetch* :rarm :inverse-kinematics (send (send *fetch* :copy-worldcoords) :transform (make-coords :pos #f(600 250 690) :rpy (float-vector 0 0 pi/2))) :rotation-axis t :debug-view t)
+(send *fetch* :head :look-at #f(600 300 500))
 (send *ri* :angle-vector (send *fetch* :angle-vector) 7000)
 (send *ri* :wait-interpolation)
 
-(send *fetch* :rarm :move-end-pos #f(160 0 0))
-(send *fetch* :rarm :inverse-kinematics (send (send *fetch* :copy-worldcoords) :transform (make-coords :pos #f(600 250 680) :rpy (float-vector 0 0 pi/2))) :rotation-axis t :debug-view t)(send *ri* :angle-vector (send *fetch* :angle-vector) 10000)
-(send *ri* :wait-interpolation)
-
-(send *fetch* :rarm :move-end-pos #f(210 0 0))
->>>>>>> eeb3432a710a60946ef786f68004dc30dc297a7f
+(send *fetch* :rarm :move-end-pos #f(180 0 0))
 (send *ri* :angle-vector (send *fetch* :angle-vector) 3000)
 (send *ri* :wait-interpolation)
-
 
 ;;open shelf 
 (send *ri* :start-grasp :effort 60)
@@ -76,6 +72,30 @@
 (send *fetch* :rarm :move-end-pos (v- #f(0 0 0) pull-range))
 (send *ri* :angle-vector (send *fetch* :angle-vector) 4000 :use-torso nil)
 (send *ri* :wait-interpolation)
+
+;;一旦放して肘を下げる
+(send *ri* :stop-grasp :effort 60)
+(unix:sleep 1)
+(send *ri* :wait-interpolation)
+(send *fetch* :rarm :move-end-pos #f(-50 0 0))
+(send *ri* :angle-vector (send *fetch* :angle-vector) 4000 :use-torso nil)
+(send *ri* :wait-interpolation)
+(send *fetch* :rarm :move-end-pos #f(0 -150 0))
+(send *ri* :angle-vector (send *fetch* :angle-vector) 4000 :use-torso nil)
+(send *ri* :wait-interpolation)
+
+;;ここで中身を確認
+
+(send *fetch* :rarm :move-end-pos #f(0 150 0))
+(send *ri* :angle-vector (send *fetch* :angle-vector) 4000 :use-torso nil)
+(send *ri* :wait-interpolation)
+(send *fetch* :rarm :move-end-pos #f(50 0 0))
+(send *ri* :angle-vector (send *fetch* :angle-vector) 4000 :use-torso nil)
+(send *ri* :wait-interpolation)
+(send *ri* :start-grasp :effort 60)
+(unix:sleep 1)
+(send *ri* :wait-interpolation)
+
 (send *fetch* :rarm :move-end-pos pull-range)
 (send *ri* :angle-vector (send *fetch* :angle-vector) 4000 :use-torso nil)
 (send *ri* :wait-interpolation)

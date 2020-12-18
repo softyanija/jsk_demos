@@ -1,0 +1,12 @@
+(defun voice_confirm()
+  (speak-jp "探し物が終わったら言ってください" :topic-name "laptop_sound")
+  (while (ros::ok)
+    (setq message (one-shot-subscribe "/Tablet/voice" speech_recognition_msgs::SpeechRecognitionCandidates))
+    (setq message (elt (send messag
+			     e :transcript) 0))
+    ;;(print message)
+    (if (or (string= message "終わりました") (string= message "終わった"))
+	(speak-jp "では終わります" :topic-name "laptop_sound")
+	(return))
+    )
+  )

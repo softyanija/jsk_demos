@@ -1,0 +1,20 @@
+<launch>
+  <node pkg="jsk_2020_10_semi" type="demo_amabe.l" name="amabe"
+    output="screen" />
+  <!-- node pkg="rqt_image_view" type="rqt_image_view" name="rqt_image_view" / -->
+  <node pkg="image_view2" type="image_view2" name="image_view" >
+    <remap from="image" to="/head_camera/rgb/image_raw" />
+  </node>
+  <include file="$(find ros_speech_recognition)/launch/speech_recognition.launch">
+    <arg name="language" value="ja-JP"/>
+    <arg name="device" value="hw:0,0"/>
+    <arg name="sample_rate" value="44100"/>
+    <arg name="n_channel" value="2"/>
+    <arg name="launch_sound_play" value="false"/>
+    <arg name="continuous" value="true"/>
+    <!-- device:=hw:0,0 sample_rate:=44100 n_channel:=2 launch_sound_play:=false continuous:=true/> -->
+  </include>
+  <include file="$(find aques_talk)/launch/aques_talk.launch">
+    <arg name ="sound_play_topic" value="laptop_sound"/>
+  </include>
+</launch>

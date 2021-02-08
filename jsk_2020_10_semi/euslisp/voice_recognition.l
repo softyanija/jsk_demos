@@ -4,10 +4,14 @@
   (while (and (ros::ok) (= f_w 0))
     (setq message (one-shot-subscribe "/Tablet/voice" speech_recognition_msgs::SpeechRecognitionCandidates))
     (setq message (elt (send message :transcript) 0))
-    ;;(print voice)
-    (cond ((string= message "三段目") (progn
+    (print message)
+    (cond ((or (string= message "三段目") (string= message "担々麺")) (progn
 					(speak-jp "三段目ですね" :topic-name "laptop_sound")
 					(setq f_w 3)
+					))
+	  ((or (string= message "2段目") (string= message "第2弾目")) (progn
+					(speak-jp "二段目ですね" :topic-name "laptop_sound")
+					(setq f_w 2)
 					))
 	  (t (speak-jp "もう一度言ってください" :topic-name "laptop_sound"))))
   f_w)

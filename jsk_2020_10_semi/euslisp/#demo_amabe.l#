@@ -39,10 +39,15 @@
   (print "start demo_amabe")
   (setq a (voice_which))
   (print "start voice_r")
-  (cond ((= a 3) (progn
+  (cond ((= a 2) (progn
 		   (pull_shelf_2)
 		   (voice_confirm)
 		   (return_shelf_2)
+		   ))
+	((= a 3) (progn
+		   (pull_shelf_3)
+		   (voice_confirm)
+		   (return_shelf_3)
 		   ))
 	(t (print "エラー")))
   )

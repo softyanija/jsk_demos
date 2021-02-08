@@ -1,0 +1,7 @@
+<launch>
+  <node pkg="jsk_2020_10_semi" type="demo_amabe.l" name="demo_amabe" />
+  <!-- node pkg="rqt_image_view" type="rqt_image_view" name="rqt_image_view" / -->
+  <node pkg="image_view2" type="image_view2" name="image_view" output="screen" />
+    <remap from="image" to="/head_camera/rgb/image_raw" />
+  </node>
+</launch>

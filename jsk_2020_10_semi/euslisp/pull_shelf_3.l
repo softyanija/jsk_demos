@@ -1,15 +1,15 @@
-;;pull_shelf_2.l
+;;pull_shelf_3.l
 (send *fetch* :reset-pose)
 (send *ri* :angle-vector (send *fetch* :angle-vector) 4000)
 (send *ri* :wait-interpolation)
 
 ;;手を取っ手の位置まで持っていく
-(send *fetch* :torso_lift_joint :joint-angle 380)
+(send *fetch* :torso_lift_joint :joint-angle 270)
 (send *ri* :angle-vector (send *fetch* :angle-vector) 3000)
 (send *ri* :wait-interpolation)
 
-(send *fetch* :rarm :inverse-kinematics (send (send *fetch* :copy-worldcoords) :transform (make-coords :pos #f(600 250 857) :rpy (float-vector 0 0 pi/2))) :rotation-axis t :debug-view t)
-(send *fetch* :head :look-at #f(750 170 660))
+(send *fetch* :rarm :inverse-kinematics (send (send *fetch* :copy-worldcoords) :transform (make-coords :pos #f(600 250 693) :rpy (float-vector 0 0 pi/2))) :rotation-axis t :debug-view t)
+(send *fetch* :head :look-at #f(750 170 500))
 (send *ri* :angle-vector (send *fetch* :angle-vector) 7000)
 (send *ri* :wait-interpolation)
 

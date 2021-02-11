@@ -1,0 +1,10 @@
+<launch>
+  <machine name="localhost" address="localhost" />
+  <machine name="fetch" user="amabe"
+           address='fetch15.jsk.imi.i.u-tokyo.ac.jp' env-loader="/opt/ros/melodic/env.sh" />
+  <node pkg="rosserial_python" type="serial_node.py" name="rosserial_python_node"
+        machine="fetch" />
+  <node pkg="rostopic" type="rostopic" name="listener"
+        args="echo /pressure"
+        launch-prefix="xterm -e" />
+</launch>

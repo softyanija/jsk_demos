@@ -1,4 +1,6 @@
-;;pull_shelf_3.l
+;;pull_shelf_3_imp.l
+(ros::load-ros-manifest "std_msgs")
+
 (send *fetch* :reset-pose)
 (send *ri* :angle-vector (send *fetch* :angle-vector) 4000)
 (send *ri* :wait-interpolation)
@@ -13,9 +15,26 @@
 (send *ri* :angle-vector (send *fetch* :angle-vector) 7000)
 (send *ri* :wait-interpolation)
 
+(ros::load-ros-manifest "std_msgs")
+(setq f 0)
+(setq dist 0)
+
+
+(while (and (= f 0) (< dist 250))
+  (setq pressure (one-shot-subscribe "/pressure" std_msgs::Float32))
+  (if (> (send pressure :data) 4.0)
+      (setq f 1)
+    (progn
+      (setq dist (+ dist 5))
+      (send *fetch* :rarm :move-end-pos #f(5 0 0))
+      (send *ri* :angle-vector (send *fetch* :angle-vector) 500)
+      (send *ri* :wait-interpolation))))
+  
+#|
 (send *fetch* :rarm :move-end-pos #f(180 0 0))
 (send *ri* :angle-vector (send *fetch* :angle-vector) 3000)
 (send *ri* :wait-interpolation)
+|#
 
 ;;取っ手をつかむ
 (send *ri* :start-grasp :effort 60)
@@ -38,4 +57,3 @@
 (send *fetch* :rarm :move-end-pos #f(0 -150 0))
 (send *ri* :angle-vector (send *fetch* :angle-vector) 4000 :use-torso nil)
 (send *ri* :wait-interpolation)
-

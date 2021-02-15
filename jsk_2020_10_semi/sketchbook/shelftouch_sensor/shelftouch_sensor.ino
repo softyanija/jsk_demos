@@ -1,11 +1,11 @@
 
 #include <ros.h>
-
-#include <std_msgs/UInt16.h>
+#include <math.h>
+#include <std_msgs/Float32.h>
 
 ros::NodeHandle nh;
 
-std_msgs::UInt16 p_msg;
+std_msgs::Float32 p_msg;
 
 ros::Publisher chatter("pressure", &p_msg);
 
@@ -30,7 +30,7 @@ void loop() {
   Serial.println(sensorValue);
   // print out the value you read:
   
-  p_msg.data = sensorValue;
+  p_msg.data = log(sensorValue + 1.0);
 
   chatter.publish( &p_msg );
   

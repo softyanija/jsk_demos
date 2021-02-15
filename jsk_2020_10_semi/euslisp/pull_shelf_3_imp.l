@@ -19,7 +19,7 @@
 (setq f 0)
 (setq dist 0)
 
-
+;;手が棚に当たるまで前に出す
 (while (and (= f 0) (< dist 250))
   (setq pressure (one-shot-subscribe "/pressure" std_msgs::Float32))
   (if (> (send pressure :data) 4.0)
@@ -27,7 +27,7 @@
     (progn
       (setq dist (+ dist 5))
       (send *fetch* :rarm :move-end-pos #f(5 0 0))
-      (send *ri* :angle-vector (send *fetch* :angle-vector) 500)
+      (send *ri* :angle-vector (send *fetch* :angle-vector) 300)
       (send *ri* :wait-interpolation))))
   
 #|

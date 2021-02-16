@@ -21,11 +21,11 @@
 (send *ri* :angle-vector (send *fetch* :angle-vector) 1000)
 (send *ri* :wait-interpolation)
 
+;;手が棚に当たるまで前に出す
 (ros::load-ros-manifest "std_msgs")
 (setq f 0)
 (setq dist 0)
 
-;;手が棚に当たるまで前に出す
 (delete-shelf-collision-object)
 
 (while (and (= f 0) (< dist 150))
@@ -35,7 +35,7 @@
     (progn
       (setq dist (+ dist 8))
       (send *fetch* :rarm :move-end-pos #f(8 0 0))
-      (send *ri* :angle-vector (send *fetch* :angle-vector) 150)
+      (send *ri* :angle-vector (send *fetch* :angle-vector) 200 :use-torso nil)
       (send *ri* :wait-interpolation))))
   
 #|

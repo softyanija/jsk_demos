@@ -25,6 +25,16 @@
 (defun delete-shelf-collision-object ()
   (send *co* :delete-object-by-id "shelf"))
 
+;;左側に障害物を設定
+(defun add-left-collision-object ()
+  (let ((shelf (make-cube 1500 10 1100)))
+    (send shelf :translate #f(0 650 550))
+    (send *co* :add-object shelf :frame-id "base_link" :object-id "left")))
+
+;;左側の障害物を削除
+(defun delete-left-collision-object ()
+  (send *co* :delete-object-by-id "left"))
+
 (defun pull_shelf_2()
   (format t ";;pull_shelf_2")
   (load "pull_shelf_2.l")

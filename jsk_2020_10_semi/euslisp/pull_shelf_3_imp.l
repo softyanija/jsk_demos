@@ -2,6 +2,7 @@
 (ros::load-ros-manifest "std_msgs")
 
 (add-shelf-collision-object)
+(add-left-collision-object)
 
 (send *fetch* :reset-pose)
 (send *ri* :angle-vector (send *fetch* :angle-vector) 4000)
@@ -21,28 +22,24 @@
 (send *ri* :angle-vector (send *fetch* :angle-vector) 1000)
 (send *ri* :wait-interpolation)
 
+;;手が棚に当たるまで前に出す
 (ros::load-ros-manifest "std_msgs")
 (setq f 0)
 (setq dist 0)
 
-;;手が棚に当たるまで前に出す
 (delete-shelf-collision-object)
 
-(while (and (= f 0) (< dist 150))
+(while (and (= f 0) (< dist 300))
   (setq pressure (one-shot-subscribe "/pressure" std_msgs::Float32))
   (if (> (send pressure :data) 4.0)
       (setq f 1)
     (progn
       (setq dist (+ dist 8))
       (send *fetch* :rarm :move-end-pos #f(8 0 0))
-      (send *ri* :angle-vector (send *fetch* :angle-vector) 150)
-      (send *ri* :wait-interpolation))))
-  
-#|
-(send *fetch* :rarm :move-end-pos #f(180 0 0))
-(send *ri* :angle-vector (send *fetch* :angle-vector) 3000)
-(send *ri* :wait-interpolation)
-|#
+      (send *ri* :angle-vector (send *fetch* :angle-vector) 200 :use-torso nil)
+      (send *ri* :wait-interpolation)
+      (ros::ros-info (format nil "dist : ~A" dist)))))
+    
 
 ;;取っ手をつかむ
 (send *ri* :start-grasp :effort 60)

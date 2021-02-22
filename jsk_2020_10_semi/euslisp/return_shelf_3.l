@@ -12,7 +12,7 @@
 (send *ri* :wait-interpolation)
 
 ;;引き出しを戻す
-(setq pull-range #f(150 0 0))
+(setq pull-range (float-vector (+ dist 70) 0 0))
 
 (send *fetch* :rarm :move-end-pos pull-range)
 (send *ri* :angle-vector (send *fetch* :angle-vector) 4000 :use-torso nil)

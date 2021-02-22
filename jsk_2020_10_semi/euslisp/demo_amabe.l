@@ -35,14 +35,14 @@
 (defun delete-left-collision-object ()
   (send *co* :delete-object-by-id "left"))
 
-(defun pull_shelf_2()
-  (format t ";;pull_shelf_2")
-  (load "pull_shelf_2.l")
+(defun pull_shelf_3()
+  (format t ";;pull_shelf_3")
+  (load "pull_shelf_3.l")
   )
 
-(defun return_shelf_2()
-  (format t ";;return_shelf_2")
-  (load "return_shelf_2.l")
+(defun return_shelf_3()
+  (format t ";;return_shelf_3")
+  (load "return_shelf_3.l")
   )
 
 (defun demo_amabe()
@@ -50,9 +50,9 @@
   (setq a (voice_which))
   (print "start voice_r")
   (cond ((= a 3) (progn
-		   (pull_shelf_2)
+		   (pull_shelf_3)
 		   (voice_confirm)
-		   (return_shelf_2)
+		   (return_shelf_3)
 		   ))
 	(t (print "エラー")))
   )

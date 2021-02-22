@@ -28,17 +28,24 @@
 (setq dist 0)
 
 (delete-shelf-collision-object)
-
-(while (and (= f 0) (< dist 300))
-  (setq pressure (one-shot-subscribe "/pressure" std_msgs::Float32))
-  (if (> (send pressure :data) 4.0)
-      (setq f 1)
-    (progn
-      (setq dist (+ dist 8))
-      (send *fetch* :rarm :move-end-pos #f(8 0 0))
-      (send *ri* :angle-vector (send *fetch* :angle-vector) 200 :use-torso nil)
-      (send *ri* :wait-interpolation)
-      (ros::ros-info (format nil "dist : ~A" dist)))))
+(while (= f 0)
+  (while (and (= f 0) (< dist 250))
+    (setq pressure (one-shot-subscribe "/pressure" std_msgs::Float32))
+    (if (> (send pressure :data) 4.0)
+	(setq f 1)
+      (progn
+	(setq dist (+ dist 8))
+	(send *fetch* :rarm :move-end-pos #f(8 0 0))
+	(send *ri* :angle-vector (send *fetch* :angle-vector) 200 :use-torso nil)
+	(send *ri* :wait-interpolation)
+	(ros::ros-info (format nil "dist : ~A" dist)))))
+  (if (= f 0)
+      (progn
+	(send *fetch* :rarm :move-end-pos (float-vector (- 0 dist) 0 0))
+	(send *ri* :angle-vector (send *fetch* :angle-vector) 1000 :use-torso nil)
+	(send *ri* :wait-interpolation)
+	(send *ri* :go-POS-UNSAFE 0.1 0 0)
+	(setq dist 0))))
     
 
 ;;取っ手をつかむ

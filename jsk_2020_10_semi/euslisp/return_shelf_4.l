@@ -1,7 +1,7 @@
-;;return_shelf_2.l
+;;return_shelf_4.l
 
 ;;取っ手を掴み直す
-(send *fetch* :rarm :move-end-pos #f(0 150 0))
+(send *fetch* :rarm :move-end-pos #f(0 50 0))
 (send *ri* :angle-vector (send *fetch* :angle-vector) 4000 :use-torso nil)
 (send *ri* :wait-interpolation)
 (send *fetch* :rarm :move-end-pos #f(50 0 0))

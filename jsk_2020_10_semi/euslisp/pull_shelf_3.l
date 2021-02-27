@@ -1,4 +1,4 @@
-;;pull_shelf_3_imp.l
+;;pull_shelf_3.l
 (ros::load-ros-manifest "std_msgs")
 
 (add-shelf-collision-object)
@@ -14,7 +14,6 @@
 (send *ri* :wait-interpolation)
 
 (send *fetch* :rarm :inverse-kinematics (send (send *fetch* :copy-worldcoords) :transform (make-coords :pos #f(600 250 693) :rpy (float-vector 0 0 pi/2))) :rotation-axis t :debug-view t)
-(send *fetch* :head :look-at #f(750 170 500))
 (send *ri* :angle-vector (send *fetch* :angle-vector) 7000)
 (send *ri* :wait-interpolation)
 
@@ -23,7 +22,6 @@
 (send *ri* :wait-interpolation)
 
 ;;手が棚に当たるまで前に出す
-(ros::load-ros-manifest "std_msgs")
 (setq f 0)
 (setq dist 0)
 
@@ -46,7 +44,10 @@
 	(send *ri* :wait-interpolation)
 	(send *ri* :go-POS-UNSAFE 0.1 0 0)
 	(setq dist 0))))
-    
+
+;;顔を手の方へ向ける
+(send *fetch* :head :look-at (float-vector (+ 620 dist) 170 500))
+(send *ri* :angle-vector (send *fetch* :angle-vector) 1000)
 
 ;;取っ手をつかむ
 (send *ri* :start-grasp :effort 60)

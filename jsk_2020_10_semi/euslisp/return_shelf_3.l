@@ -22,7 +22,7 @@
 (unix:sleep 1)
 (send *ri* :wait-interpolation)
 
-(send *fetch* :rarm :move-end-pos #f(-160 0 0))
+(send *fetch* :rarm :move-end-pos (v- #f(0 0 0) pull-range))
 (send *ri* :angle-vector (send *fetch* :angle-vector) 4000 :use-torso nil)
 (send *ri* :wait-interpolation)
 

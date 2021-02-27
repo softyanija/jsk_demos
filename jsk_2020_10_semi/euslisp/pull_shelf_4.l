@@ -1,4 +1,4 @@
-;;pull_shelf_3_imp.l
+;;pull_shelf_4.l
 (ros::load-ros-manifest "std_msgs")
 
 (add-shelf-collision-object)
@@ -9,12 +9,11 @@
 (send *ri* :wait-interpolation)
 
 ;;手を取っ手の位置まで持っていく
-(send *fetch* :torso_lift_joint :joint-angle 270)
+(send *fetch* :torso_lift_joint :joint-angle 130)
 (send *ri* :angle-vector (send *fetch* :angle-vector) 3000)
 (send *ri* :wait-interpolation)
 
-(send *fetch* :rarm :inverse-kinematics (send (send *fetch* :copy-worldcoords) :transform (make-coords :pos #f(600 250 693) :rpy (float-vector 0 0 pi/2))) :rotation-axis t :debug-view t)
-(send *fetch* :head :look-at #f(750 170 500))
+(send *fetch* :rarm :inverse-kinematics (send (send *fetch* :copy-worldcoords) :transform (make-coords :pos #f(600 250 511) :rpy (float-vector 0 0 pi/2))) :rotation-axis t :debug-view t)
 (send *ri* :angle-vector (send *fetch* :angle-vector) 7000)
 (send *ri* :wait-interpolation)
 
@@ -46,7 +45,10 @@
 	(send *ri* :wait-interpolation)
 	(send *ri* :go-POS-UNSAFE 0.1 0 0)
 	(setq dist 0))))
-    
+
+;;顔を手の方へ向ける
+(send *fetch* :head :look-at (float-vector (+ 620 dist) 170 320))
+(send *ri* :angle-vector (send *fetch* :angle-vector) 1000)
 
 ;;取っ手をつかむ
 (send *ri* :start-grasp :effort 60)
@@ -66,7 +68,7 @@
 (send *fetch* :rarm :move-end-pos #f(-50 0 0))
 (send *ri* :angle-vector (send *fetch* :angle-vector) 4000 :use-torso nil)
 (send *ri* :wait-interpolation)
-(send *fetch* :rarm :move-end-pos #f(0 -150 0))
+(send *fetch* :rarm :move-end-pos #f(0 -50 0))
 (send *ri* :angle-vector (send *fetch* :angle-vector) 4000 :use-torso nil)
 (send *ri* :wait-interpolation)
 

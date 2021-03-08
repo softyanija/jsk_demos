@@ -16,5 +16,6 @@
   </include>
   <include file="$(find aques_talk)/launch/aques_talk.launch">
     <arg name ="sound_play_topic" value="laptop_sound"/>
+    <arg name ="sound_play_node_name" value="mypc_node_name"/>
   </include>
 </launch>

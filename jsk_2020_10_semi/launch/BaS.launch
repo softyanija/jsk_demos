@@ -1,4 +1,3 @@
 <launch>
-	<node pkg="jsk_2020_10_semi" type="BaS.l" name="amabe"
-    output="screen" />
+	<node pkg="jsk_2020_10_semi" type="BaS.l" name="amabe" output="screen" />
 </launch>

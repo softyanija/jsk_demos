@@ -1,4 +1,4 @@
-#!/usr/bin/env roseus
+#!/BIN/ENV ROSEUS
 
 (require "package://fetcheus/fetch-utils.l")
 (require "package://fetcheus/fetch-interface.l")

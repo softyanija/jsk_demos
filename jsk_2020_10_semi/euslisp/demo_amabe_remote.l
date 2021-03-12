@@ -72,17 +72,17 @@
   (print "start voice_r")
   (cond ((= a 2) (progn
 		   (pull_shelf_2)
-		   (voice_confirm_remote)
+		   (voice_confirm)
 		   (return_shelf_2)
 		   ))
 	((= a 3) (progn
 		   (pull_shelf_3)
-		   (voice_confirm_remote)
+		   (voice_confirm)
 		   (return_shelf_3)
 		   ))
 	((= a 4) (progn
 		   (pull_shelf_4)
-		   (voice_confirm_remote)
+		   (voice_confirm)
 		   (return_shelf_4)
 		   ))
 	(t (print "エラー")))

@@ -2,9 +2,7 @@
   (while (ros::ok)
     (setq message (one-shot-subscribe "/Tablet/voice" speech_recognition_msgs::SpeechRecognitionCandidates))    (setq message (elt (send message :transcript) 0))
     (print message)
-    (if (or (string= message "u終わりまし") (string= message "終わった")) (progn
-									    (print "\u3067\u306f\u7d42\u308f\u308a\u307e\u3059")
-									    (return))
+    (if (or (string= message "終わりました") (string= message "終わった")) (return)
       )
     )
   )

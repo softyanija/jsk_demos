@@ -1,4 +1,3 @@
-
 #!/usr/bin/env roseus
 
 (require "package://fetcheus/fetch-utils.l")

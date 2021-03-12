@@ -1,0 +1,4 @@
+<launch>
+  <arg name="test" default="$(optenv ROS_NAMESPACE /head_camera/rgb/)" />
+  <node pkg="jsk_2020_10_semi" type="image_view2_test.l" name="iv2" />
+</launch>

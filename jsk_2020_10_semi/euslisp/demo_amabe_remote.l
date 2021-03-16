@@ -92,6 +92,8 @@
 
 (add-shelf-collision-object)
 
+(setq an 0)
+
 (demo_amabe_remote)
 
 (delete-shelf-collision-object)

@@ -90,9 +90,9 @@
 
 (print "start")
 
-(add-shelf-collision-object)
-
 (setq an 0)
+
+(add-shelf-collision-object)
 
 (demo_amabe_remote)
 

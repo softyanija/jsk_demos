@@ -26,9 +26,11 @@ rosrun tf static_transform_publisher 0 0 1 0 0 0 /camera /target 10
    (case an
           (0
            (send mrk :type image_view2::ImageMarker2::*TEXT*)
-           (send mrk :position (instance geometry_msgs::Point :init :x 320 :y 240))
-           (send mrk :scale 0.5)
-           (send mrk :text "こんにちは")
+           (send mrk :position (instance geometry_msgs::Point :init :x 320 :y 70))
+           (send mrk :scale 5.0)
+	   (send mrk :fill_color (instance std_msgs::ColorRGBA :init :r 0.0 :g 0.0 :b 0.0 :a 0.5))
+	  ;; (send mrk :outline_colors (instance std_msgs::ColorRGBA :init :r 0.0 :g 1.0 :b 0.0 :a 1.0))
+	   (send mrk :text "Hello!")
            )
           (1
            (send mrk :type image_view2::ImageMarker2::*LINE_STRIP*)
@@ -36,7 +38,7 @@ rosrun tf static_transform_publisher 0 0 1 0 0 0 /camera /target 10
                                    (instance geometry_msgs::Point :init :x 440 :y 150)
                                    (instance geometry_msgs::Point :init :x 440 :y 330)
                                    (instance geometry_msgs::Point :init :x 200 :y 330)))
-           (send mrk :outline_colors (list (instance std_msgs::ColorRGBA :init :r 0.0 :g 1.0 :b 0.0 :a 1.0)
+           (send mrk :outline_colors (list (instance std_msgs::ColorRGBA :init :r 1.0 :g 0.0 :b 0.0 :a 1.0)
 					      (instance std_msgs::ColorRGBA :init :r 0.0 :g 0.0 :b 1.0 :a 1.0)))
            )
           (2

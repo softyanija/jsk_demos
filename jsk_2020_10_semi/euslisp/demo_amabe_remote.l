@@ -39,12 +39,20 @@
   (send *co* :delete-object-by-id "left"))
 
 ;;Realsence回避用の障害物を設定
+#|
 (defun add-realsence-collision-object ()
-  (let ((keepout (make-cylinder 300 50))
-	(b (make-cube 450 600 100)))
-    (setq keepout (body- keepout b))
-    (send keepout :translate #f(0 0 375))
+  (let ((keepout (make-cylinder 300 50)))
+    (send keepout :translate #f(0 500 500))
     (send *co* :add-object keepout :frame-id "base-link" :object-id "realsence")))
+|#
+(defun add-realsence-collision-object ()
+  (let ((cube (make-cube 450 400 50))
+          (keepout (make-cylinder 350 50)))
+      (send cube :translate #f(-30 0 0))
+      (send keepout :translate #f(0 0 -25))
+      (setq keepout (body- keepout cube))
+      (send keepout :translate #f(0 0 400))
+      (send *co* :add-object keepout :frame-id "base_link" :object-id "realsence")))
 
 ;;Realsence回避用の障害物を削除
 (defun delete-realsence-collision-object ()

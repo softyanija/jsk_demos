@@ -48,7 +48,8 @@
 
 ;;Realsence回避用の障害物を削除
 (defun delete-realsence-collision-object ()
-  (send *co* :delete-object-by-id "ralsence"))"
+  (send *co* :delete-object-by-id "ralsence"))
+
 
 (defun pull_shelf_2()
   (format t ";;pull_shelf_2")

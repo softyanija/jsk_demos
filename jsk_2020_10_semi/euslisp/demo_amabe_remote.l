@@ -41,14 +41,14 @@
 ;;Realsence回避用の障害物を設定
 (defun add-realsence-collision-object ()
   (let ((keepout (make-cylinder 300 50))
-	(b (make-cube 450 600 50)))
-    (senq keepout (body- keepout b))
+	(b (make-cube 450 600 100)))
+    (setq keepout (body- keepout b))
     (send keepout :translate #f(0 0 375))
-    (send *co* :add-object keepout :frame-id "base-link" :object-id "ralsence")))
+    (send *co* :add-object keepout :frame-id "base-link" :object-id "realsence")))
 
 ;;Realsence回避用の障害物を削除
 (defun delete-realsence-collision-object ()
-  (send *co* :delete-object-by-id "ralsence"))"
+  (send *co* :delete-object-by-id "realsence"))
 
 (defun pull_shelf_2()
   (format t ";;pull_shelf_2")

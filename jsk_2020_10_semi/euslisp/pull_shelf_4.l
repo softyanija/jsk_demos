@@ -68,8 +68,5 @@
 (send *fetch* :rarm :move-end-pos #f(-50 0 0))
 (send *ri* :angle-vector (send *fetch* :angle-vector) 4000 :use-torso nil)
 (send *ri* :wait-interpolation)
-(send *fetch* :rarm :move-end-pos #f(0 -50 0))
-(send *ri* :angle-vector (send *fetch* :angle-vector) 4000 :use-torso nil)
-(send *ri* :wait-interpolation)
 
 (add-shelf-collision-object)

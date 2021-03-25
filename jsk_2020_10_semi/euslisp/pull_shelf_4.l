@@ -27,6 +27,7 @@
 (setq dist 0)
 
 (delete-shelf-collision-object)
+
 (while (= f 0)
   (while (and (= f 0) (< dist 250))
     (setq pressure (one-shot-subscribe "/pressure" std_msgs::Float32))
@@ -68,5 +69,3 @@
 (send *fetch* :rarm :move-end-pos #f(-50 0 0))
 (send *ri* :angle-vector (send *fetch* :angle-vector) 4000 :use-torso nil)
 (send *ri* :wait-interpolation)
-
-(add-shelf-collision-object)

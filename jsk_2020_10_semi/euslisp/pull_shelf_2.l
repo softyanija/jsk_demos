@@ -1,9 +1,6 @@
 ;;pull_shelf_2.l
 (ros::load-ros-manifest "std_msgs")
 
-(add-shelf-collision-object)
-(add-left-collision-object)
-
 (send *fetch* :reset-pose)
 (send *ri* :angle-vector (send *fetch* :angle-vector) 4000)
 (send *ri* :wait-interpolation)

@@ -152,10 +152,12 @@
 
 (add-shelf-collision-object)
 (add-realsence-collision-object)
+(add-left-collision-object)
 
 (demo_amabe_remote)
 
 (delete-shelf-collision-object)
 (delete-realsence-collision-object)
+(delete-left-collision-object)
 
 (print "finish")

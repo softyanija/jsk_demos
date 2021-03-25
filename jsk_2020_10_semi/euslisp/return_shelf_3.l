@@ -26,6 +26,13 @@
 (send *ri* :angle-vector (send *fetch* :angle-vector) 4000 :use-torso nil)
 (send *ri* :wait-interpolation)
 
+(send *fetch* :rarm :angle-vector #f(75.6304 80.2141 -11.4592 98.5487 0.0 95.111 0.0))
+(send *ri* :angle-vector (send *fetch* :angle-vector) 6000)
+(send *ri* :wait-interpolation)
+
+(add-shelf-collision-object)
+(delete-realsence-collision-object)
+
 (send *fetch* :reset-pose)
 (send *ri* :angle-vector (send *fetch* :angle-vector) 4000)
 (send *ri* :wait-interpolation)

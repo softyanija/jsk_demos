@@ -26,7 +26,7 @@
 (send *ri* :angle-vector (send *fetch* :angle-vector) 4000 :use-torso nil)
 (send *ri* :wait-interpolation)
 
-(send *fetch* :torso-lift-joint :joint-angle 200)
+(send *fetch* :torso_lift_joint :joint-angle 300)
 (send *ri* :angle-vector (send *fetch* :angle-vector) 3000)
 (send *ri* :wait-interpolation)
 

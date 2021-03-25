@@ -48,7 +48,7 @@
 	(setq dist 0))))
 
 ;;顔を手の方へ向ける
-(send *fetch* :head :look-at (float-vector (+ 620 dist) 170 320))
+(send *fetch* :head :look-at (float-vector (+ 670 dist) 170 350))
 (send *ri* :angle-vector (send *fetch* :angle-vector) 1000)
 
 ;;取っ手をつかむ

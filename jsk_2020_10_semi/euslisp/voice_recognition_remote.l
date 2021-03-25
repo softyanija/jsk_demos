@@ -13,5 +13,5 @@
 	  ((or (string= message "4段目") (string= message "四段目") (string= message "4番目")) (progn
 												 (setq f_w 4)
 												 ))
-	  t))
+	  (t)))
   f_w)

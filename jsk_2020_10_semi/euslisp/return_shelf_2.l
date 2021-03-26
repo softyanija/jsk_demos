@@ -8,7 +8,7 @@
 (send *ri* :angle-vector (send *fetch* :angle-vector) 4000 :use-torso nil)
 (send *ri* :wait-interpolation)
 (send *ri* :start-grasp :effort 60)
-(unix:sleep 1)
+(unix:sleep 3)
 (send *ri* :wait-interpolation)
 
 ;;引き出しを戻す
@@ -19,7 +19,7 @@
 (send *ri* :wait-interpolation)
 
 (send *ri* :stop-grasp :effort 60)
-(unix:sleep 1)
+(unix:sleep 3)
 (send *ri* :wait-interpolation)
 
 (send *fetch* :rarm :move-end-pos (v- #f(0 0 0) pull-range))

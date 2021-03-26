@@ -48,7 +48,7 @@
 
 ;;取っ手をつかむ
 (send *ri* :start-grasp :effort 60)
-(unix:sleep 1)
+(unix:sleep 3)
 (send *ri* :wait-interpolation)
 
 (setq pull-range (float-vector (+ dist 70) 0 0))
@@ -59,7 +59,7 @@
 
 ;;一旦放して肘を下げる
 (send *ri* :stop-grasp :effort 60)
-(unix:sleep 1)
+(unix:sleep 3)
 (send *ri* :wait-interpolation)
 (send *fetch* :rarm :move-end-pos #f(-50 0 0))
 (send *ri* :angle-vector (send *fetch* :angle-vector) 4000 :use-torso nil)

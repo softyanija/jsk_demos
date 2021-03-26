@@ -1,0 +1,3 @@
+apps:
+ - display: Amabe Demo
+   app: jsk_2020_10_semi/app_amabe

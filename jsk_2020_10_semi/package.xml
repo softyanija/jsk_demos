@@ -19,6 +19,9 @@
   <run_depend>jsk_maps</run_depend>
   <run_depend>pr2eus</run_depend>
 
+  <run_depend>app_manager</run_depend>
+
   <export>
+    <app_manager app_dir="${prefix}/apps"/>
   </export>
 </package>

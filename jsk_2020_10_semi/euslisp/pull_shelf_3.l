@@ -44,12 +44,14 @@
 	(setq dist 0))))
 
 ;;顔を手の方へ向ける
-(send *fetch* :head :look-at (float-vector (+ 620 dist) 170 500))
+(send *fetch* :head :look-at (float-vector (+ 670 dist) 170 500))
 (send *ri* :angle-vector (send *fetch* :angle-vector) 1000)
 
 ;;取っ手をつかむ
-(send *ri* :start-grasp :effort 60)
-(unix:sleep 3)
+(send *fetch* :rarm :move-end-pos (float-vector -3 0 0))
+(send *ri* :angle-vector (send *fetch* :angle-vector) 1000 :use-torso nil)
+(send *ri* :start-grasp :effort 80)
+(unix:sleep 5)
 (send *ri* :wait-interpolation)
 
 (setq pull-range (float-vector (+ dist 70) 0 0))

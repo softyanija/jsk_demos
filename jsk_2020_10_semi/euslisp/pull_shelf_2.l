@@ -10,7 +10,7 @@
 (send *ri* :angle-vector (send *fetch* :angle-vector) 3000)
 (send *ri* :wait-interpolation)
 
-(send *fetch* :rarm :inverse-kinematics (send (send *fetch* :copy-worldcoords) :transform (make-coords :pos #f(600 250 880) :rpy (float-vector 0 0 pi/2))) :rotation-axis t :debug-view t)
+(send *fetch* :rarm :inverse-kinematics (send (send *fetch* :copy-worldcoords) :transform (make-coords :pos #f(600 250 886) :rpy (float-vector 0 0 pi/2))) :rotation-axis t :debug-view t)
 (send *ri* :angle-vector (send *fetch* :angle-vector) 7000)
 (send *ri* :wait-interpolation)
 
@@ -37,18 +37,20 @@
   (if (= f 0)
       (progn
 	(send *fetch* :rarm :move-end-pos (float-vector -dist 0 0))
-	(send *ri* :angle-vector (send *fetch* :angle-vector) 200 :use-torso nil)
+	(send *ri* :angle-vector (send *fetch* :angle-vector) 2000 :use-torso nil)
 	(send *ri* :wait-interpolation)
 	(send *ri* :go-POS-UNSAFE 0.1 0 0)
 	(setq dist 0))))
 
 ;;顔を手の方へ向ける
-(send *fetch* :head :look-at (float-vector (+ 620 dist) 170 687))
+(send *fetch* :head :look-at (float-vector (+ 670 dist) 170 687))
 (send *ri* :angle-vector (send *fetch* :angle-vector) 1000)
 
 ;;取っ手をつかむ
-(send *ri* :start-grasp :effort 60)
-(unix:sleep 3)
+(send *fetch* :rarm :move-end-pos #f(-3 0 0))
+(send *ri* :angle-vector (send *fetch* :angle-vector) 1000 :use-torso nil)
+(send *ri* :start-grasp :effort 80)
+(unix:sleep 5)
 (send *ri* :wait-interpolation)
 
 (setq pull-range (float-vector (+ dist 70) 0 0))

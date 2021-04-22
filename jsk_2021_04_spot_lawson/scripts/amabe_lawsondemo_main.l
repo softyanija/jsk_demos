@@ -33,11 +33,12 @@
 
 (send *ri* :speak-jp "エレベータ前に向かいます")
 (send *ri* :navigate-to 0)
-
-(send *ri* "エレベータに乗ります")
+(send *ri* :go-pos 0 0 90)
+(send *ri* :go-pos 4.5 0 0)
+(send *ri* :speak-jp "エレベータに乗ります")
 (elevator-spot 2 7)
 
-(send *ri* "研究室へ向かいます")
+(send *ri* :speak-jp "研究室へ向かいます")
 (setq *path* "/home/spot/デスクトップ/73B2toElevator.walk")
 
 (send *ri* :upload-path *path*)

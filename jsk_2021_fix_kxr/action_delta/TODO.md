@@ -1,0 +1,12 @@
+1. つかっているpkgのなかでDatasetSave.srv, ModelFit.srv, ModelPredict.srvみたいなserviceを定義してCMakeを変える
+   cf:https://raspimouse-sim-tutorial.gitbook.io/project/ros_tutorial/how_to_write_serviceとか公式参照
+
+2. model.pyを書く。tensorflowの学習とかは、[こことか | https://www.tensorflow.org/tutorials/keras/regress]参照。
+3. action_delta_learning.lをかく。action_delta_learning.pyのアルゴリズムを参考に。
+
+
+考えるといいこと
+ニューラルネットワークを保存する&ロードするようにして、プログラムを途中で止めても、途中のモデルから始められるようにしよう
+データセットもファイルに保存して、中断しても大丈夫なようにしよう
+データセットは一つのファイルにするひつようはなく、複数にわけてほぞんしてロードするときは全部読むとかでもいいかもしれない
+

@@ -1,0 +1,15 @@
+(load "package://pr2eus/pr2-interface.l")
+(pr2-init)
+(objects (list *pr2*))
+
+(load "package://assemble_table_pr2/euslisp/parameters.l")
+(load "package://assemble_table_pr2/euslisp/utils.l")
+
+(send *ri* :stop-grasp :rarm)
+(send *ri* :stop-grasp :larm)
+(unix:sleep 1)
+(send *pr2* :head_tilt_joint :joint-angle 35)
+(send *ri* :angle-vector (send *pr2* :angle-vector) 3000)
+(send *ri* :wait-interpolation)
+
+(screw-onestroke)

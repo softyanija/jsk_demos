@@ -5,12 +5,12 @@
        ))
 (setq *rarm-pos-2*
       (make-coords
-       :pos #f(688 -13 152.5)
+       :pos #f(687 -13 152.5)
        :rpy #f(1.175 0.0 0.0)
        ))
 (setq *rarm-pos-3*
       (make-coords
-       :pos #f(696 -12 150)
+       :pos #f(680 -12 150)
        :rpy #f(0.78 0.0 0.0)
        ))
 

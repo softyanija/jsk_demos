@@ -1,0 +1,5 @@
+;; (send *baxter* :angle-vector (send *ri* :state :potentio-vector))
+(load "package://eus_vive/euslisp/lib/baxter-interface.l")
+(load "package://assemble_table_baxter/euslisp/parameters.l")
+(eus_vive::baxter-init :lgripper :softhand :rgripper :softhand)
+(objects (list *baxter*))

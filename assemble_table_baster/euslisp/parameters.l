@@ -92,3 +92,24 @@
        :pos #f(660 100 950)
        :rpy #f(-0.0 0.0 0.0)
        ))
+
+(setq *rarm-turnover-1*
+      (make-coords
+       :pos #f(920 -347 280)
+       :rpy #f(-0.382 1.23 -2.0)
+       ))
+(setq *larm-turnover-1*
+      (make-coords
+       :pos #f(920 347 280)
+       :rpy #f(0.48 1.3 2.0)
+       ))
+(setq *rarm-turnover-2*
+      (make-coords
+       :pos #f(850 -347 430)
+       :rpy #f(-0.382 1.0 -2.0)
+       ))
+(setq *larm-turnover-2*
+      (make-coords
+       :pos #f(850 347 430)
+       :rpy #f(0.48 1.0 2.0)
+       ))

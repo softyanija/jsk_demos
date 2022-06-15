@@ -15,6 +15,7 @@
 
 (send *ri* :start-grasp :rarm :rotate-angle (* pi -0.3))
 (send *ri* :start-grasp :larm :rotate-angle (* pi -0.3))
+(unix:sleep 2)
 
 (send *baxter* :rarm :inverse-kinematics *rarm-turnover-2*)
 (send *baxter* :larm :inverse-kinematics *larm-turnover-2*)

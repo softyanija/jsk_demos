@@ -95,21 +95,21 @@
 
 (setq *rarm-turnover-1*
       (make-coords
-       :pos #f(920 -347 280)
-       :rpy #f(-0.382 1.23 -2.0)
+       :pos #f(980 -358 170)
+       :rpy #f(0.69 -0.076 3.126)
        ))
 (setq *larm-turnover-1*
       (make-coords
-       :pos #f(920 347 280)
-       :rpy #f(0.48 1.3 2.0)
+       :pos #f(980 358 170)
+       :rpy #f(-0.705 -0.084 3.055)
        ))
 (setq *rarm-turnover-2*
       (make-coords
-       :pos #f(850 -347 430)
-       :rpy #f(-0.382 1.0 -2.0)
+       :pos #f(830 -346 230)
+       :rpy #f(0.5 -0.36 2.99)
        ))
 (setq *larm-turnover-2*
       (make-coords
-       :pos #f(850 347 430)
-       :rpy #f(0.48 1.0 2.0)
+       :pos #f(830 346 230)
+       :rpy #f(-0.5 -0.36 -2.99)
        ))

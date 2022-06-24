@@ -58,7 +58,46 @@
        :pos #f(643.413 194.005 961.952)
        :rpy #f(-1.404 0.086 1.571)
        ))
-
+(setq *rarm-pickup-table-pos5*
+      (make-coords
+       :pos #f(702.907 -184.066 900.075)
+       :rpy #f(1.487 -0.002 3.011)
+       ))
+(setq *larm-pickup-table-pos5*
+      (make-coords
+       :pos #f(728.769 137.04 909.786)
+       :rpy #f(-1.506 0.028 0.126)
+       ))
+(setq *rarm-pickup-table-pos6*
+      (make-coords
+       :pos #f(704.37 -126.637 888.281)
+       :rpy #f(1.605 0.054 3.035)
+       ))
+(setq *larm-pickup-table-pos6*
+      (make-coords
+       :pos #f(735.37 80.398 897.109)
+       :rpy #f(-1.492 0.032 0.079)
+       ))
+(setq *rarm-pickup-table-pos7*
+      (make-coords
+       :pos #f(546.143 -122.28 982.956)
+       :rpy #f(1.653 0.105 1.52)
+       ))
+(setq *larm-pickup-table-pos7*
+      (make-coords
+       :pos #f(574.566 83.194 988.262)
+       :rpy #f(-1.613 0.071 1.524)
+       ))
+(setq *rarm-pickup-table-pos8*
+      (make-coords
+       :pos #f(538.953 -120.827 940.44)
+       :rpy #f(1.654 0.122 1.51)
+       ))
+(setq *larm-pickup-table-pos8*
+      (make-coords
+       :pos #f(567.939 85.321 941.29)
+       :rpy #f(-1.605 0.075 1.566)
+       ))
 
 (setq *rarm-pos-1*
       (make-coords

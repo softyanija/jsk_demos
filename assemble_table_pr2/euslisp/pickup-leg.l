@@ -21,5 +21,9 @@
 (unix:sleep 1)
 
 (send *pr2* :angle-vector *pickup-leg-init*)
-(send *ri* :angle-vector (send *pr2* :angle-vector) 3000)
+(send *ri* :angle-vector (send *pr2* :angle-vector) 2000)
+(send *ri* :wait-interpolation)
+
+(send *pr2* :larm :inverse-kinematics *larm-pickup-leg2*)
+(send *ri* :angle-vector (send *pr2* :angle-vector) 2000)
 (send *ri* :wait-interpolation)

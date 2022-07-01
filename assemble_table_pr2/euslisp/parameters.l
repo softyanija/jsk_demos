@@ -9,6 +9,21 @@
        :pos #f(494.534 107.501 941.814)
        :rpy #f(-1.124 0.112 -3.1)
        ))
+(setq *larm-pickup-leg3*
+      (make-coords
+       :pos #f(494.549 128.947 890.781)
+       :rpy #f(-1.114 0.113 3.13)
+       ))
+(setq *rarm-pickup-leg3*
+      (make-coords
+       :pos #f(481.092 107.167 957.888)
+       :rpy #f(1.57 1.57 0.0)
+       ))
+(setq *larm-pickup-leg4*
+      (make-coords
+       :pos #f(647.297 258.087 789.476)
+       :rpy #f(-0.116 1.517 -1.758)
+       ))
 (setq *rarm-pre-grasp-table-pos*
       (make-coords
        :pos #f(656.575 -162.925 851.102)

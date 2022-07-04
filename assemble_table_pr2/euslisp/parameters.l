@@ -1,4 +1,34 @@
 (setq *pickup-leg-init* #f(299.836 43.8488 12.1982 80.795 -68.4633 107.176 -92.4502 -26.4936 -45.5738 15.7826 -62.6215 -83.734 -65.1959 -78.9413 -163.842 -0.029299 56.946))
+(setq *rarm-rotation1*
+      (make-coords
+       :pos #f(741.276 -148.104 816.227)
+       :rpy #f(0.0 1.57 2.534)
+       ))
+(setq *larm-rotation1*
+      (make-coords
+       :pos #f(611.827 16.382 988.794)
+       :rpy #f(-1.16 1.457 2.572)
+       ))
+(setq *rarm-rotation2*
+      (make-coords
+       :pos #f(679.358 -58.106 779.605)
+       :rpy #f(0.0 1.547 -3.009)
+       ))
+(setq *larm-rotation2*
+      (make-coords
+       :pos #f(680.611 154.32 946.658)
+       :rpy #f(-0.945 1.471 -3.117)
+       ))
+(setq *rarm-rotation3*
+      (make-coords
+       :pos #f(573.267 8.89 779.159)
+       :rpy #f(-0.333 1.527 -2.821)
+       ))
+(setq *larm-rotation3*
+      (make-coords
+       :pos #f(728.754 164.879 945.986)
+       :rpy #f(0.289 1.508 -0.499)
+       ))
 (setq *larm-pickup-leg*
       (make-coords
        :pos #f(608.295 410.076 759.782)

@@ -43,10 +43,10 @@
 ;;   (send *ri* :wait-interpolation)  
 ;;   )
   
-;; (defun get-pos ()
-;;   (send *pr2* :angle-vector (send *ri* :state :potentio-vector))
-;;   (ros::ros-info (format nil "rarm-corods is ~A" (send *pr2* :rarm :end-coords)))
-;;   (ros::ros-info (format nil "larm-coords is ~A" (send *pr2* :larm :end-coords))))
+(defun get-pos ()
+  (send *pr2* :angle-vector (send *ri* :state :potentio-vector))
+  (ros::ros-info (format nil "rarm-corods is ~A" (send *pr2* :rarm :end-coords)))
+  (ros::ros-info (format nil "larm-coords is ~A" (send *pr2* :larm :end-coords))))
   
 ;;   )
 

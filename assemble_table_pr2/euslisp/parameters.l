@@ -5,6 +5,11 @@
        :pos #f(546.681 5.501 940.012)
        :rpy #f(-1.231 -0.0 3.14)
        ))
+(setq *rarm-pre-apply*
+      (make-coords
+       :pos #f(687.845 -90.112 771.366)
+       :rpy #f(-1.011 1.57 -0.258)
+       ))
 (setq *rarm-rotation1*
       (make-coords
        :pos #f(741.276 -148.104 816.227)

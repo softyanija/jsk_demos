@@ -18,13 +18,14 @@
 (send *ri* :stop-grasp :larm)
 (unix:sleep 1)
 
-(send *pr2* :larm :inverse-kinematics *larm-pre-apply*)
-(send *pr2* :rarm :inverse-kinematics *rarm-pre-apply*)
-(send *ri* :angle-vector (send *pr2* :angle-vector) 3000)
+(send *ri* :move-gripper :rarm 0.020)
+
+(send *pr2* :rarm :inverse-kinematics *rarm-pre-guide*)
+(send *ri* :angle-vector (send *pr2* :angle-vector) 2000)
 (send *ri* :wait-interpolation)
 
-(send *pr2* :rarm :move-end-pos #f(17 0 0))
-(send *ri* :angle-vector (send *pr2* :angle-vector) 3000)
+(send *pr2* :larm :inverse-kinematics *larm-pre-guide*)
+(send *ri* :angle-vector (send *pr2* :angle-vector) 2000)
 (send *ri* :wait-interpolation)
 
 (setq i 0)
@@ -46,34 +47,7 @@
 	(setq i (+ i 1))
 	(ros::ros-info (format nil "stroke is ~A" stroke)))))
 
-;;chech if botl and nat is -- directly
-
-(setq base-coords (send *pr2* :larm :end-coords))
-
-(setq move-radius 2.5)
-(setq i 1)
-(setq n 0)
-(setq f 0)
-(setq apply_lim_z 0.9)
-
-(while (and (< i 4) (= f 0))
-  (setq n 0)
-  (while (and (< n 9) (= f 0))
-    (send *pr2* :larm :inverse-kinematics base-coords)
-    (setq move-vector (scale i (scale move-radius (float-vector (sin (* n (/ pi 4))) (cos (* n (/ pi 4))) 0))))
-    (send *pr2* :larm :move-end-pos move-vector)
-    (send *ri* :angle-vector (send *pr2* :angle-vector) 2000)
-    (send *ri* :wait-interpolation)
-
-    (setq force_z_p (send (send (send (one-shot-subscribe "/left_endeffector/wrench" geometry_msgs::WrenchStamped) :wrench) :force) :z))
-    (setq force_z (* -1 force_z_p))
-    (ros::ros-info (format nil "now n:~A i:~A z_force:~A" n i force_z))
-    (if (< force_z apply_lim_z)
-	(progn
-	  (setq f 1)
-	  (ros::ros-info "success applying")
-	  (return)))
-    (setq n (+ n 1))
-    (ros::ros-info (format nil "n = ~A" n)))
-  (setq i (+ i 1)))
-
+;;#f(1 0 0) or #f(-1 0 0)
+(send *pr2* :larm :move-end-pos #f(1 0 0))
+(send *ri* :angle-vector (send *pr2* :angle-vector) 1000)
+(send *ri* :wait-interpolation)

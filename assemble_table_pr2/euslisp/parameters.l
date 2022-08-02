@@ -2,13 +2,18 @@
 
 (setq *rarm-pre-guide*
       (make-coords
-       :pos #f(550.0 -80.0 774)
-       :rpy #f(1.57 0.506 0.0)
+       :pos #f(550.0 -80.0 765)
+       :rpy #f(1.57 0.785 0.0)
        ))
 (setq *larm-pre-guide*
       (make-coords
        :pos #f(575 -60.0 870.012)
        :rpy #f(-1.57 -0.0 3.14)
+       ))
+(setq *larm-guide*
+      (make-coords
+       :pos #f(578.248 -83.683 880.9)
+       :rpy #f(-1.57 0.343 3.081)
        ))
 (setq *larm-pre-apply*
       (make-coords

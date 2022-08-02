@@ -28,26 +28,35 @@
 (send *ri* :angle-vector (send *pr2* :angle-vector) 2000)
 (send *ri* :wait-interpolation)
 
-(setq i 0)
-(while (< i 15)
-  (setq force_z_p (send (send (send (one-shot-subscribe "/left_endeffector/wrench" geometry_msgs::WrenchStamped) :wrench) :force) :z))
-  (setq force_z (* -1 force_z_p))
-  (ros::ros-info (format nil "counter force is ~A" force_z))
-  (if (> force_z push_z_lim)
-      (progn
-	(ros::ros-info "detect contacting")
-	(return))
-      (progn
-	(ros::ros-info "still hanging")
-	(send *pr2* :larm :move-end-pos #f(0 0 3))
-	(send *ri* :angle-vector (send *pr2* :angle-vector) 1000)
-	(send *ri* :wait-interpolation)
+(send *ri* :start-grasp :larm)
 
-	(setq stroke (* 3 i))
-	(setq i (+ i 1))
-	(ros::ros-info (format nil "stroke is ~A" stroke)))))
+(send *pr2* :larm :inverse-kinematics *larm-guide*)
+(send *ri* :angle-vector (send *pr2* :angle-vector) 2000)
+(send *ri* :wait-interpolation)
+
+;;roop
+(setq stroke (transform (inverse-matrix (send (send *pr2* :larm :end-coords) :worldrot)) #f(0 0 -10)))
+(send *pr2* :larm :move-end-pos stroke)
+;; e(transform (inverse-matrix (send (send *pr2* :larm :end-coords) :worldrot)) #f(0 0 -10))
+(send 
+;; (setq i 0)
+;; (while (< i 15)
+;;   (setq force_z_p (send (send (send (one-shot-subscribe "/left_endeffector/wrench" geometry_msgs::WrenchStamped) :wrench) :force) :z))
+;;   (setq force_z (* -1 force_z_p))
+;;   (ros::ros-info (format nil "counter force is ~A" force_z))
+;;   (if (> force_z push_z_lim)
+;;       (progn
+;; 	(ros::ros-info "detect contacting")
+;; 	(return))
+;;       (progn
+;; 	(ros::ros-info "still hanging")
+;; 	(send *pr2* :larm :move-end-pos #f(0 0 3))
+;; 	(send *ri* :angle-vector (send *pr2* :angle-vector) 1000)
+;; 	(send *ri* :wait-interpolation)
+
+;; 	(setq stroke (* 3 i))
+;; 	(setq i (+ i 1))
+;; 	(ros::ros-info (format nil "stroke is ~A" stroke)))))
 
 ;;#f(1 0 0) or #f(-1 0 0)
-(send *pr2* :larm :move-end-pos #f(1 0 0))
-(send *ri* :angle-vector (send *pr2* :angle-vector) 1000)
-(send *ri* :wait-interpolation)
+

@@ -19,6 +19,7 @@
 (unix:sleep 1)
 
 (send *ri* :move-gripper :rarm 0.020)
+(unix:sleep 1)
 
 (send *pr2* :rarm :inverse-kinematics *rarm-pre-guide*)
 (send *ri* :angle-vector (send *pr2* :angle-vector) 2000)
@@ -29,6 +30,7 @@
 (send *ri* :wait-interpolation)
 
 (send *ri* :start-grasp :larm)
+(unix:sleep 1)
 
 (send *pr2* :larm :inverse-kinematics *larm-guide*)
 (send *ri* :angle-vector (send *pr2* :angle-vector) 2000)
@@ -37,6 +39,13 @@
 ;;roop
 (setq stroke (transform (inverse-matrix (send (send *pr2* :larm :end-coords) :worldrot)) #f(0 0 -10)))
 (send *pr2* :larm :move-end-pos stroke)
+(send *ri* :angle-vector (send *pr2* :angle-vector) 2000)
+(send *ri* :wait-interpolation)
+
+(setq stroke (transform (inverse-matrix (send (send *pr2* :larm :end-coords) :worldrot)) #f(-3 0 0)))
+(send *pr2* :larm :move-end-pos stroke)
+(send *ri* :angle-vector (send *pr2* :angle-vector) 2000)
+(send *ri* :wait-interpolation)
 ;; e(transform (inverse-matrix (send (send *pr2* :larm :end-coords) :worldrot)) #f(0 0 -10))
 (send 
 ;; (setq i 0)

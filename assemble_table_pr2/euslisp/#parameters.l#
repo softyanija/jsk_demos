@@ -13,7 +13,7 @@
 (setq *larm-guide*
       (make-coords
        :pos #f(583.248 -83.683 880.9)
-       :rpy #f(-1.57 0.3 3.14)
+       :rpy #f(-1.57 0.3 3.08)
        ))
 (setq *larm-pre-apply*
       (make-coords

@@ -13,17 +13,27 @@
 (setq *larm-guide*
       (make-coords
        :pos #f(583.248 -83.683 880.9)
-       :rpy #f(-1.57 0.3 3.14)
+       :rpy #f(-1.57 0.3 3.08)
        ))
 (setq *larm-pre-apply*
       (make-coords
-       :pos #f(546.681 5.501 940.012)
-       :rpy #f(-1.231 -0.0 3.14)
+       :pos #f(546.681 5.501 900)
+       :rpy #f(-1.57 0.0 0)
        ))
 (setq *rarm-pre-apply*
       (make-coords
-       :pos #f(687.845 -90.112 771.366)
-       :rpy #f(-1.011 1.57 -0.258)
+       :pos #f(532.708 -45 789.706)
+       :rpy #f(1.57 0.785 3.14)
+       ))
+(setq *rarm-apply*
+      (make-coords
+       :pos #f(530.262 -20.061 773.183)
+       :rpy #f(1.6 0.852 3.107)
+       ))
+(setq *rarm-apply2*
+      (make-coords
+       :pos #f(530.262 -14.61 773.183)
+       :rpy #f(1.6 1.05 3.107)
        ))
 (setq *rarm-rotation1*
       (make-coords

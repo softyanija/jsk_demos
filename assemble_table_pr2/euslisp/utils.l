@@ -6,6 +6,12 @@
   (send *pr2* :rarm :move-end-pos stroke-rarm)
   (send *ri* :angle-vector (send *pr2* :angle-vector) 2000)
   (send *ri* :wait-interpolation))
+
+(defun larm-move-end-pos-worldcoords (stroke-worldcoords)
+  (setq stroke-larm (transform (inverse-matrix (send (send *pr2* :larm :end-coords) :worldrot)) stroke-worldcoords))
+  (send *pr2* :larm :move-end-pos stroke-larm)
+  (send *ri* :angle-vector (send *pr2* :angle-vector) 2000)
+  (send *ri* :wait-interpolation))
   
 (defun screw-onestroke ()
   (send *pr2* :l_wrist_roll_joint :joint-angle (+ (send *pr2* :l_wrist_roll_joint :joint-angle) 360))

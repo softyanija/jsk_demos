@@ -1,0 +1,11 @@
+<launch>
+  <include file="$(find jsk_pcl_ros)/sample/tabletop_object_detector.launch">
+    <arg name="input" value="/kinect_head/depth_registered/quater/throttled/points" />
+    <arg name="sensor_frame" value="/head_mount_kinect_rgb_optical_frame" />
+    <arg name="manager" value="pr2_tabletop_object_detector_nodelet_manager"/>
+    <arg name="launch_openni" value="false" />
+    <arg name="launch_tracking" value="false" />
+    <arg name="launch_rviz" value="false" />
+    <arg name="publish_tf" value="true" />
+  </include>
+</launch>

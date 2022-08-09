@@ -35,11 +35,27 @@
        :pos #f(530.262 -14.61 773.183)
        :rpy #f(1.6 1.05 3.107)
        ))
+(setq *rarm-before-rotation1*
+       (make-coords
+       :pos #f(530.588 -127.551 1019.47)
+       :rpy #f(1.391 0.634 3.065)
+       ))
+(setq *rarm-before-rotation2*
+      (make-coords
+       :pos #f(528.994 -7.984 1004.94)
+       :rpy #f(0.434 1.515 1.985)
+       ))
+(setq *rarm-before-rotation3*
+      (make-coords
+       :pos #f(530.57 -8.713 959.46)
+       :rpy #f(0.554 1.512 2.155)
+       ))
 (setq *rarm-rotation1*
       (make-coords
        :pos #f(741.276 -148.104 816.227)
        :rpy #f(0.0 1.57 2.534)
        ))
+
 (setq *larm-rotation1*
       (make-coords
        :pos #f(611.827 16.382 988.794)
@@ -77,12 +93,12 @@
        ))
 (setq *larm-pickup-leg3*
       (make-coords
-       :pos #f(494.549 128.947 890.781)
-       :rpy #f(-1.114 0.113 3.13)
+       :pos #f(495.549 120.947 930.781)
+       :rpy #f(-1.114 0.0 3.13)
        ))
 (setq *rarm-pickup-leg3*
       (make-coords
-       :pos #f(481.092 107.167 957.888)
+       :pos #f(481.092 107.167 997.888)
        :rpy #f(1.57 1.57 0.0)
        ))
 (setq *larm-pickup-leg4*

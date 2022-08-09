@@ -13,9 +13,15 @@
   (send *ri* :angle-vector (send *pr2* :angle-vector) 2000)
   (send *ri* :wait-interpolation))
   
-(defun screw-onestroke ()
+(defun larm-screw-onestroke ()
   (send *pr2* :l_wrist_roll_joint :joint-angle (+ (send *pr2* :l_wrist_roll_joint :joint-angle) 360))
   (send *pr2* :larm :move-end-pos (float-vector *pitch* 0 0))
+  (send *ri* :angle-vector (send *pr2* :angle-vector) 2000)
+  (send *ri* :wait-interpolation))
+
+(defun rarm-screw-onestroke ()
+  (send *pr2* :r_wrist_roll_joint :joint-angle (+ (send *pr2* :r_wrist_roll_joint :joint-angle) 360))
+  (send *pr2* :rarm :move-end-pos (float-vector *pitch* 0 0))
   (send *ri* :angle-vector (send *pr2* :angle-vector) 2000)
   (send *ri* :wait-interpolation))
 

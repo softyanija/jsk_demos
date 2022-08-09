@@ -57,12 +57,49 @@
 (send *ri* :angle-vector (send *pr2* :angle-vector) 3000)
 (send *ri* :wait-interpolation)
 
+(send *pr2* :rarm :inverse-kinematics *rarm-pre-apply*)
+(send *ri* :angle-vector (send *pr2* :angle-vector) 3000)
+(send *ri* :wait-interpolation)
+
+(send *ri* :stop-grasp :rarm)
+
+(send *pr2* :rarm :inverse-kinematics *rarm-before-rotation1*)
+(send *ri* :angle-vector (send *pr2* :angle-vector) 3000)
+(send *ri* :wait-interpolation)
+
+(send *pr2* :rarm :inverse-kinematics *rarm-before-rotation2*)
+(send *ri* :angle-vector (send *pr2* :angle-vector) 3000)
+(send *ri* :wait-interpolation)
+
+(send *pr2* :rarm :inverse-kinematics *rarm-before-rotation3*)
+(send *ri* :angle-vector (send *pr2* :angle-vector) 3000)
+(send *ri* :wait-interpolation)
+
+(send *ri* :start-grasp :rarm)
+(unix:sleep 1)
+
+(send *ri* :stop-grasp :larm)
+(unix:sleep 1)
+
+(send *pr2* :larm :move-end-pos #f(-60 0 0))
+(send *ri* :angle-vector (send *pr2* :angle-vector) 3000)
+(send *ri* :wait-interpolation)
+
+;try to screw-in and check if insertion was successed
+(setq i 0)
+(while (< i 5)
+  (ros::ros-info (format nil "times : ~A" i))
+  (rarm-screw-onestroke)
+  (setq i (+ i 1)))
+
+
+#|
 (setq j 0)
 (while (< j 15)
   (ros::ros-info (format nil "j : ~A" j)) 
   (rarm-move-end-pos-worldcoords #f(0 2 0))
   (setq j (+ j 1)))
-#|
+
 (send *pr2* :rarm :move-end-pos #f(3 0 3))
 (send *ri* :angle-vector (send *pr2* :angle-vector) 1000)
 (send *ri* :wait-interpolation)

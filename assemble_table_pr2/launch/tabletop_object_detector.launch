@@ -7,7 +7,7 @@
   <arg name="launch_manager" default="true" />
   <arg name="launch_tracking" default="true" />
   <arg name="launch_openni" default="false" />
-  <arg name="launch_rviz" default="true" />
+  <arg name="launch_rviz" default="false" />
   <arg name="publish_tf" default="true" />
 
   <machine name="localhost" address="localhost" />

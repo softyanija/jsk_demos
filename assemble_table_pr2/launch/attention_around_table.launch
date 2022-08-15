@@ -2,7 +2,7 @@
 
   <arg name="gui" default="true" />
 
-  <arg name="INPUT_CLOUD" value="/kinect_head/depth_registered/quater/throttled/points" />
+  <arg name="INPUT_CLOUD" value="/kinect_head/depth_registered/throttled/points" />
 
   <node name="attention_clipper"
         pkg="nodelet" type="nodelet"
@@ -24,5 +24,7 @@
     <remap from="~indices" to="attention_clipper/output/point_indices" />
     <remap from="~output" to="attention_table/output/pointcloud" />
   </node>
+
+  <include file="$(find assemble_table_pr2)/launch/leg_color_filter.launch" />
 
 </launch>

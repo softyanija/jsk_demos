@@ -8,18 +8,18 @@
   * subscribe camera/depth_registered/hsi_output
   * subscribe tf and find /target
   -->
-  <arg name="INPUT" default="/kinect_head/depth_registered/quater/throttled/points"/>
+  <arg name="INPUT" default="/attention_table/output/pointcloud"/>
   <arg name="CENTROID_FRAME" default="target"/>
   <arg name="DEFAULT_NAMESPACE" default="HSI_color_filter"/>
   <arg name="FILTER_NAME_SUFFIX" default=""/>
   <arg name="OUTPUT" default="hsi_output$(arg FILTER_NAME_SUFFIX)"/>
 
-  <arg name="h_max" default="10" />
-  <arg name="h_min" default="-50" />
-  <arg name="s_max" default="255" />
-  <arg name="s_min" default="0" />
-  <arg name="i_max" default="255" />
-  <arg name="i_min" default="0" />
+  <arg name="h_max" default="123"/>
+  <arg name="h_min" default="83" />
+  <arg name="s_max" default="103" />
+  <arg name="s_min" default="30" />
+  <arg name="i_max" default="148" />
+  <arg name="i_min" default="112" />
 
   <arg name="create_manager" default="true" />
   <arg name="manager" default="hsi_filter_manager$(arg FILTER_NAME_SUFFIX)" />

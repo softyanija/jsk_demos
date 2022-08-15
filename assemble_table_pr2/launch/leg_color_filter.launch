@@ -63,6 +63,7 @@
       <remap from="~boxes" to="boxes$(arg FILTER_NAME_SUFFIX)" />
       <rosparam>
       </rosparam>
+      <param name="use_pca" value="True" />
     </node>
 
 

@@ -9,12 +9,18 @@
         args="standalone jsk_pcl/AttentionClipper">
     <remap from="~input/points" to="$(arg INPUT_CLOUD)" />
     <rosparam>
-      initial_pos: [0.0, 0.1, 1.1]
-      initial_rot: [-0.3, 0, 0.0]
-      dimension_x: 1.0
-      dimension_y: 0.7
-      dimension_z: 0.6
-      frame_id: head_mount_kinect_rgb_optical_frame
+      <!-- initial_pos: [0.0, 0.1, 1.1] -->
+      <!-- initial_rot: [-0.3, 0, 0.0] -->
+      <!-- dimension_x: 1.0 -->
+      <!-- dimension_y: 0.7 -->
+      <!-- dimension_z: 0.6 -->
+      <!-- frame_id: head_mount_kinect_rgb_optical_frame -->
+      initial_pos: [0.7, 0.0, 0.8]
+      initial_rot: [0.0, 0.0, 0.0]
+      dimension_x: 0.6
+      dimension_y: 1.0
+      dimension_z: 0.4
+      frame_id: base_link
     </rosparam>
   </node>
 

@@ -1,0 +1,45 @@
+<!-- -*- mode: xml -*- -->
+<launch>
+  <arg name="INPUT" default="/kinect_head/depth_registered/quater/throttled/points"/>
+  <arg name="FILTER_NAME_SUFFIX" default=""/>
+  <arg name="create_manager" default="true" />
+  <arg name="manager" default="plane_extraction_manager" />
+
+  <node if="$(arg create_manager)"
+        pkg="nodelet" type="nodelet" name="$(arg manager)"
+        args="manager" output="screen"/>
+
+  <node name="input_relay" pkg="nodelet" type="nodelet"
+        args="load jsk_topic_tools/Relay $(arg manager)">
+      <remap from="~input" to="$(arg INPUT)" />
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="multi_plane_estimate"
+        args="load jsk_pcl/OrganizedMultiPlaneSegmentation $(arg manager)"
+        output="screen">
+    <remap from="~input" to="/input_relay/output" />
+    <rosparam>
+      use_async: true
+      min_size: 2000
+      max_curvature: 0.01 
+      estimate_normal: true
+      publish_normal: true  
+    </rosparam>
+  </node>  
+
+  <node pkg="nodelet" type="nodelet" name="plane_extraction" args="load jsk_pcl/MultiPlaneExtraction $(arg manager)" output="screen">
+    <rosparam>
+      use_async: true
+      max_height: 0.3
+      use_indices: false
+    </rosparam>
+    <remap from="~input" to="/input_relay/output" />
+    <remap from="~indices" to="/multi_plane_estimate/output_refined" />
+    <remap from="~input_polygons" to="/multi_plane_estimate/output_refined_polygon" />
+    <remap from="~input_coefficients" to="/multi_plane_estimate/output_refined_coefficients" />
+  </node> 
+
+  <include file="$(find assemble_table_pr2)/launch/leg_color_filter.launch">
+    <arg name="INPUT" value="/plane_extraction/output"/>
+  </include>  
+</launch>

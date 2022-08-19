@@ -41,5 +41,7 @@
 
   <include file="$(find assemble_table_pr2)/launch/leg_color_filter.launch">
     <arg name="INPUT" value="/plane_extraction/output"/>
-  </include>  
+  </include>
+
+  <node name="single_leg_tf_broadcaster" pkg="assemble_table_pr2" type="single_leg_tf_broadcaster.py" />
 </launch>

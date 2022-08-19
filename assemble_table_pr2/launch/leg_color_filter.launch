@@ -29,8 +29,12 @@
           pkg="nodelet" type="nodelet" name="$(arg manager)"
           args="manager" output="screen"/>
 
+  <!--
     <node pkg="nodelet" type="nodelet" name="hsi_filter$(arg FILTER_NAME_SUFFIX)"
           args="load jsk_pcl/HSIColorFilter $(arg manager)" output="screen">
+-->
+    <node pkg="nodelet" type="nodelet" name="hsi_filter$(arg FILTER_NAME_SUFFIX)"
+          args="standalone jsk_pcl/HSIColorFilter" output="screen">
       <remap from="~input" to="$(arg INPUT)" />
       <remap from="~output" to="$(arg OUTPUT)" />
       <rosparam>
@@ -44,8 +48,13 @@
       <param name="i_limit_max" value="$(arg i_max)" />
       <param name="i_limit_min" value="$(arg i_min)" />
     </node>
+
+    <!--
     <node pkg="nodelet" type="nodelet" name="euclidean_clustering$(arg FILTER_NAME_SUFFIX)"
           args="load jsk_pcl/EuclideanClustering $(arg manager)" output="screen">
+-->
+    <node pkg="nodelet" type="nodelet" name="euclidean_clustering$(arg FILTER_NAME_SUFFIX)"
+          args="standalone jsk_pcl/EuclideanClustering" output="screen">
       <remap from="~input" to="$(arg OUTPUT)" />
       <rosparam>
         tolerance: 0.02
@@ -53,9 +62,15 @@
       </rosparam>
     </node>
 
+    <!--
     <node pkg="nodelet" type="nodelet"
           name="cluster_decomposer$(arg FILTER_NAME_SUFFIX)"
           args="load jsk_pcl/ClusterPointIndicesDecomposerZAxis $(arg manager)"
+          output="screen" clear_params="true">
+-->
+    <node pkg="nodelet" type="nodelet"
+          name="cluster_decomposer$(arg FILTER_NAME_SUFFIX)"
+          args="standalone jsk_pcl/ClusterPointIndicesDecomposerZAxis"
           output="screen" clear_params="true">
       <remap from="~input" to="$(arg OUTPUT)" />
       <remap from="~align_planes" to="/multi_plane_estimate/output_polygon" />
@@ -64,6 +79,8 @@
       <remap from="~debug_output" to="debug_output$(arg FILTER_NAME_SUFFIX)" />
       <remap from="~boxes" to="boxes$(arg FILTER_NAME_SUFFIX)" />
       <rosparam>
+        approximate_sync: True
+        publish_tf: True
         align_boxes: True
         align_boxes_with_plane: True
       </rosparam>

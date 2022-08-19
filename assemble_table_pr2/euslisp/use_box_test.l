@@ -20,9 +20,33 @@
 (send *ri* :angle-vector (send *pr2* :angle-vector) 3000)
 (send *ri* :wait-interpolation)
 
-(setq stamp (ros::time-now)) 
+(setq stamp (ros::time-now))
 (when (send *tfl* :wait-for-transform "base_link" "leg" stamp 5)
   (setq leg-origin (send *tfl* :lookup-transform "base_link" "leg" stamp)))
+
+(setq base-to-leg (send (send leg-origin :copy-worldcoords) :transform *larm-pickleg*))
+
+(send *pr2* :larm :inverse-kinematics base-to-leg)
+(send *ri* :angle-vector (send *pr2* :angle-vector) 3000)
+(send *ri* :wait-interpolation)
+
+(send *ri* :move-gripper :larm 0.050)
+(unix:sleep 1)
+
+(send *pr2* :larm :move-end-pos #f(70 0 0))
+(send *ri* :angle-vector (send *pr2* :angle-vector) 2000)
+(send *ri* :wait-interpolation)
+
+(send *ri* :start-grasp :larm)
+(unix:sleep 2)
+
+(send *pr2* :larm :inverse-kinematics base-to-leg)
+(send *ri* :angle-vector (send *pr2* :angle-vector) 3000)
+(send *ri* :wait-interpolation)
+
+(send *pr2* :larm :inverse-kinematics *larm-raise-leg*)
+(send *ri* :angle-vector (send *pr2* :angle-vector) 3000)
+(send *ri* :wait-interpolation)
 
 
 #|

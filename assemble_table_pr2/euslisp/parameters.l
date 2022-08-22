@@ -7,7 +7,11 @@
        :pos #f(58.381 -9.393 -73.867)
        :rpy #f(-1.461 -1.528 1.406)
        ))
-
+(setq *larm-raise-leg*
+      (make-coords
+       :pos #f(531.703 106.423 1027.905)
+       :rpy #f(-1.623 0.789 -3.018)
+       ))
 (setq *rarm-pre-guide*
       (make-coords
        :pos #f(550.0 -80.0 765)

@@ -1,0 +1,8 @@
+<launch>
+  <arg name="INPUT" default="/image_raw"/>
+  
+  <include file="$(find opencv_apps)/launch/hough_circles.launch">
+    <arg name="image" value="INPUT"/>
+  </include>
+</launch>
+  

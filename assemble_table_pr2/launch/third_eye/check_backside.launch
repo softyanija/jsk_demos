@@ -1,8 +1,27 @@
 <launch>
-  <arg name="INPUT" default="/image_raw"/>
+  <arg name="INPUT" default="/timer_cam_image"/>
+
+  <include file="$(find opencv_apps)/launch/hsv_color_filter.launch">
+    <arg name="image" value="$(arg INPUT)"/>
+    <arg name="h_limit_max" default="261"/>
+    <arg name="h_limit_min" default="189"/>
+    <arg name="s_limit_max" default="239"/>
+    <arg name="s_limit_min" default="80"/>
+    <arg name="v_limit_max" default="228"/>
+    <arg name="v_limit_min" default="124"/>
+  </include>
+  
+  <!-- <include file="$(find opencv_apps)/launch/smoothing.launch"> -->
+  <!--   <arg name="image" value="$(arg INPUT)"/> -->
+  <!--   <rosparam> -->
+  <!--     kernel_size: 3 -->
+  <!--   </rosparam> -->
+  <!-- </include> -->
   
   <include file="$(find opencv_apps)/launch/hough_circles.launch">
-    <arg name="image" value="INPUT"/>
+    <arg name="image" value="/hsv_color_filter/image"/>
+    <arg name="min_circle_radius" value="15"/>
+    <arg name="max_circle_radius" value="50"/>
   </include>
 </launch>
   

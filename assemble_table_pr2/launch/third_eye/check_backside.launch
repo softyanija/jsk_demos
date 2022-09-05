@@ -21,7 +21,7 @@
     </include>
   </group>
 
-  <group ns="screw">
+  <group ns="memory">
     <include file="$(find opencv_apps)/launch/hsv_color_filter.launch">
       <arg name="image" value="$(arg INPUT)"/>
       <arg name="h_limit_max" default="27"/>
@@ -29,7 +29,7 @@
       <arg name="s_limit_max" default="162"/>
       <arg name="s_limit_min" default="34"/>
       <arg name="v_limit_max" default="173"/>
-      <arg name="v_limit_min" default="98"/>
+      <arg name="v_limit_min" default="43"/>
     </include>
 
     <include file="$(find opencv_apps)/launch/general_contours.launch">

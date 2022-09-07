@@ -29,7 +29,7 @@
       (setq g_y (send (send (elt rects i) :center) :y))
       (setq l_x (send (send (elt rects i) :size) :width))
       (setq l_y (send (send (elt rects i) :size) :height))
-      (if (and t (> g_x 250) (< g_x 650) (> g_y 150) (> l_y (* 2 l_x)))
+      (if (and t (> g_x 80) (< g_x 240) (> g_y 30) (< g_y 210)(> l_y (* 2 l_x)))
 	  (progn
 	    (setq size_buf (* (send (send (elt rects i) :size) :width) (send (send (elt rects i) :size) :height)))
 	    (if (> size_buf size_max)

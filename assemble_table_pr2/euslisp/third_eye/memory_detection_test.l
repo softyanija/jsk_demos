@@ -6,7 +6,7 @@
 
 (ros::load-ros-manifest "opencv_apps")
 
-(ros::roseus "memory__test")
+(ros::roseus "memory_test")
 
 (setq lim_x )
 (setq lim_y )

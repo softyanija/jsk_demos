@@ -8,6 +8,21 @@
 	<remap from="~image" to="/timer_cam_image/image_rect_color" />
   </node>
 
+  <include file="$(find opencv_apps)/launch/threshold.launch">
+    <arg name="image" value="background_subtraction/output"/>
+    <arg name="threshold" value="100"/>
+  </include>
+
+  <include file="$(find opencv_apps)/launch/smoothing.launch">
+    <arg name="image" value="threshold/image"/>
+	<arg name="kernel_size" value="3"/>
+  </include>
+
+  <include file="$(find opencv_apps)/launch/hough_lines.launch">
+    <arg name="image" value="smoothing/image"/>
+	<arg name="threshold" value="95"/>
+  </include>
+
   <group if="$(arg gui)">
 	<node name="image_view_fg"
 		  pkg="image_view" type="image_view">

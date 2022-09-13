@@ -1,0 +1,40 @@
+<launch>
+  <arg name="INPUT" default="/timer_cam1/timer_cam_image/image_rect_color"/>
+  <arg name="debug_view" default="false"/>
+
+  <group ns="timer_cam1_rec">
+	<group ns="socket">
+      <include file="$(find opencv_apps)/launch/hsv_color_filter.launch">
+		<arg name="image" value="$(arg INPUT)"/>
+		<arg name="h_limit_max" default="209"/>
+		<arg name="h_limit_min" default="123"/>
+		<arg name="s_limit_max" default="256"/>
+		<arg name="s_limit_min" default="52"/>
+		<arg name="v_limit_max" default="256"/>
+		<arg name="v_limit_min" default="103"/>
+      </include>
+
+      <include file="$(find opencv_apps)/launch/general_contours.launch">
+		<arg name="image" value="hsv_color_filter/image"/>
+		<arg name="debug_view" value="$(arg debug_view)"/>
+      </include>
+	</group>
+
+	<group ns="memory">
+      <include file="$(find opencv_apps)/launch/hsv_color_filter.launch">
+		<arg name="image" value="$(arg INPUT)"/>
+		<arg name="h_limit_max" default="27"/>
+		<arg name="h_limit_min" default="345"/>
+		<arg name="s_limit_max" default="162"/>
+		<arg name="s_limit_min" default="34"/>
+		<arg name="v_limit_max" default="173"/>
+		<arg name="v_limit_min" default="43"/>
+      </include>
+
+      <include file="$(find opencv_apps)/launch/general_contours.launch">
+		<arg name="image" value="hsv_color_filter/image"/>
+		<arg name="debug_view" value="$(arg debug_view)"/>
+      </include>
+	</group>
+  </group>  
+</launch>

@@ -25,7 +25,7 @@ from geometry_msgs.msg import PoseArray
 def main():
 
     rospy.init_node("memory_edge_publisher")
-
+    
     pub = rospy.Publisher("/memory_edge", PoseArray, queue_size=3)
 
     rate = rospy.Rate(1)

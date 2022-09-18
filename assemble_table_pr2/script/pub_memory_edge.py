@@ -16,39 +16,40 @@ class memory_edge():
         self.img_pub = rospy.Publisher("/timer_cam2_rec/memory_edge/debug_image", Image, queue_size=3)
         
     def callback(self, data):
+        ps = PoseArray()
+        ps.header.frame_id="timer_cam2"
+        ps.header.stamp = rospy.Time.now()
         bridge = CvBridge()
         img = bridge.imgmsg_to_cv2(data, "bgr8")
         img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         cv2.imshow('gray', img)
         ret,thresh = cv2.threshold(img_gray,127,255,0)
         imgEdge,contours,hierarchy = cv2.findContours(thresh, 1, 2)
-        cnt = max(contours, key=lambda x: cv2.contourArea(x))
-        rect = cv2.minAreaRect(cnt)
-        box = cv2.boxPoints(rect)
-        box = np.int0(box)
-        print(box)
-        buf = box.tolist()
-        print(buf)
-        img = cv2.drawContours(img, [box], 0, (0,255,0), 3)
-        imgmsg = bridge.cv2_to_imgmsg(img, "bgr8")
-
-        ps = PoseArray()
-        ps.header.frame_id="timer_cam2"
-        ps.header.stamp = rospy.Time.now()
-        for i in range(4):
-            pose = Pose()
-            pose.position.x = box[i][0]
-            pose.position.y = box[i][1]
-            pose.position.z= 0
-            pose.orientation.x = 0
-            pose.orientation.y = 0
-            pose.orientation.z = 0
-            pose.orientation.w = 1
-
-            ps.poses.append(pose)
         
+        if (not contours == []):
+            cnt = max(contours, key=lambda x: cv2.contourArea(x))
+            rect = cv2.minAreaRect(cnt)
+            box = cv2.boxPoints(rect)
+            box = np.int0(box)
+            buf = box.tolist()
+            img = cv2.drawContours(img, [box], 0, (0,255,0), 3)
+            
+            
+            for i in range(4):
+                pose = Pose()
+                pose.position.x = box[i][0]
+                pose.position.y = box[i][1]
+                pose.position.z= 0
+                pose.orientation.x = 0
+                pose.orientation.y = 0
+                pose.orientation.z = 0
+                pose.orientation.w = 1
+
+                ps.poses.append(pose)
+
+        img = bridge.cv2_to_imgmsg(img, "bgr8")
         self.edge_publish(ps)
-        self.img_publish(imgmsg)
+        self.img_publish(img)
 
     def edge_publish(self, data):
         self.edge_pub.publish(data)

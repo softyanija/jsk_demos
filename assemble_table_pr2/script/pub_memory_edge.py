@@ -59,10 +59,5 @@ class memory_edge():
 
 if __name__ == '__main__':
     rospy.init_node('pub_memory_edge')
-
-    time.sleep(2.0)
-    rate = rospy.Rate(1)
     node = memory_edge()
-
-    while not rospy.is_shutdown():
-        rate.sleep()
+    rospy.spin()

@@ -17,8 +17,11 @@ def callback(lines_msg, area_msg): ##how to use data
     #cv_img = bridge.imgmsg_to_cv2()
     rospy.loginfo("callback")
     memory_line = LineArrayStamped()
+    memory_line.header = lines_msg.header
 
-    if ((not lines_msg == []) and (not area_msg)):
+    if ((not lines_msg.lines == []) and (not area_msg.poses == [])):
+        rospy.loginfo("process")
+        
         l1 = (area_msg.poses[1].position.x - area_msg.poses[0].position.x)**2 + (area_msg.poses[1].position.y - area_msg.poses[0].position.y)**2
         l2 = (area_msg.poses[1].position.x - area_msg.poses[2].position.x)**2 + (area_msg.poses[1].position.y - area_msg.poses[2].position.y)**2
 
@@ -30,9 +33,9 @@ def callback(lines_msg, area_msg): ##how to use data
         ref_deg = math.atan(t)
         use_line = 0
         
-        for i,lines in enumerate(lines_msg.lines):
-            buf = (lines.lines[i].pt1.y - lines.lines[i].pt2.y) / (lines.lines[i].pt1.x - lines.lines[i].pt2.x)
-            buf_deg = atan(buf)
+        for i,line in enumerate(lines_msg.lines):
+            buf = (line.pt1.y - line.pt2.y) / (line.pt1.x - line.pt2.x)
+            buf_deg = math.atan(buf)
             diff_deg = buf_deg - ref_deg
 
             if i == 0:
@@ -42,7 +45,6 @@ def callback(lines_msg, area_msg): ##how to use data
                 diff_deg_min = diff_deg
                 use_line = i
          
-        memory_line.header.stamp = rospy.Time.now()
         line = Line()
         line = lines_msg.lines[use_line]
         memory_line.lines.append(line)
@@ -56,7 +58,6 @@ sub_area = message_filters.Subscriber('/timer_cam2_rec/memory_edge', PoseArray)
 
 sync = message_filters.ApproximateTimeSynchronizer([sub_lines,sub_area], 10, 0.9)
 sync.registerCallback(callback)
-rospy.loginfo("hoge")
 rospy.spin()
 
 #     def __init__(self):

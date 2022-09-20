@@ -7,5 +7,8 @@
 
 (move-to-init)
 (pick-memory)
+(adjust-angle)
+(adjust-pos)
+(insert-memory)
 
 

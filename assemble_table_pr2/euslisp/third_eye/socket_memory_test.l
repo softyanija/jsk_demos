@@ -8,7 +8,7 @@
 
 (ros::roseus "socket_test")
 
-(setq rects (send (one-shot-subscribe "/timer_cam_1_rec/socket/general_contours/rectangles" opencv_apps::RotatedRectArrayStamped) :rects))
+(setq rects (send (one-shot-subscribe "/timer_cam1_rec/socket/general_contours/rectangles" opencv_apps::RotatedRectArrayStamped) :rects))
 (when rects
   (progn
     (setq l (length rects))

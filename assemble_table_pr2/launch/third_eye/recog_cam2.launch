@@ -11,9 +11,9 @@
 		<arg name="h_limit_max" default="84"/>
 		<arg name="h_limit_min" default="45"/>
 		<arg name="s_limit_max" default="143"/>
-		<arg name="s_limit_min" default="43"/>
+		<arg name="s_limit_min" default="40"/>
 		<arg name="v_limit_max" default="256"/>
-		<arg name="v_limit_min" default="52"/>
+		<arg name="v_limit_min" default="0"/>
 	  </include>
 
 	  <include file="$(find opencv_apps)/launch/general_contours.launch">
@@ -73,5 +73,7 @@
 	</node>
 
 	<node name="pub_memory_edge" pkg="assemble_table_pr2" type="pub_memory_edge.py" />
+    <node name="pub_memory_line" pkg="assemble_table_pr2" type="memory_line.py" />
+    
   </group>
 </launch>

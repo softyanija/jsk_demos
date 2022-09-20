@@ -48,12 +48,13 @@ def callback(lines_msg, area_msg, image_msg):
                 use_line = i
                 line_start = (int(line.pt1.x), int(line.pt1.y))
                 line_end = (int(line.pt2.x), int(line.pt2.y))
-         
+
         line = Line()
-        line = lines_msg.lines[use_line]
-        memory_line.lines.append(line)
         image_msg = bridge.imgmsg_to_cv2(image_msg, "bgr8")
-        image_msg = cv2.line(image_msg, line_start, line_end, (0,255,0), 3)
+        if (abs(diff_deg_min) < 0.2):
+            line = lines_msg.lines[use_line]
+            memory_line.lines.append(line)
+            image_msg = cv2.line(image_msg, line_start, line_end, (0,255,0), 3)
         image_msg = bridge.cv2_to_imgmsg(image_msg, "bgr8")
     
     pub_line.publish(memory_line)

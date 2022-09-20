@@ -9,18 +9,18 @@ import math
 import time
 from opencv_apps.msg import Line,LineArrayStamped
 from geometry_msgs.msg import PoseArray
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge
 
 rospy.init_node('detect_lines')
 
-def callback(lines_msg, area_msg): ##how to use data
-    #for debug
-    #cv_img = bridge.imgmsg_to_cv2()
-    rospy.loginfo("callback")
+def callback(lines_msg, area_msg, image_msg):
+
+    bridge = CvBridge()
     memory_line = LineArrayStamped()
     memory_line.header = lines_msg.header
 
     if ((not lines_msg.lines == []) and (not area_msg.poses == [])):
-        rospy.loginfo("process")
         
         l1 = (area_msg.poses[1].position.x - area_msg.poses[0].position.x)**2 + (area_msg.poses[1].position.y - area_msg.poses[0].position.y)**2
         l2 = (area_msg.poses[1].position.x - area_msg.poses[2].position.x)**2 + (area_msg.poses[1].position.y - area_msg.poses[2].position.y)**2
@@ -40,56 +40,34 @@ def callback(lines_msg, area_msg): ##how to use data
 
             if i == 0:
                 diff_deg_min = diff_deg
+                line_start = (int(line.pt1.x), int(line.pt1.y))
+                line_end = (int(line.pt2.x), int(line.pt2.y))
 
             if diff_deg_min > diff_deg:
                 diff_deg_min = diff_deg
                 use_line = i
+                line_start = (int(line.pt1.x), int(line.pt1.y))
+                line_end = (int(line.pt2.x), int(line.pt2.y))
          
         line = Line()
         line = lines_msg.lines[use_line]
         memory_line.lines.append(line)
+        image_msg = bridge.imgmsg_to_cv2(image_msg, "bgr8")
+        image_msg = cv2.line(image_msg, line_start, line_end, (0,255,0), 3)
+        image_msg = bridge.cv2_to_imgmsg(image_msg, "bgr8")
     
     pub_line.publish(memory_line)
+    pub_image.publish(image_msg)
 
 
-pub_line = rospy.Publisher('/timer_cam2_rec/memory/memory_line',LineArrayStamped , queue_size=1)
+pub_line = rospy.Publisher('/timer_cam2_rec/memory/memory_line/line',LineArrayStamped , queue_size=1)
+pub_image = rospy.Publisher('/timer_cam2_rec/memory/memory_line/debug_image', Image , queue_size=1)
+
+
 sub_lines = message_filters.Subscriber('/timer_cam2_rec/memory/hough_lines/lines', LineArrayStamped)
 sub_area = message_filters.Subscriber('/timer_cam2_rec/memory_edge', PoseArray)
+sub_image = message_filters.Subscriber('/timer_cam2/timer_cam_image/image_rect_color', Image)
 
-sync = message_filters.ApproximateTimeSynchronizer([sub_lines,sub_area], 10, 0.9)
+sync = message_filters.ApproximateTimeSynchronizer([sub_lines,sub_area,sub_image], 10, 0.9)
 sync.registerCallback(callback)
 rospy.spin()
-
-#     def __init__(self):
-
-#         self.subs = []
-#         self.pub = rospy.Publisher('/timer_cam2_rec/memory/memory_line',LineArrayStamped , queue_size=1)
-#         rospy.loginfo("hoge")
-
-        
-#    def callback(self, lines, area): ##how to use data
-#         #for debug
-#         #cv_img = bridge.imgmsg_to_cv2()
-#         memory_line = LineArrayStamped()
-#         self.pub(memory_line)
-
-        
-
-#     def subcribe(self):
-#         rospy.loginfo("poyo")
-        
-#         warn_no_remap('/timer_cam2_rec/memory/hough_lines/lines', '/timer_cam2_rec/memory_edge')
-
-#         subs = [sub_lines, sub_area]
-
-#         if self.approximate_sync:
-#             slop = 0.1
-            
-
-#         self.subs = subs
-
-# if __name__ == '__main__':
-#     rospy.init_node('detect_lines')
-#     dl = DetectLines()
-#     rospy.spin()
-

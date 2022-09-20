@@ -7,6 +7,7 @@ import time
 from geometry_msgs.msg import Pose
 from geometry_msgs.msg import PoseArray
 from sensor_msgs.msg import Image
+from std_msgs.msg import Header
 from cv_bridge import CvBridge
 
 class memory_edge():
@@ -17,8 +18,7 @@ class memory_edge():
         
     def callback(self, data):
         ps = PoseArray()
-        ps.header.frame_id="timer_cam2"
-        ps.header.stamp = rospy.Time.now()
+        ps.header = data.header
         bridge = CvBridge()
         img = bridge.imgmsg_to_cv2(data, "bgr8")
         img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)

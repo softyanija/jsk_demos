@@ -27,7 +27,7 @@
 		<arg name="h_limit_min" default="345"/>
 		<arg name="s_limit_max" default="162"/>
 		<arg name="s_limit_min" default="34"/>
-		<arg name="v_limit_max" default="173"/>
+		<arg name="v_limit_max" default="160"/>
 		<arg name="v_limit_min" default="43"/>
       </include>
 

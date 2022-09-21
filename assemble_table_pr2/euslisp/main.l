@@ -1,3 +1,5 @@
+#!/usr/bin/env roseus
+
 (load "package://pr2eus/pr2-interface.l")
 (load "package://assemble_table_pr2/euslisp/parameters.l")
 (load "package://assemble_table_pr2/euslisp/utils.l")

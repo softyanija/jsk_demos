@@ -11,7 +11,7 @@
 		<arg name="s_limit_max" default="256"/>
 		<arg name="s_limit_min" default="52"/>
 		<arg name="v_limit_max" default="256"/>
-		<arg name="v_limit_min" default="103"/>
+		<arg name="v_limit_min" default="120"/>
       </include>
 
       <include file="$(find opencv_apps)/launch/general_contours.launch">

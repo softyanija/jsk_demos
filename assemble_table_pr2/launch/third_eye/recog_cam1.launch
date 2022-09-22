@@ -3,7 +3,25 @@
   <arg name="debug_view" default="false"/>
 
   <group ns="timer_cam1_rec">
-	<group ns="socket">
+	
+	<group ns="memory">
+      <include file="$(find opencv_apps)/launch/hsv_color_filter.launch">
+		<arg name="image" value="$(arg INPUT)"/>
+		<arg name="h_limit_max" default="27"/>
+		<arg name="h_limit_min" default="345"/>
+		<arg name="s_limit_max" default="215"/>
+		<arg name="s_limit_min" default="26"/>
+		<arg name="v_limit_max" default="160"/>
+		<arg name="v_limit_min" default="0"/>
+      </include>
+
+      <include file="$(find opencv_apps)/launch/general_contours.launch">
+		<arg name="image" value="hsv_color_filter/image"/>
+		<arg name="debug_view" value="$(arg debug_view)"/>
+      </include>
+	</group>
+
+    <group ns="socket">
       <include file="$(find opencv_apps)/launch/hsv_color_filter.launch">
 		<arg name="image" value="$(arg INPUT)"/>
 		<arg name="h_limit_max" default="209"/>
@@ -20,21 +38,25 @@
       </include>
 	</group>
 
-	<group ns="memory">
-      <include file="$(find opencv_apps)/launch/hsv_color_filter.launch">
-		<arg name="image" value="$(arg INPUT)"/>
-		<arg name="h_limit_max" default="27"/>
-		<arg name="h_limit_min" default="345"/>
-		<arg name="s_limit_max" default="162"/>
-		<arg name="s_limit_min" default="34"/>
-		<arg name="v_limit_max" default="160"/>
-		<arg name="v_limit_min" default="43"/>
-      </include>
+    <node name="add_mask_image"
+          pkg="nodelet" type="nodelet"
+          args="standalone jsk_perception/AddMaskImage sample_manager"
+          respawn="true" >
+      <remap from="~input/src1" to="memory/hsv_color_filter/image" />
+      <remap from="~input/src2" to="socket/hsv_color_filter/image" />
+	</node>
 
-      <include file="$(find opencv_apps)/launch/general_contours.launch">
-		<arg name="image" value="hsv_color_filter/image"/>
-		<arg name="debug_view" value="$(arg debug_view)"/>
-      </include>
-	</group>
+	<node name="apply_mask_image"
+          pkg="nodelet" type="nodelet"
+          args="standalone jsk_perception/ApplyMaskImage"
+          respawn="true" >
+      <remap from="~input" to="$(arg INPUT)" />
+      <remap from="~input/mask" to="add_mask_image/output" />
+      <rosparam>
+        approximate_sync: true
+        clip: false
+      </rosparam>
+    </node>
+
   </group>  
 </launch>

@@ -2,18 +2,18 @@
   <arg name="INPUT" default="/timer_cam2/timer_cam_image/image_rect_color"/>
   <arg name="gui" default="true" />
   <arg name="debug_view" default="true" />
-  <param name="/use_sim_time" value="true" />
+  <param name="/use_sim_time" value="false" />
 
   <group ns="timer_cam2_rec">
 	<group ns="memory">
 	  <include file="$(find opencv_apps)/launch/hsv_color_filter.launch">
 		<arg name="image" value="$(arg INPUT)"/>
 		<arg name="h_limit_max" default="84"/>
-		<arg name="h_limit_min" default="45"/>
-		<arg name="s_limit_max" default="143"/>
-		<arg name="s_limit_min" default="40"/>
+		<arg name="h_limit_min" default="14"/>
+		<arg name="s_limit_max" default="256"/>
+		<arg name="s_limit_min" default="15"/>
 		<arg name="v_limit_max" default="256"/>
-		<arg name="v_limit_min" default="0"/>
+		<arg name="v_limit_min" default="44"/>
 	  </include>
 
 	  <include file="$(find opencv_apps)/launch/general_contours.launch">
@@ -41,7 +41,7 @@
 		<arg name="h_limit_max" default="174"/>
 		<arg name="h_limit_min" default="104"/>
 		<arg name="s_limit_max" default="193"/>
-		<arg name="s_limit_min" default="40"/>
+		<arg name="s_limit_min" default="35"/>
 		<arg name="v_limit_max" default="256"/>
 		<arg name="v_limit_min" default="73"/>
 	  </include>

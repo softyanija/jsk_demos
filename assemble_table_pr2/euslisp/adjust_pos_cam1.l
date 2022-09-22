@@ -31,12 +31,11 @@
 
 (defun adjust-pos-cam1 ()
   (ros::ros-info (format nil "adjusting pos of memory according to cam1"))
-  (setq angle_diff_tol 5)
   (setq x_goal 0)
   (setq y_goal -10)
 
-  (setq f_a 0)
-  (while (= f_a 0)
+  (setq f 0)
+  (while (= f 0)
     (setq socket_cand (send (one-shot-subscribe "/timer_cam1_rec/socket/general_contours/rectangles" opencv_apps::RotatedRectArrayStamped) :rects))
     (when socket_cand
       (progn
@@ -53,7 +52,7 @@
           (incf i))
         (setq socket (elt socket_cand max_i))
         (if (> size_max 150)
-            (setq f_a 1))
+            (setq f 1))
         )))
   (setq socket_x (send (send socket :center) :x))
   (setq socket_y (send (send socket :center) :y))
@@ -78,8 +77,8 @@
           (setq f 1))
         (progn
           (ros::ros-info "move hand")
-          (setq x_delta (/ (- 0 y_corr) x_rate))
-          (setq y_delta (/ (- 0 x_corr) y_rate))
+          (setq y_delta (/ (- 0 x_corr) x_rate))
+          (setq x_delta (/ (- 0 y_corr) y_rate))
           (send *pr2* :larm :move-end-pos (float-vector x_delta y_delta 0))
           (send *ri* :angle-vector (send *pr2* :angle-vector) 3000)
           (send *ri* :wait-interpolation)

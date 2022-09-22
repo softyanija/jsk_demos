@@ -26,15 +26,15 @@ def callback(lines_msg, area_msg, image_msg):
         l2 = (area_msg.poses[1].position.x - area_msg.poses[2].position.x)**2 + (area_msg.poses[1].position.y - area_msg.poses[2].position.y)**2
 
         if l1 > l2:
-            t = (area_msg.poses[1].position.y - area_msg.poses[0].position.y) / (area_msg.poses[1].position.x - area_msg.poses[0].position.x)
+            t = (area_msg.poses[1].position.y - area_msg.poses[0].position.y) / max(1, (area_msg.poses[1].position.x - area_msg.poses[0].position.x))
         else:
-            t = (area_msg.poses[1].position.y - area_msg.poses[2].position.y) / (area_msg.poses[1].position.x - area_msg.poses[2].position.x)
+            t = (area_msg.poses[1].position.y - area_msg.poses[2].position.y) / max(1, (area_msg.poses[1].position.x - area_msg.poses[2].position.x))
 
         ref_deg = math.atan(t)
         use_line = 0
         
         for i,line in enumerate(lines_msg.lines):
-            buf = (line.pt1.y - line.pt2.y) / (line.pt1.x - line.pt2.x)
+            buf = (line.pt1.y - line.pt2.y) / max(1, (line.pt1.x - line.pt2.x))
             buf_deg = math.atan(buf)
             diff_deg = buf_deg - ref_deg
 
@@ -69,6 +69,6 @@ sub_lines = message_filters.Subscriber('/timer_cam2_rec/memory/hough_lines/lines
 sub_area = message_filters.Subscriber('/timer_cam2_rec/memory_edge', PoseArray)
 sub_image = message_filters.Subscriber('/timer_cam2/timer_cam_image/image_rect_color', Image)
 
-sync = message_filters.ApproximateTimeSynchronizer([sub_lines,sub_area,sub_image], 10, 0.9)
+sync = message_filters.ApproximateTimeSynchronizer([sub_lines,sub_area,sub_image], 10, 0.5)
 sync.registerCallback(callback)
 rospy.spin()

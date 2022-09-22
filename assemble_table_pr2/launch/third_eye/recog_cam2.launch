@@ -24,9 +24,14 @@
 	  <include file="$(find opencv_apps)/launch/hough_lines.launch">
 		<arg name="image" value="hsv_color_filter/image"/>
 		<arg name="hough_type" value="1" />
-		<arg name="threshold" value="75"/>
+		<arg name="threshold" value="90"/>
 		<arg name="rho" value="4.0"/>
+        <arg name="minLineLength" value="130" />
+        <arg name="maxLineGrap" value="50" />
 	  </include>
+
+      <node name="pub_memory_edge" pkg="assemble_table_pr2" type="pub_memory_edge.py" />
+      <node name="pub_memory_line" pkg="assemble_table_pr2" type="memory_line.py" />
 
 	  <group if="$(arg gui)">
 		<node name="image_view_fg"
@@ -50,6 +55,15 @@
 		<arg name="image" value="hsv_color_filter/image"/>
 		<arg name="debug_view" value="$(arg debug_view)"/>
       </include>
+
+      <include file="$(find opencv_apps)/launch/hough_lines.launch">
+		<arg name="image" value="$(arg INPUT)"/>
+		<arg name="hough_type" value="1" />
+		<arg name="threshold" value="100"/>
+		<arg name="rho" value="4.0"/>
+        <arg name="minLineLength" value="135"/>
+        <arg name="maxLineGrap" value="15" />
+	  </include>
 	</group>
 
 	<node name="add_mask_image"
@@ -71,9 +85,6 @@
         clip: false
       </rosparam>
 	</node>
-
-	<node name="pub_memory_edge" pkg="assemble_table_pr2" type="pub_memory_edge.py" />
-    <node name="pub_memory_line" pkg="assemble_table_pr2" type="memory_line.py" />
     
   </group>
 </launch>

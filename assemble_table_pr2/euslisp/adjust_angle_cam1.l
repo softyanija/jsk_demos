@@ -8,7 +8,7 @@
 (ros::load-ros-manifest "opencv_apps")
 
 (defun adjust-angle-cam1 ()
-  (ros::ros-info (format nil "adjusting angle of memory according to cam1"))
+  (ros::ros-info (format nil "adjusting angle of memory according to cam1 image"))
   (setq angle_diff_tol 5)
 
   (setq f 0)

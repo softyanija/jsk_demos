@@ -88,13 +88,3 @@
         )
     )
 )
-    
-    
-
-        
-        
-
-
-
-
-     (setq memory (send (one-shot-subscribe "/timer_cam2_rec/memory_edge" geometry_msgs::PoseArray) :poses))

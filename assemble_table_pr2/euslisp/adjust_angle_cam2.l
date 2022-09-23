@@ -29,7 +29,7 @@
           (progn
             (if (> (abs angle_diff) 6)
                 (setq angle_diff (* 6 (/ angle_diff (abs angle_diff)))))
-            (send *pr2* :larm :move-end-rot angle_diff :z)
+            (send *pr2* :larm :move-end-rot angle_diff :y)
             (send *ri* :angle-vector (send *pr2* :angle-vector) 3000)
             (send *ri* :wait-interpolation))
           (progn

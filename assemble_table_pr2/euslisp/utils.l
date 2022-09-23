@@ -117,3 +117,75 @@
 
         (setq *memory_edge_cam2* (send (elt memory_edge_cand max_i) :position))))))
 
+(defun get-cam2-socket ()
+  (setq f 0)
+  (while (= f 0)
+    (setq socket_cand (send (one-shot-subscribe "/timer_cam2_rec/socket/general_contours/rectangles" opencv_apps::RotatedRectArrayStamped) :rects))
+    (when socket_cand
+      (progn
+        (setq l (length socket_cand))
+        (setq i 0)
+        (setq size_max 0)
+        (while (< i l)
+          (setq rect (elt socket_cand i))
+          (setq size_buf (* (send (send rect :size) :width) (send (send rect :size) :height)))
+          (if (> size_buf size_max)
+              (progn
+                (setq size_max size_buf)
+                (setq max_i i)))
+          (incf i))
+        (setq socket (elt socket_cand max_i))
+        (if (> size_max 100)
+            (progn
+              (setq f 1)
+              (setq *socket_cam2* socket)))
+        ))))
+
+(defun check-set-memory-cam2 ()
+  (get-cam2-memory-edge)
+  (get-cam2-socket)
+  (setq th 3)
+  (setq memory_edge (send *memory_edge_cam2* :y))
+  (setq socket_center (send (send *socket_cam2* :center) :y))
+  (> (+ memory_edge th) socket_center))
+
+(defun judge-set-memory-cam2 ()
+  (get-cam2-memory-edge)
+  (setq socket_before_x (send (send *socket_cam2* :center) :x))
+  (setq socket_before_y (send (send *socket_cam2* :center) :y))
+
+  (result 1)
+  (setq socket_cand (send (one-shot-subscribe "/timer_cam2_rec/socket/general_contours/rectangles" opencv_apps::RotatedRectArrayStamped) :rects))
+  (setq size_max 0)
+  (when socket_cand
+    (progn
+      (setq l (length socket_cand))
+      (setq i 0)
+      (setq size_max 0)
+      (while (< i l)
+        (setq rect (elt socket_cand i))
+        (setq size_buf (* (send (send rect :size) :width) (send (send rect :size) :height)))
+        (if (> size_buf size_max)
+            (progn
+              (setq size_max size_buf)
+              (setq max_i i)))
+        (incf i))
+      (setq socket_buf (elt socket_cand max_i))
+      (if (< size_max 100)
+          (progn
+            (ros::ros-info "memory is rear")
+            1)
+            (progn
+              (setq f 4)
+              (setq socket_j socket_buf))))))
+;; (defun buf ()
+;;   (if (< size_b 100)
+;;           (progn
+;;             (ros::ros-info "memory is rear")
+;;             1)
+;;             (progn
+;;               (setq f 4)
+;;               (ros::ros-info "piyo"))))
+          
+
+

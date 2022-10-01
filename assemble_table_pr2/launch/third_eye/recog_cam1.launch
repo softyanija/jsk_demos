@@ -58,5 +58,7 @@
       </rosparam>
     </node>
 
+    <node name="indicate_memory_under" pkg="assemble_table_pr2" type="indicate_memory_edge_cam1.py" />
+
   </group>  
 </launch>

@@ -71,7 +71,7 @@
     (ros::ros-info (format nil "x_corr is ~A" x_corr))
     (ros::ros-info (format nil "y_corr is ~A" y_corr))
 
-    (if (and (< (abs x_corr) 5) (< (abs y_corr) 5))
+    (if (and (< (abs x_corr) 3) (< (abs y_corr) 5))
         (progn
           (ros::ros-info "adjust-pos finished")
           (setq f 1))

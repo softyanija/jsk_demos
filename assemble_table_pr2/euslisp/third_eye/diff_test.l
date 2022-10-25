@@ -10,7 +10,7 @@
 (ros::roseus "diff_test")
 
 (defun background-init ()
-  (let ((srv-name (format nil "/timer_cam2_rec/background_subtraction/set_parameters")) (req (instance dynamic_reconfigure::ReconfigureRequest :init)))
+  (let ((srv-name (format nil "/background_subtraction/set_parameters")) (req (instance dynamic_reconfigure::ReconfigureRequest :init)))
 	(send req :config :doubles
 		  (list (instance dynamic_reconfigure::DoubleParameter :init
 						  :name "false" :value 3)))

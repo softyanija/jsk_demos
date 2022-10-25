@@ -24,7 +24,7 @@
     <group ns="socket">
       <include file="$(find opencv_apps)/launch/hsv_color_filter.launch">
 		<arg name="image" value="$(arg INPUT)"/>
-		<arg name="h_limit_max" default="209"/>
+		<arg name="h_limit_max" default="179"/>
 		<arg name="h_limit_min" default="123"/>
 		<arg name="s_limit_max" default="256"/>
 		<arg name="s_limit_min" default="52"/>
@@ -58,7 +58,25 @@
       </rosparam>
     </node>
 
-    <node name="indicate_memory_under" pkg="assemble_table_pr2" type="indicate_memory_edge_cam1.py" />
+    <!-- <node name="indicate_memory_under" pkg="assemble_table_pr2" type="indicate_memory_edge_cam1.py" /> -->
 
-  </group>  
+    <group ns="lever">
+      <include file="$(find opencv_apps)/launch/hsv_color_filter.launch">
+		<arg name="image" value="around_image"/>
+		<arg name="h_limit_max" default="270"/>
+		<arg name="h_limit_min" default="170"/>
+		<arg name="s_limit_max" default="256"/>
+		<arg name="s_limit_min" default="40"/>
+		<arg name="v_limit_max" default="256"/>
+		<arg name="v_limit_min" default="0"/>
+	  </include>
+
+	  <include file="$(find opencv_apps)/launch/general_contours.launch">
+		<arg name="image" value="hsv_color_filter/image"/>
+		<arg name="debug_view" value="$(arg debug_view)"/>
+      </include>
+    </group>
+  </group>
+
+  <node name="check_lever_cam1" pkg="assemble_table_pr2" type="check_lever_cam1.py" />
 </launch>

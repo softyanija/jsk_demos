@@ -35,10 +35,26 @@ def callback(img_msg, rec_msg):
         under = Pose()
         image_msg = bridge.imgmsg_to_cv2(img_msg, "bgr8")
         if f == 1:
-            memory_len = max(rec_msg.rects[use_rect].size.width,rec_msg.rects[use_rect].size.height) 
-            under_x = int(rec_msg.rects[use_rect].center.x)
-            under_y = int(rec_msg.rects[use_rect].center.y + memory_len/2)
-            image_msg = cv2.circle(image_msg, (under_x,under_y), 10,(0,0,255),2,4,0)
+            memory_len = max(rec_msg.rects[use_rect].size.width,rec_msg.rects[use_rect].size.height)
+            #memory_len = rec_msg.rects[use_rect].size.width
+            # under_x = int(rec_msg.rects[use_rect].center.x)
+            # under_y = int(rec_msg.rects[use_rect].center.y + memory_len/2)
+            
+            if (abs(rec_msg.rects[use_rect].angle) < (rec_msg.rects[use_rect].angle + 90)):
+                angle = rec_msg.rects[use_rect].angle
+            else:
+                angle = (rec_msg.rects[use_rect].angle + 90)
+
+            print(angle)
+            
+            under_x = int(rec_msg.rects[use_rect].center.x + (memory_len / 2)* math.sin(angle))
+            under_y = int(rec_msg.rects[use_rect].center.y + (memory_len / 2)* math.cos(angle))
+            top_x = int(rec_msg.rects[use_rect].center.x - (memory_len / 2)* math.sin(angle))
+            top_y = int(rec_msg.rects[use_rect].center.y - (memory_len / 2)* math.cos(angle))
+            image_msg = cv2.circle(image_msg, (under_x,under_y), 3,(0,0,255),1,4,0)
+            #image_msg = cv2.circle(image_msg, (top_x,top_y), 5,(255,0,0),2,4,0)
+            #image_msg = cv2.line(image_msg, (under_x,under_y),(top_x,top_y),(0,255,0),1)
+            
         
     image_msg = bridge.cv2_to_imgmsg(image_msg, "bgr8")
 

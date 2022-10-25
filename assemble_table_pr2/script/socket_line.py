@@ -37,7 +37,7 @@ def callback(lines_msg,image_msg):
             socket_line.lines.append(line)
             line_start = (int(line.pt1.x), int(line.pt1.y))
             line_end = (int(line.pt2.x), int(line.pt2.y))
-            image_msg = cv2.line(image_msg, line_start, line_end, (0,255,0), 3)
+            image_msg = cv2.line(image_msg, line_start, line_end, (0,255,0), 2)
         image_msg = bridge.cv2_to_imgmsg(image_msg, "bgr8")
         pub_line.publish(socket_line)
         pub_image.publish(image_msg)

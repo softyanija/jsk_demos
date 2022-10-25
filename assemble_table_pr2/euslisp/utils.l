@@ -37,7 +37,7 @@
   (send *ri* :wait-interpolation)
 
   (send *ri* :stop-grasp :larm)
-  (send *ri* :stop-grasp :larm)
+  (send *ri* :stop-grasp :rarm)
   (unix:sleep 1))
 
 (defun pick-memory ()
@@ -154,7 +154,7 @@
   (setq socket_before_x (send (send *socket_cam2* :center) :x))
   (setq socket_before_y (send (send *socket_cam2* :center) :y))
 
-  (result 1)
+  (setq result 0)
   (setq socket_cand (send (one-shot-subscribe "/timer_cam2_rec/socket/general_contours/rectangles" opencv_apps::RotatedRectArrayStamped) :rects))
   (setq size_max 0)
   (when socket_cand
@@ -171,13 +171,30 @@
               (setq max_i i)))
         (incf i))
       (setq socket_buf (elt socket_cand max_i))
-      (if (< size_max 100)
+      (if (< size_max 150)
           (progn
-            (ros::ros-info "memory is rear")
-            1)
-            (progn
+            (ros::ros-info "memory is front side")
+            2)
+          (progn
               (setq f 4)
-              (setq socket_j socket_buf))))))
+              (setq memory_x (send *memory_edge_cam2* :x))
+              (setq memory_y (send *memory_edge_cam2* :y))
+              (setq socket_x (send (send socket_buf :center) :x))
+              (setq socket_y (send (send socket_buf :center) :y))
+              (setq diff_x (- memory_x socket_x))
+              (setq diff_y (- memory_y socket_y))
+              (cond ((> diff_y 3) (progn
+                                      (ros::ros-info "memory is set")
+                                      0))
+                    ((> diff_y -4) (progn
+                                     (ros::ros-info "memory is rear")
+                                     1))
+                    (t (progn
+                         (ros::ros-info "memory is on the socket edge")
+                         3))
+                    )
+      
+          )))))
 ;; (defun buf ()
 ;;   (if (< size_b 100)
 ;;           (progn

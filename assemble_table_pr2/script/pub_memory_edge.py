@@ -22,7 +22,6 @@ class memory_edge():
         bridge = CvBridge()
         img = bridge.imgmsg_to_cv2(data, "bgr8")
         img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        cv2.imshow('gray', img)
         ret,thresh = cv2.threshold(img_gray,127,255,0)
         imgEdge,contours,hierarchy = cv2.findContours(thresh, 1, 2)
         

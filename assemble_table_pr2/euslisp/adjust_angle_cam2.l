@@ -12,7 +12,7 @@
   (setq angle_diff_tol 3)
   (setq angle_goal -3)
   (setq socket_angle (/ (- (send (send *socket_line_cam2* :pt1) :y) (send (send *socket_line_cam2* :pt2) :y)) (- (send (send *socket_line_cam2* :pt1) :x) (send (send *socket_line_cam2* :pt2) :x))))
-      (setq angle (* (/ (atan tilt) pi) 180))
+      (setq angle (* (/ (atan socket_angle) pi) 180))
         
   (setq f 0)
   (while (= f 0)

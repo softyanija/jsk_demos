@@ -14,16 +14,16 @@ from sensor_msgs.msg import Image
 from std_msgs.msg import Header
 from cv_bridge import CvBridge
 
-rospy.init_node('check_lever')
+rospy.init_node('check_lever_cam2')
 
 width = 320
 height = 240
-mask_width = 25
-mask_height = 20
-mask_delta_x = -23
-mask_delta_y = -25
-socket_x = 190
-socket_y = 190
+mask_width_half = 8
+mask_height_half = 8
+mask_delta_x = -3
+mask_delta_y = -20
+mask_x = 190
+mask_y = 190
 
 def callback(img_msg, rect_msg):
 
@@ -43,10 +43,12 @@ def callback(img_msg, rect_msg):
                 f = 1
                 
         if f == 1:
-            print('x is {}, y is {}'.format(rect_msg.rects[use_rect].center.x,rect_msg.rects[use_rect].center.y))
+            print('mask_x is {}, mask_y is {}'.format(rect_msg.rects[use_rect].center.x,rect_msg.rects[use_rect].center.y))
+            mask_x = int(rect_msg.rects[use_rect].center.x)
+            mask_y = int(rect_msg.rects[use_rect].center.y)
 
     mask = cv2.rectangle(image_msg_copy, (0,0),(width,height),(0,0,0), -1)
-    mask = cv2.rectangle(image_msg_copy, (socket_x + mask_delta_x,socket_y + mask_delta_y),(socket_x + mask_delta_x + mask_width,socket_y + mask_delta_y + mask_height),(255,255,255), -1)
+    mask = cv2.rectangle(image_msg_copy, (mask_x - mask_width_half + mask_delta_x, mask_y - mask_height_half + mask_delta_y), (mask_x + mask_width_half + mask_delta_x, mask_y + mask_height_half + mask_delta_y), (255,255,255), -1)
     image_msg = cv2.bitwise_and(image_msg, mask)
     
     #image_msg = bridge.cv2_to_imgmsg(image_msg, "bgr8")

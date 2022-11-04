@@ -19,9 +19,9 @@ rospy.init_node('check_lever_cam1')
 width = 320
 height = 240
 mask_width_half = 8
-mask_height_half = 14
+mask_height_half = 12
 mask_delta_x = 0
-mask_delta_y = -16
+mask_delta_y = -20
 mask_x = 190
 mask_y = 150
 

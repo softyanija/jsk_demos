@@ -27,6 +27,9 @@ mask_y = 150
 
 def callback(img_msg, rect_msg):
 
+    global mask_x
+    global mask_y
+    
     bridge = CvBridge()
 
     image_msg = bridge.imgmsg_to_cv2(img_msg, "bgr8")

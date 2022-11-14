@@ -7,24 +7,39 @@
 
 (ros::load-ros-manifest "opencv_apps")
 
+(defun oneshotsub-debug ()
+  (one-shot-subscribe "/timer_cam1_rec/socket/general_contours/rectangles" opencv_apps::RotatedRectArrayStamped))
+
+(defun oneshotsub-debug2 ()
+  (ros::ros-info "test")
+  (setq angle_diff_tol 5)
+  (setq f 0)
+  (while (= f 0)
+    (setq socket_cand (send (one-shot-subscribe "/timer_cam1_rec/socket/general_contours/rectangles" opencv_apps::RotatedRectArrayStamped) :rects))
+    (ros::ros-info "in while loop now")
+    (setq f 1)
+    ))
+  
 (defun adjust-angle-cam1 ()
   (ros::ros-info (format nil "adjusting angle of memory according to cam1 image"))
   (setq angle_diff_tol 5)
 
   (setq f 0)
   (while (= f 0)
+    (ros::ros-info "huga")
     (setq socket_cand (send (one-shot-subscribe "/timer_cam1_rec/socket/general_contours/rectangles" opencv_apps::RotatedRectArrayStamped) :rects))
+    (ros::ros-info "hoge")
   
-  (setq f 0)
-  (while (= f 0)
-    (when socket_cand
-      (progn
-        (setq l (length socket_cand))
-        (setq i 0)
-        (setq size_max 0)
-        (while (< i l)
-          (setq rect (elt socket_cand i))
-          (setq size_buf (* (send (send rect :size) :width) (send (send rect :size) :height)))
+    (setq f 0)
+    (while (= f 0)
+      (when socket_cand
+        (progn
+          (setq l (length socket_cand))
+          (setq i 0)
+          (setq size_max 0)
+          (while (< i l)
+            (setq rect (elt socket_cand i))
+            (setq size_buf (* (send (send rect :size) :width) (send (send rect :size) :height)))
           (if (> size_buf size_max)
               (progn
                 (setq size_max size_buf)
@@ -78,6 +93,3 @@
               (setq f 1)
               (ros::ros-info (format nil "end adjusting"))))
         ))))
-
-    
-        

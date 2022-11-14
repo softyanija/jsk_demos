@@ -7,7 +7,9 @@
 
 (defun set-memory ()
 
-  (larm-move-end-pos-worldcoords #f(0 0 -6))
+  (larm-move-end-pos-worldcoords #f(0 3 -6))
+  (larm-move-end-pos-worldcoords #f(2 0 0))
+  (larm-move-end-pos-worldcoords #f(-2 0 0))
   (larm-move-end-pos-worldcoords #f(0 -2 0))
 
   (larm-move-end-pos-worldcoords #f(0 0 -5))

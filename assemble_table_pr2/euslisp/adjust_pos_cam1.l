@@ -16,7 +16,7 @@
   (send *pr2* :larm :move-end-pos #f(-5 -5 0))
   (send *ri* :angle-vector (send *pr2* :angle-vector) 3000)
   (send *ri* :wait-interpolation)
-  (unix:sleep 3)
+  (unix:sleep 5)
   (get-cam1-memory)
   (setq x_b (send (send *memory_cam1* :center) :x))
   (setq y_b (+ (send (send *memory_cam1* :center) :y) (/ (max (send (send *memory_cam1* :size) :height) (send (send *memory_cam1* :size) :width)) 2)))
@@ -60,6 +60,7 @@
   (setq f 0)
   (while (= f 0)
     (get-cam1-memory)
+    (setq f 0)
     (setq memory_x (send (send *memory_cam1* :center) :x))
     (setq memory_y (+ (send (send *memory_cam1* :center) :y) (/ (max (send (send *memory_cam1* :size) :height) (send (send *memory_cam1* :size) :width)) 2)))
 
@@ -71,7 +72,7 @@
     (ros::ros-info (format nil "x_corr is ~A" x_corr))
     (ros::ros-info (format nil "y_corr is ~A" y_corr))
 
-    (if (and (< (abs x_corr) 3) (< (abs y_corr) 5))
+    (if (and (< (abs x_corr) 2) (< (abs y_corr) 5))
         (progn
           (ros::ros-info "adjust-pos finished")
           (setq f 1))
@@ -86,5 +87,5 @@
           )
         )
     )
-)    
+)
         

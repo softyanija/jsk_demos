@@ -11,16 +11,20 @@
 (load "package://assemble_table_pr2/euslisp/adjust_angle_cam2.l")
 (load "package://assemble_table_pr2/euslisp/pr2-manequine.l")
 (load "package://assemble_table_pr2/euslisp/set_memory.l")
-(load "package://assemble_table_pr2/euslisp/push_memory.l")
+(load "package://assemble_table_pr2/euslisp/push_memory_improved.l")
 (pr2-init)
 (objects (list *pr2*))
 
+(ros::roseus "third_eye")
 (move-to-init)
 
 (place-cam2)
 (move-to-init)
 (place-cam1)
 (move-to-init)
+(send *pr2* :angle-vector *rarm-down*)
+(send *ri* :angle-vector (send *pr2* :angle-vector) 2000)
+(send *ri* :wait-interpolation)
 
 (measure-socket-line-cam2)
 (pick-memory)
@@ -39,5 +43,4 @@
 (set-memory)
 
 (push-memory)
-
 

@@ -45,11 +45,11 @@
 	  <include file="$(find opencv_apps)/launch/hsv_color_filter.launch">
 		<arg name="image" value="$(arg INPUT)"/>
 		<arg name="h_limit_max" default="174"/>
-		<arg name="h_limit_min" default="104"/>
+		<arg name="h_limit_min" default="130"/>
 		<arg name="s_limit_max" default="193"/>
 		<arg name="s_limit_min" default="35"/>
 		<arg name="v_limit_max" default="256"/>
-		<arg name="v_limit_min" default="73"/>
+		<arg name="v_limit_min" default="140"/>
 	  </include>
 
 	  <include file="$(find opencv_apps)/launch/general_contours.launch">
@@ -103,9 +103,28 @@
 		<arg name="debug_view" value="$(arg debug_view)"/>
       </include>
     </group>
+
+    <group ns="board">
+      <include file="$(find opencv_apps)/launch/hsv_color_filter.launch">
+		<arg name="image" value="$(arg INPUT)"/>
+		<arg name="h_limit_max" default="295"/>
+		<arg name="h_limit_min" default="196"/>
+		<arg name="s_limit_max" default="256"/>
+		<arg name="s_limit_min" default="40"/>
+		<arg name="v_limit_max" default="256"/>
+		<arg name="v_limit_min" default="0"/>
+	  </include>
+
+	  <include file="$(find opencv_apps)/launch/general_contours.launch">
+		<arg name="image" value="hsv_color_filter/image"/>
+		<arg name="debug_view" value="$(arg debug_view)"/>
+      </include>
+    </group>
+    
   </group>
   <node name="pub_socket_line" pkg="assemble_table_pr2" type="socket_line.py" />
   <node name="check_lever" pkg="assemble_table_pr2" type="check_lever.py" />
+  <node name="aruco_hand" pkg="assemble_table_pr2" type="aruco_hand.py" />
 
   
 </launch>

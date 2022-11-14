@@ -22,7 +22,6 @@
   (send *ri* :angle-vector (send *pr2* :angle-vector) 2000)
   (send *ri* :wait-interpolation))
 
-
 (defun get-pos ()
   (send *pr2* :angle-vector (send *ri* :state :potentio-vector))
   (ros::ros-info (format nil "rarm-corods is ~A" (send *pr2* :rarm :end-coords)))
@@ -42,11 +41,13 @@
 
 (defun pick-memory ()
   (send *pr2* :angle-vector *pick-memory-1*)
+  (send *pr2* :rarm :inverse-kinematics (send (send *pr2* :copy-worldcoords) :transform (make-coords :pos #f(764.215 -305.59 831.716) :rpy (float-vector 0.357 0.162 0.032))) :translation-axis t :rotation-axis t)
   (send *pr2* :larm :move-end-pos #f(-100 0 0))
   (send *ri* :angle-vector (send *pr2* :angle-vector) 3000)
   (send *ri* :wait-interpolation)
 
   (send *pr2* :angle-vector *pick-memory-1*)
+  (send *pr2* :rarm :inverse-kinematics (send (send *pr2* :copy-worldcoords) :transform (make-coords :pos #f(764.215 -305.59 831.716) :rpy (float-vector 0.357 0.162 0.032))) :translation-axis t :rotation-axis t)
   (send *ri* :angle-vector (send *pr2* :angle-vector) 3000)
   (send *ri* :wait-interpolation)
 
@@ -54,19 +55,23 @@
   (unix:sleep 1)
 
   (send *pr2* :angle-vector *pick-memory-1*)
+  (send *pr2* :rarm :inverse-kinematics (send (send *pr2* :copy-worldcoords) :transform (make-coords :pos #f(764.215 -305.59 831.716) :rpy (float-vector 0.357 0.162 0.032))) :translation-axis t :rotation-axis t)
   (send *pr2* :larm :move-end-pos #f(-100 0 0))
   (send *ri* :angle-vector (send *pr2* :angle-vector) 3000)
   (send *ri* :wait-interpolation)
 
   (send *pr2* :angle-vector *pick-memory-2*)
+  (send *pr2* :rarm :inverse-kinematics (send (send *pr2* :copy-worldcoords) :transform (make-coords :pos #f(764.215 -305.59 831.716) :rpy (float-vector 0.357 0.162 0.032))) :translation-axis t :rotation-axis t)
   (send *ri* :angle-vector (send *pr2* :angle-vector) 2000)
   (send *ri* :wait-interpolation)
 
   (send *pr2* :angle-vector *pick-memory-3*)
+  (send *pr2* :rarm :inverse-kinematics (send (send *pr2* :copy-worldcoords) :transform (make-coords :pos #f(764.215 -305.59 831.716) :rpy (float-vector 0.357 0.162 0.032))) :translation-axis t :rotation-axis t)
   (send *ri* :angle-vector (send *pr2* :angle-vector) 2000)
   (send *ri* :wait-interpolation)
 
   (send *pr2* :angle-vector *pick-memory-4*)
+  (send *pr2* :rarm :inverse-kinematics (send (send *pr2* :copy-worldcoords) :transform (make-coords :pos #f(764.215 -305.59 831.716) :rpy (float-vector 0.357 0.162 0.032))) :translation-axis t :rotation-axis t)
   (send *ri* :angle-vector (send *pr2* :angle-vector) 2000)
   (send *ri* :wait-interpolation)
   )
@@ -92,7 +97,8 @@
                       (setq size_max size_buf)
                       (setq max_i i)))))
           (incf i)))))
-  (setq *memory_cam1* (elt memory_cand max_i)))
+  (setq *memory_cam1* (elt memory_cand max_i))
+  (ros::ros-info (format nil "x is ~A, y is ~A" (send (send *memory_cam1* :center) :x) (send (send *memory_cam1* :center) :y))))
 
 (defun get-cam2-memory-edge ()
   (setq f 0)
@@ -195,14 +201,3 @@
                     )
       
           )))))
-;; (defun buf ()
-;;   (if (< size_b 100)
-;;           (progn
-;;             (ros::ros-info "memory is rear")
-;;             1)
-;;             (progn
-;;               (setq f 4)
-;;               (ros::ros-info "piyo"))))
-          
-
-

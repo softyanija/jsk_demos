@@ -52,6 +52,7 @@
                 (setq max_i i)))
           (incf i))
         (setq socket (elt socket_cand max_i))
+        (ros::ros-info "size_max is ~A" size_max)
         (if (> size_max 150)
             (setq f 1))
         )))

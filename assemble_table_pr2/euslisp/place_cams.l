@@ -32,7 +32,6 @@
   (send *pr2* :angle-vector *place-cam2-4*)
   (send *ri* :angle-vector (send *pr2* :angle-vector) 2000)
   (send *ri* :wait-interpolation)
-
   )
 
 (defun place-cam1 ()
@@ -70,4 +69,7 @@
 
   (send *pr2* :angle-vector *place-cam1-7*)
   (send *ri* :angle-vector (send *pr2* :angle-vector) 2000)
-  (send *ri* :wait-interpolation))
+  (send *ri* :wait-interpolation)
+
+  (rarm-move-end-pos-worldcoords #f(0 0 40))
+  )

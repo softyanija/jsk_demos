@@ -24,6 +24,8 @@
 
     (setq x_rate (/ (- x_b x_a) 7))
     (setq y_rate (/ (- y_b y_a) -7))
+    (if (> -5.0 x_rate) (setq x_rate -5.0))
+    (if (< 5.0 y_rate) (setq y_rate 5.0))
     (ros::ros-info (format nil "x_rate:~A y_rate:~A" x_rate y_rate))
 
     (send *pr2* :larm :move-end-pos #f(7 0 -7))

@@ -37,10 +37,8 @@
 (get-cam2-pos-param)
 (adjust-pos-cam2)
 
-(get-cam1-pos-param)
 (adjust-pos-cam1)
 
 (set-memory)
 
-(push-memory)
-
+(push_memory)

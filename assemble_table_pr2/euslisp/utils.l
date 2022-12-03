@@ -120,7 +120,6 @@
                 (setq max_sum buf_sum)
                 (setq max_i i)))
           (incf i))
-
         (setq *memory_edge_cam2* (send (elt memory_edge_cand max_i) :position))))))
 
 (defun get-cam2-socket ()
@@ -157,6 +156,7 @@
 
 (defun judge-set-memory-cam2 ()
   (get-cam2-memory-edge)
+  (get-cam2-socket)
   (setq socket_before_x (send (send *socket_cam2* :center) :x))
   (setq socket_before_y (send (send *socket_cam2* :center) :y))
 
@@ -177,7 +177,7 @@
               (setq max_i i)))
         (incf i))
       (setq socket_buf (elt socket_cand max_i))
-      (if (< size_max 150)
+      (if (< size_max 100)
           (progn
             (ros::ros-info "memory is front side")
             2)
@@ -189,7 +189,7 @@
               (setq socket_y (send (send socket_buf :center) :y))
               (setq diff_x (- memory_x socket_x))
               (setq diff_y (- memory_y socket_y))
-              (cond ((> diff_y 3) (progn
+              (cond ((> diff_y 1) (progn
                                       (ros::ros-info "memory is set")
                                       0))
                     ((> diff_y -4) (progn
@@ -199,5 +199,4 @@
                          (ros::ros-info "memory is on the socket edge")
                          3))
                     )
-      
           )))))

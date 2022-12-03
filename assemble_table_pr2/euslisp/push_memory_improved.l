@@ -6,7 +6,7 @@
   (setq size_lim_cam2 30)
   (setq size_lim_cam1 30)
   
-  (larm-move-end-pos-worldcoords #f(0 10 14))
+  (larm-move-end-pos-worldcoords #f(0 15 14))
   (send *pr2* :larm :move-end-rot 90 :x)
   (send *pr2* :larm :move-end-rot -1 :z)
   (send *pr2* :larm :move-end-rot 1 :y)
@@ -34,36 +34,41 @@
       (setq diff_x (- (- hand_x socket_x) goal_x))
       (setq diff_y (- (- hand_y socket_y) goal_y))
       (if (not (and (< (abs diff_x) 3) (< (abs diff_y) 5)))
-          (setq move_x (- 0 (/ diff_y rate_y)))
-          (setq move_y (/ diff_x rate_x))
+          (progn
+            (setq move_x (- 0 (/ diff_y rate_y)))
+            (setq move_y (/ diff_x rate_x))
 
-          (send *pr2* :larm :move-end-pos (float-vector move_x move_y 0))
-          (send *ri* :angle-vector (send *pr2* :angle-vector) 3000)
-          (send *ri* :wait-interpolation)
-          (setq rate_x (* rate_x 1.2))
-          (setq rate_y (* rate_y 1.2))
-          (unix:sleep 1))))
+            (send *pr2* :larm :move-end-pos (float-vector move_x move_y 0))
+            (send *ri* :angle-vector (send *pr2* :angle-vector) 3000)
+            (send *ri* :wait-interpolation)
+            (setq rate_x (* rate_x 1.2))
+            (setq rate_y (* rate_y 1.2))
+            (unix:sleep 2))
+          (progn
+            (setq f 1))))
+      (larm-move-end-pos-worldcoords #f(0.1 0 0))
+    )
+          
 
   (setq f 0)
-  (while (f = 0)
+  (while (= f 0)
     (setq f 1)
-    (send *pr2* :larm :move-end-rot 5 :z)
+    (send *pr2* :larm :move-end-rot 8 :z)
     (send *ri* :angle-vector (send *pr2* :angle-vector) 2000)
     (send *ri* :wait-interpolation)
-    (send *pr2* :torso_lift_joint :joint-angle (+ (send *pr2* :torso_lift_joint :joint-angle) -40))
+    (send *pr2* :torso_lift_joint :joint-angle (+ (send *pr2* :torso_lift_joint :joint-angle) -32))
     (send *ri* :angle-vector (send *pr2* :angle-vector) 2000)
     (send *ri* :wait-interpolation)
     
-    (send *pr2* :torso_lift_joint :joint-angle (+ (send *pr2* :torso_lift_joint :joint-angle) 40))
+    (send *pr2* :torso_lift_joint :joint-angle (+ (send *pr2* :torso_lift_joint :joint-angle) 32))
     (send *ri* :angle-vector (send *pr2* :angle-vector) 2000)
     (send *ri* :wait-interpolation)
-        (send *pr2* :larm :move-end-rot -5 :z)
+        (send *pr2* :larm :move-end-rot -8 :z)
     (send *ri* :angle-vector (send *pr2* :angle-vector) 2000)
     (send *ri* :wait-interpolation)
 
-    ;;check if lever was locked
     (setq rects (send (one-shot-subscribe "/timer_cam2_rec/lever/general_contours/rectangles" opencv_apps::RotatedRectArrayStamped) :rects))
-    (when rects
+    (if rects
       (progn
         (setq l (length rects))
         (setq i 0)
@@ -81,25 +86,27 @@
               (ros::ros-info "memory of cam2 isn't locked")
               (setq f 0))
             (ros::ros-info "memory of cam2 side is locked"))
-            )))
+        )
+      (progn
+        (setq f 0)))
 
-  (larm-move-end-pos-worldcoords #f(0 -60 0))
+  (larm-move-end-pos-worldcoords #f(0 -65 0))
 
   (setq f 0)
-  (while (f = 0)
+  (while (= f 0)
     (setq f 1)
-    (send *pr2* :larm :move-end-rot -5 :z)
+    (send *pr2* :larm :move-end-rot -7 :z)
     (send *ri* :angle-vector (send *pr2* :angle-vector) 2000)
     (send *ri* :wait-interpolation)
-    (send *pr2* :torso_lift_joint :joint-angle (+ (send *pr2* :torso_lift_joint :joint-angle) -40))
+    (send *pr2* :torso_lift_joint :joint-angle (+ (send *pr2* :torso_lift_joint :joint-angle) -35))
     (send *ri* :angle-vector (send *pr2* :angle-vector) 2000)
     (send *ri* :wait-interpolation)
     
-    (send *pr2* :torso_lift_joint :joint-angle (+ (send *pr2* :torso_lift_joint :joint-angle) 40))
+    (send *pr2* :torso_lift_joint :joint-angle (+ (send *pr2* :torso_lift_joint :joint-angle) 35))
     (send *ri* :angle-vector (send *pr2* :angle-vector) 2000)
     (send *ri* :wait-interpolation)
 
-    (send *pr2* :larm :move-end-rot 5 :z)
+    (send *pr2* :larm :move-end-rot 7 :z)
     (send *ri* :angle-vector (send *pr2* :angle-vector) 2000)
     (send *ri* :wait-interpolation)
 

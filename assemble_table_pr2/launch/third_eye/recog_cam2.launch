@@ -26,7 +26,7 @@
 		<arg name="hough_type" value="1" />
 		<arg name="threshold" value="90"/>
 		<arg name="rho" value="4.0"/>
-        <arg name="minLineLength" value="130" />
+        <arg name="minLineLength" value="95" />
         <arg name="maxLineGrap" value="50" />
 	  </include>
 
@@ -49,7 +49,7 @@
 		<arg name="s_limit_max" default="193"/>
 		<arg name="s_limit_min" default="35"/>
 		<arg name="v_limit_max" default="256"/>
-		<arg name="v_limit_min" default="140"/>
+		<arg name="v_limit_min" default="115"/>
 	  </include>
 
 	  <include file="$(find opencv_apps)/launch/general_contours.launch">

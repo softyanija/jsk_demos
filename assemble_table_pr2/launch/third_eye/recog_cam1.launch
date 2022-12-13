@@ -79,4 +79,5 @@
   </group>
 
   <node name="check_lever_cam1" pkg="assemble_table_pr2" type="check_lever_cam1.py" />
+  <node name="indicate_memory_line_cam1" pkg="assemble_table_pr2" type="indicate_memory_edge_cam1.py" />
 </launch>

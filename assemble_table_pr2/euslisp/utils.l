@@ -51,7 +51,7 @@
   (send *ri* :angle-vector (send *pr2* :angle-vector) 3000)
   (send *ri* :wait-interpolation)
 
-  (send *ri* :start-grasp :larm)
+  (send *ri* :move-gripper :larm 0.002 :effort 60)
   (unix:sleep 1)
 
   (send *pr2* :angle-vector *pick-memory-1*)

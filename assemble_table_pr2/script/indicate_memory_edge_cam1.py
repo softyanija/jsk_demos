@@ -51,17 +51,15 @@ def callback(img_msg, rec_msg):
             under_y = int(rec_msg.rects[use_rect].center.y + (memory_len / 2)* math.cos(angle))
             top_x = int(rec_msg.rects[use_rect].center.x - (memory_len / 2)* math.sin(angle))
             top_y = int(rec_msg.rects[use_rect].center.y - (memory_len / 2)* math.cos(angle))
-rossetmaster pr1040
-rossetip
-image_msg = cv2.circle(image_msg, (under_x,under_y), 3,(0,0,255),1,4,0)
-            #image_msg = cv2.circle(image_msg, (top_x,top_y), 5,(255,0,0),2,4,0)
-            #image_msg = cv2.line(image_msg, (under_x,under_y),(top_x,top_y),(0,255,0),1)
-            
-        
-    image_msg = bridge.cv2_to_imgmsg(image_msg, "bgr8")
 
-    pub_under.publish(memory_under)
-    pub_image.publish(image_msg)
+            image_msg = cv2.circle(image_msg, (under_x,under_y), 3,(0,0,255),1,4,0)
+            #image_msg = cv2.circle(image_msg, (top_x,top_y), 5,(255,0,0),2,4,0)
+            image_msg = cv2.line(image_msg, (under_x,under_y),(top_x,top_y),(0,255,0),1)
+            
+            image_msg = bridge.cv2_to_imgmsg(image_msg, "bgr8")
+
+        pub_under.publish(memory_under)
+        pub_image.publish(image_msg)
 
 
 pub_under = rospy.Publisher('/timer_cam1_rec/memory/memory_under', PoseArray, queue_size=1)

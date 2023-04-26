@@ -1,3 +1,10 @@
 <launch>
-  <node pkg="tf" type="static_transform_publisher" name="r_gripper_l_keypoint1_link_broadcaster" args="0.071 0 0.0032 0 -0 0 r_gripper_l_finger_link r_gripper_l_keypoint1_link 100" />
+  <node pkg="tf" type="static_transform_publisher" name="r_gripper_l_keypoint1_link_broadcaster" args="0.071 0.0032 0.0 0 -0 0 r_gripper_l_finger_link r_gripper_l_keypoint1_link 100" />
+
+  <node pkg="tf" type="static_transform_publisher" name="r_gripper_r_keypoint1_link_broadcaster" args="0.071 -0.0032 0.0 0 -0 0 r_gripper_r_finger_link r_gripper_r_keypoint1_link 100" />
+
+  <node pkg="tf" type="static_transform_publisher" name="r_gripper_l_keypoint2_link_broadcaster" args="0.119 0.007 0.0 0 -0 0 r_wrist_roll_link r_gripper_l_keypoint2_link 100" />
+
+  <node pkg="tf" type="static_transform_publisher" name="r_gripper_r_keypoint2_link_broadcaster" args="0.119 -0.007 0.0 0 -0 0 r_wrist_roll_link r_gripper_r_keypoint2_link 100" />
+  
 </launch>

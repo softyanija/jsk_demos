@@ -1,0 +1,11 @@
+<launch>
+  <arg name="rosbag" doc="rosbag file path" />
+  <arg name="model" default="$(find pr2_description)/robots/pr2.urdf.xacro" />
+  <param name="robot_description" command="$(find xacro)/xacro $(arg model)"/>
+  
+  <node name="rosbag_play" pkg="rosbag" type="play"
+        args="$(arg rosbag) -l"/>
+
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find multi_device_view)/config/multicam_tfframe_debug.rviz"/>
+  
+</launch>

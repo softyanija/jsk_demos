@@ -13,9 +13,9 @@
   <node name="rosbag_record" pkg="rosbag" type="record"
         args="-q $(arg compress_flag) -O $(arg rosbag) -b 0
             /rosout
-            /timer_cam1/timer_cam_image
+            /timer_cam1/timer_cam_image/image_rect_color
             /timer_cam1/timer_cam_image/camera_info
-            /timer_cam2/timer_cam_image
+            /timer_cam2/timer_cam_image/image_rect_color
             /timer_cam2/timer_cam_image/camera_info
             /tf
             /tf_static"

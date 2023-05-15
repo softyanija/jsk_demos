@@ -70,7 +70,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/Image
       Enabled: true
-      Image Topic: /timer_cam2/timer_cam_image
+      Image Topic: /timer_cam2/timer_cam_image/image_rect_color
       Max Value: 1
       Median window: 5
       Min Value: 0
@@ -297,6 +297,8 @@ Visualization Manager:
           Value: false
         sensor_mount_link:
           Value: false
+        timer_cam1_optical_frame:
+          Value: true
         torso_lift_link:
           Value: false
         torso_lift_motor_screw_link:
@@ -476,6 +478,8 @@ Visualization Manager:
                           {}
                       torso_lift_motor_screw_link:
                         {}
+                    timer_cam1_optical_frame:
+                      {}
             eng8/b1f:
               {}
       Update Interval: 0
@@ -573,38 +577,6 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-        head_mount_kinect_ir_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        head_mount_kinect_ir_optical_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        head_mount_kinect_rgb_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        head_mount_kinect_rgb_optical_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        head_mount_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        head_mount_prosilica_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        head_mount_prosilica_optical_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
         head_pan_link:
           Alpha: 1
           Show Axes: false
@@ -1015,5 +987,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1386
-  X: 28
-  Y: 86
+  X: 72
+  Y: 85

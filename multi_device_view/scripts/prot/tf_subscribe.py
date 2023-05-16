@@ -2,12 +2,12 @@ import rospy
 from tf2_msgs.msg import TFMessage
 
 def callback(data):
-    rospy.loginfo("Get tf")
-    rospy.loginfo(len(data.transforms))
+    rospy.loginfo("len of data.transforms is %s",len(data.transforms))
     for tf in data.transforms:
        if tf.header.frame_id == "base_link":
            print("found base_link")
            print(tf.transform)
+           return tf.transform
 
 def get_tf():
     rospy.init_node("tf_listener", anonymous=True)

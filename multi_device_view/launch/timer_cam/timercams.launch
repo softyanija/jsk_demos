@@ -2,12 +2,12 @@
 
   <include file="$(find m5stack_ros)/launch/timer_cam.launch">
 	<arg name="port" value="/dev/rfcomm0" />
-	<arg name="namespace" value="timer_cam1" />
-    <arg name="camera_info" value="timer_cam1_info.yaml" />
+	<arg name="namespace" value="timercam_1" />
+    <arg name="camera_info" value="timercam_1_info.yaml" />
   </include>
   <include file="$(find m5stack_ros)/launch/timer_cam.launch">
 	<arg name="port" value="/dev/rfcomm1" />
-	<arg name="namespace" value="timer_cam2" />
-    <arg name="camera_info" value="timer_cam2_info.yaml" />
+	<arg name="namespace" value="timercam_2" />
+    <arg name="camera_info" value="timercam_2_info.yaml" />
   </include>
 </launch>

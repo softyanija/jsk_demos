@@ -1,6 +1,6 @@
 <launch>
   <include file="$(find m5stack_ros)/launch/timer_cam.launch">
-	<arg name="namespace" value="timer_cam2" />
+	<arg name="namespace" value="timercam_2" />
     <arg name="baud" value="115200" />
     <arg name="port" value="/dev/rfcomm1" />
   </include>

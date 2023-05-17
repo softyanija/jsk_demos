@@ -16,7 +16,7 @@ tmux split-window -v
 
 tmux send-keys -t 0 "echo 0" C-m
 tmux send-keys -t 0 "rossetmaster pr1012" C-m
-tmux send-keys -t 0 "roslaunch multi_device_view timer_cams.launch" C-m
+tmux send-keys -t 0 "roslaunch multi_device_view timercams.launch" C-m
 
 tmux send-keys -t 1 "echo 1" C-m
 tmux send-keys -t 1 "rossetmaster pr1012" C-m

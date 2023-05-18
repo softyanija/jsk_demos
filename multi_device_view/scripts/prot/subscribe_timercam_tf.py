@@ -14,9 +14,11 @@ class Calculation_timercam_pos:
         self.timercam_name = timercam_name
         self.timercam_tf = None
         self.timercam_tf_stock = []
+        self.estimated_tf = None
         self.timercam_camera_frame = timercam_camera_frame
         self.Rate = 5
         self.subscribe()
+        # self.pub_estimated_tf = rospy.Publisher("/{}_estimated".format(self.timercam_camera_frame), Transform, queue_size=10)
 
     def subscribe(self):
         rospy.Subscriber("tf", TFMessage, self.callback)
@@ -42,12 +44,12 @@ class Calculation_timercam_pos:
         tf_listener = tf2_ros.TransformListener(tf_buffer)
         
         try:
-            trans = tf_buffer.lookup_transform("base_link", self.timercam_camera_frame, rospy.Time())
+            trans = tf_buffer.lookup_transform("base_link", self.timercam_camera_frame, rospy.Time(), rospy.Duration(0.5))
             self.timercam_tf_stock.append(trans)
             return True
 
         except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
-            rospy.loginfo("Couldn't get tf")
+            rospy.logwarn("Failed to get transform")
             return False
 
     def calculation_tf_average(self):
@@ -85,4 +87,8 @@ class Calculation_timercam_pos:
             tf_average.rotation.z = q_average.z
             tf_average.rotation.w = q_average.w
 
+            self.estimated_tf = tf_average
             return tf_average
+
+    # def publish_estimated_tf(self):
+    #     self.pub_estimated_tf(self.estimated_tf)

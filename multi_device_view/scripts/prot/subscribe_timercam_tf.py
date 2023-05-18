@@ -1,10 +1,12 @@
 import rospy
+import tf
+import tf2_ros
 from tf2_msgs.msg import TFMessage
 from geometry_msgs.msg import Transform
 import numpy as np
 from pyquaternion import Quaternion
 
-#write only class definition in this file, and I will make two python program to launch node
+# write only class definition in this file, and I will make two python program to launch node
 
 
 class Calculation_timercam_pos:
@@ -23,22 +25,29 @@ class Calculation_timercam_pos:
 
     def callback(self, data):
         # rospy.loginfo("len of data.transforms is %s",len(data.transforms))
-        
+        # may be this func have not to do anything
+
         for tf in data.transforms:
             if tf.header.frame_id == self.timercam_camera_frame:  # timer_cam1_optical_frame
                 # print("found tf")
                 # print(tf.transform)
                 self.timercam_tf = tf.transform
-                
+
             else:
                 self.timercam_tf = None
         # print(self.timercam_tf)
 
     def stock_tf(self):
-        if not (self.timercam_tf == None):
-            self.timercam_tf_stock.append(self.timercam_tf)
+        tf_buffer = tf2_ros.Buffer()
+        tf_listener = tf2_ros.TransformListener(tf_buffer)
+        
+        try:
+            trans = tf_buffer.lookup_transform("base_link", self.timercam_camera_frame, rospy.Time())
+            self.timercam_tf_stock.append(trans)
             return True
-        else:
+
+        except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
+            rospy.loginfo("Couldn't get tf")
             return False
 
     def calculation_tf_average(self):
@@ -49,13 +58,13 @@ class Calculation_timercam_pos:
             pose_y = 0
             pose_z = 0
             qlist = []
-            
-            for i in self.timercam_tf_stock:
-                pose_x += i.translation.x
-                pose_y += i.translation.y
-                pose_z += i.translation.z
 
-                q_buf = Quaternion(i.rotation.w, i.rotation.x, i.rotation.y, i.rotation.z)
+            for i in self.timercam_tf_stock:
+                pose_x += i.transform.translation.x
+                pose_y += i.transform.translation.y
+                pose_z += i.transform.translation.z
+
+                q_buf = Quaternion(i.transform.rotation.w, i.transform.rotation.x, i.transform.rotation.y, i.transform.rotation.z)
                 qlist.append(q_buf)
 
             pose_x = pose_x / len(self.timercam_tf_stock)

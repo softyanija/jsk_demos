@@ -9,7 +9,7 @@ args = parser.parse_args()
 if args.test:
     frame_name = "base_link"
 else:
-    frame_name = "timer_cam1_optical_frame"
+    frame_name = "timercam_1_optical_frame"
 
 rospy.init_node("sucscribe_timercam_1_tf")
 calculation_timercam_pos_1 = Calculation_timercam_pos(timercam_name = "timer_cam1", timercam_camera_frame = frame_name)

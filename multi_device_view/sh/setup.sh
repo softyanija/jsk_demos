@@ -23,9 +23,11 @@ tmux send-keys -t 1 "rossetmaster pr1012" C-m
 tmux send-keys -t 1 "roslaunch multi_device_view pub_keypoints_tf.launch" C-m
 
 tmux send-keys -t 2 "echo 2" C-m
+tmux send-keys -t 2 "ssh heavens" C-m
+tmux send-keys -t 2 "rossetip" C-m
 tmux send-keys -t 2 "rossetmaster pr1012" C-m
 tmux send-keys -t 2 "cd ~/robothand_dataset_ws/src/DREAM" C-m
-tmux send-keys -t 2 "sh shell/ros_interface_timercam.sh train/kp4_0510/kp4_0510.pth" C-m
+tmux send-keys -t 2 "sh shell/ros_interface_timercam.sh trained/kp4_0510/kp4_0510.pth" C-m
 
 tmux send-keys -t 3 "echo 3" C-m
 tmux send-keys -t 3 "rossetmaster pr1012" C-m

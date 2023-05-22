@@ -2,7 +2,8 @@ import rospy
 import tf
 import tf2_ros
 from tf2_msgs.msg import TFMessage
-from geometry_msgs.msg import Transform
+from geometry_msgs.msg import *
+from dynamic_tf_publisher.srv import SetDynamicTF
 import numpy as np
 from pyquaternion import Quaternion
 
@@ -17,6 +18,7 @@ class Calculation_timercam_pos:
         self.estimated_tf = None
         self.timercam_camera_frame = timercam_camera_frame
         self.Rate = 5
+        self.tf_hz = 10
         self.subscribe()
         # self.pub_estimated_tf = rospy.Publisher("/{}_estimated".format(self.timercam_camera_frame), Transform, queue_size=10)
 
@@ -42,7 +44,7 @@ class Calculation_timercam_pos:
     def stock_tf(self):
         tf_buffer = tf2_ros.Buffer()
         tf_listener = tf2_ros.TransformListener(tf_buffer)
-        
+
         try:
             trans = tf_buffer.lookup_transform("base_link", self.timercam_camera_frame, rospy.Time(), rospy.Duration(0.5))
             self.timercam_tf_stock.append(trans)
@@ -90,5 +92,16 @@ class Calculation_timercam_pos:
             self.estimated_tf = tf_average
             return tf_average
 
-    # def publish_estimated_tf(self):
-    #     self.pub_estimated_tf(self.estimated_tf)
+    def set_estimated_tf(self):
+        rospy.wait_for_service("/set_dynamic_tf")
+        try:
+            client = rospy.ServiceProxy("/set_dynamic_tf", SetDynamicTF)
+            pose = TransformStamped()
+            pose.header.frame_id = "base_link"
+            pose.child_frame_id = self.timercam_camera_frame + "_estimated"
+            pose.transform = self.estimated_tf
+            print(pose)
+            res = client(self.tf_hz, pose)
+            return
+        except rospy.ServiceException as e:
+            print("Service call failed: %s"%e)

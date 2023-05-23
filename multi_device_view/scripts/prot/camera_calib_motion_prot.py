@@ -11,12 +11,15 @@ parser.add_argument("--test", action="store_true")
 args = parser.parse_args()
 
 if args.test:
-    frame_name = "base_link"
+    frame_name_1 = "base_link"
+    frame_name_2 = "base_link"
 else:
-    frame_name = "timercam_1_optical_frame"
+    frame_name_1 = "timercam_1_optical_frame"
+    frame_name_2 = "timercam_2_optical_frame"
     
-rospy.init_node("sucscribe_timercam_1_tf")
-calculation_timercam_pos_1 = Calculation_timercam_pos(timercam_name = "timer_cam1", timercam_camera_frame = frame_name)
+rospy.init_node("sucscribe_timercams_tf")
+calculation_timercam_pos_1 = Calculation_timercam_pos(timercam_name = "timercam_1", timercam_camera_frame = frame_name_1)
+calculation_timercam_pos_2 = Calculation_timercam_pos(timercam_name = "timercam_2", timercam_camera_frame = frame_name_2)
 
 r = skrobot.models.PR2()
 ri = PR2ROSRobotInterface(r)
@@ -57,11 +60,20 @@ for i in range(pose_number):
     ri.angle_vector(r.angle_vector(), 5)
     ri.wait_interpolation()
 
-    n = 0
-    while ((not calculation_timercam_pos_1.stock_tf()) and n < 5):
-        print("now getting timercam tf at pose {}".format(i))
+    n_1 = 0
+    while ((not calculation_timercam_pos_1.stock_tf()) and n_1 < 5):
+        print("now getting timercam_1 tf at pose {}".format(i))
+        n_1+=1
+        time.sleep(1)
+
+    n_2 = 0
+    while ((not calculation_timercam_pos_2.stock_tf()) and n_2 < 5):
+        print("now getting timercam_2 tf at pose {}".format(i))
+        n_2+=1
         time.sleep(1)
 
 print(calculation_timercam_pos_1.calculation_tf_average())
+print(calculation_timercam_pos_2.calculation_tf_average())
 
 calculation_timercam_pos_1.set_estimated_tf()
+calculation_timercam_pos_2.set_estimated_tf()

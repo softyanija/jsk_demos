@@ -1,0 +1,7 @@
+<launch>
+  <include file="$(find multi_device_view)/launch/timer_cam/pub_keypoints_tf.launch"/>
+  <include file="$(find multi_device_view)/launch/timer_cam/estimated_tf_server.launch"/>
+  <include file="$(find multi_device_view)/launch/timer_cam/timercams.launch"/>
+
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find multi_device_view)/config/multicam_tfframe_debug.rviz"/>
+</launch>  

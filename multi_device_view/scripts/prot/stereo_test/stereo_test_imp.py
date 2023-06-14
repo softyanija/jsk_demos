@@ -37,9 +37,12 @@ coords = Coordinates(
     rot=(trans.transform.rotation.w, trans.transform.rotation.x, trans.transform.rotation.y, trans.transform.rotation.z))
 q = np.quaternion(trans.transform.rotation.w, trans.transform.rotation.x, trans.transform.rotation.y, trans.transform.rotation.z)
 # R = quaternion.as_rotation_matrix(q)
-T = np.array([[- trans.transform.translation.x],
-              [trans.transform.translation.y],
-              [trans.transform.translation.z]])
+# T = np.array([[trans.transform.translation.x],
+#               [trans.transform.translation.y],
+#               [trans.transform.translation.z]])
+T = np.array([[trans.transform.translation.x],
+              [0],
+              [0]])
 R = coords.rotation
 # T = (coords.translation.copy() / np.linalg.norm(coords.translation.copy())).reshape(3, 1)
  #T = coords.translation.copy().reshape(3, 1)
@@ -59,8 +62,8 @@ l_maps = cv2.initUndistortRectifyMap(cameraMatrix1, distCoeffs1, R1, P1, (640, 4
 r_maps = cv2.initUndistortRectifyMap(cameraMatrix2, distCoeffs2, R2, P2, (640, 480), cv2.CV_16SC2)
 
 #i = 1
-lframe = cv2.imread("calib_img/stereo_test/timercam2_000001.png")
-rframe = cv2.imread("calib_img/stereo_test/timercam1_000001.png")
+lframe = cv2.imread("calib_img/stereo_test_imp/timercam2_000001.png")
+rframe = cv2.imread("calib_img/stereo_test_imp/timercam1_000001.png")
 # use the rectified data to do remap on webcams
 lframe_remap = cv2.remap(lframe, l_maps[0], l_maps[1], cv2.INTER_LINEAR)
 rframe_remap = cv2.remap(rframe, r_maps[0], r_maps[1], cv2.INTER_LINEAR)

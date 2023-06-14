@@ -36,5 +36,17 @@ tmux send-keys -t 3 "rossetmaster pr1012" C-m
 tmux send-keys -t 3 "cd ~/robothand_dataset_ws/src/DREAM" C-m
 tmux send-keys -t 3 "sh shell/ros_interface_timercam_2.sh trained_models/kp4_0510/kp4_0510.pth" C-m
 
+tmux new-window
+
+
 # 新しいセッションをアタッチ
 tmux attach-session
+
+tmux split-window -h
+
+tmux send-keys -t 0 "echo 0" C-m
+tmux send-keys -t 0 "rossetmaster pr1012" C-m
+
+tmux send-keys -t 1 "echo 1" C-m
+tmux send-keys -t 1 "rossetmaster pr1012" C-m
+

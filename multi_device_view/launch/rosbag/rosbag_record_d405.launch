@@ -15,8 +15,8 @@
             /rosout
             /camera/color/camera_info
             /camera/color/image_rect_color/compressed
-            /camera/depth/camera_info
-            /camera/depth/image_rect_raw/compressedDepth
+            /camera/aligned_depth_to_color/camera_info
+            /camera/aligned_depth_to_color/image_raw/compressedDepth
             /tf
             /tf_static"
         output="screen" />

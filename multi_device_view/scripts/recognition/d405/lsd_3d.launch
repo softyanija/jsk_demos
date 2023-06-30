@@ -31,10 +31,10 @@
       <rosparam>
         frame_id: camera_color_optical_frame
         use_multiple_attention: false
-        dimension_x: 0.3
-        dimension_y: 0.3
-        dimension_z: 0.2
-        initial_pos: [0.0, 0.0, 0.1]
+        dimension_x: 0.1
+        dimension_y: 0.1
+        dimension_z: 0.15
+        initial_pos: [0.0, 0.0, 0.075]
       </rosparam>
   </node>
 

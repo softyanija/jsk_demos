@@ -1,0 +1,43 @@
+<launch>
+  <arg name="rosbag" doc="rosbag file path" />
+  <arg name="create_manager" default="true" />
+  <arg name="manager" default="realsense2_camera_manager" />
+  <arg name="camera" default="camera" />
+  
+  <rosparam param="/use_sim_time">
+    true
+  </rosparam>
+  
+  <node name="rosbag_play" pkg="rosbag" type="play"
+        args="$(arg rosbag) -l --clock"/>
+
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find multi_device_view)/config/d405_test.rviz"/>
+
+  <group ns="$(arg camera)">
+    <node if="$(arg create_manager)"
+          pkg="nodelet" type="nodelet" name="$(arg manager)"
+          args="manager" output="screen" />
+  </group>
+  
+  <node name="republish" pkg="image_transport" type="republish" args="compressed raw">
+    <remap from="in" to="/camera/color/image_rect_color" />
+    <remap from="out" to="/camera/color/image_rect_color" />
+  </node>
+
+  <node name="depth_image_republish" pkg="image_transport" type="republish" args="compressedDepth raw">
+    <remap from="in" to="/camera/aligned_depth_to_color/image_raw" />
+    <remap from="out" to="/camera/aligned_depth_to_color/image_raw" />
+  </node>
+
+  <!-- <node pkg="nodelet" type="nodelet" name="points_xyzrgb_hw_registered" -->
+  <!--       args="standalone depth_image_proc/point_cloud_xyzrgb"> -->
+  <!--   <remap from="rgb/image_rect_color"        to="/camera/color/image_rect_color"/> -->
+  <!--   <remap from="rgb/camera_info"             to="/camera/color/camera_info"/> -->
+  <!--   <remap from="depth_registered/image_rect" to="/camera/aligned_depth_to_color/image_raw"/> -->
+  <!--   <remap from="depth_registered/points"     to="/camera/depth_registered/points"/> -->
+  <!--   <rosparam> -->
+  <!--     queue_size: 10 -->
+  <!--   </rosparam> -->
+  <!-- </node> -->
+  
+</launch>

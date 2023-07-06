@@ -1,0 +1,12 @@
+<launch>
+  <node pkg="nodelet" type="nodelet" name="points_xyzrgb_hw_registered"
+        args="standalone depth_image_proc/point_cloud_xyzrgb">
+    <remap from="rgb/image_rect_color"        to="/camera/color/image_rect_color"/>
+    <remap from="rgb/camera_info"             to="/camera/color/camera_info"/>
+    <remap from="depth_registered/image_rect" to="/camera/aligned_depth_to_color/image_raw"/>
+    <remap from="depth_registered/points"     to="/remote/camera/depth_registered/points"/>
+    <rosparam>
+      queue_size: 10
+    </rosparam>
+  </node>
+</launch>

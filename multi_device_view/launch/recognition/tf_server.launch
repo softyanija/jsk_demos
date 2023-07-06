@@ -1,0 +1,4 @@
+<launch>
+  <node name="tf_publisher" pkg="dynamic_tf_publisher"
+	type="tf_publish.py"  output="screen"/>
+</launch>

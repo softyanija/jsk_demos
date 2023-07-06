@@ -1,0 +1,22 @@
+<launch>
+  <node pkg="tf" type="static_transform_publisher" name="screw_hole_broadcaster" args="-0.0095 -0.006 -0.002 0 -1.57 0 servo screw_hole 100" />
+
+  <node pkg="tf" type="static_transform_publisher" name="r_hand_front_broadcaster" args="0.0165 0.0065 0.0136 1.57 0 0 r_gripper_r_finger_tip_link r_gripper_front 100" />
+  
+  <!-- <node pkg="tf" type="static_transform_publisher" name="r_gripper_l_keypoint1_link_broadcaster" args="0.071 0.0032 0.0 0 -0 0 r_gripper_l_finger_link r_gripper_l_keypoint1_link 100" /> -->
+
+  <!-- <node pkg="tf" type="static_transform_publisher" name="r_gripper_r_keypoint1_link_broadcaster" args="0.071 -0.0032 0.0 0 -0 0 r_gripper_r_finger_link r_gripper_r_keypoint1_link 100" /> -->
+
+  <!-- <node pkg="tf" type="static_transform_publisher" name="r_gripper_l_keypoint2_link_broadcaster" args="0.119 0.007 0.0 0 -0 0 r_wrist_roll_link r_gripper_l_keypoint2_link 100" /> -->
+
+  <!-- <node pkg="tf" type="static_transform_publisher" name="r_gripper_r_keypoint2_link_broadcaster" args="0.119 -0.007 0.0 0 -0 0 r_wrist_roll_link r_gripper_r_keypoint2_link 100" /> -->
+
+  <!-- <node pkg="tf" type="static_transform_publisher" name="r_gripper_r_keypoint3_link_broadcaster" args="0.024 0.006 0.0 0 -0 0 r_gripper_r_finger_tip_link r_gripper_r_keypoint3_link 100" /> -->
+
+  <!-- <node pkg="tf" type="static_transform_publisher" name="r_gripper_l_keypoint3_link_broadcaster" args="0.024 0.006 0.0 0 -0 0 r_gripper_l_finger_tip_link r_gripper_l_keypoint3_link 100" /> -->
+
+  <!-- <node pkg="tf" type="static_transform_publisher" name="r_gripper_r_keypoint4_link_broadcaster" args="0.0115 -0.0032 0.0 0 -0 0 r_gripper_r_finger_tip_link r_gripper_r_keypoint4_link 100" /> -->
+
+  <!-- <node pkg="tf" type="static_transform_publisher" name="r_gripper_l_keypoint4_link_broadcaster" args="0.0115 0.0032 0.0 0 -0 0 r_gripper_l_finger_tip_link r_gripper_l_keypoint4_link 100" /> -->
+  
+</launch>

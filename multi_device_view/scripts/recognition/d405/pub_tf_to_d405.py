@@ -3,16 +3,6 @@ import tf2_ros
 from tf2_msgs.msg import TFMessage
 from geometry_msgs.msg import TransformStamped
 
-# def tf_callback(msg):
-
-#     new_msg = TransformStamped()
-#     new_msg.header.stamp = rospy.Time.now()
-#     new_msg.header.frame_id = "r_gripper_front_apriltag"  # パブリッシュするTFの親フレーム
-#     new_msg.child_frame_id = "camera_color_optical_frame"  # パブリッシュするTFの子フレーム
-#     new_msg.transform = msg.transform
-
-#     tf_pub.publish(new_msg)
-
 if __name__ == "__main__":
     rospy.init_node("apriltag_tf_converter")
 
@@ -29,7 +19,6 @@ if __name__ == "__main__":
             new_tf.header.stamp = rospy.Time.now()
             new_tf.header.frame_id = "r_gripper_front"
             new_tf.child_frame_id = "camera_link"
-            #new_tf.child_frame_id = "camera_color_optical_frame"
             new_tf.transform = trans.transform
             print(trans.transform)
             tf_broadcaster.sendTransform(new_tf)

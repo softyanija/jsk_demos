@@ -25,11 +25,9 @@ tmux send-keys -t 1 "rossetip" C-m
 tmux send-keys -t 1 "rviz -d $(rospack find multi_device_view)/config/d405_remote.rviz" C-m
 
 tmux send-keys -t 2 "echo 2" C-m
-tmux send-keys -t 2 "ssh heavens" C-m
+tmux send-keys -t 2 "rossetmaster 133.11.216.44" C-m
 tmux send-keys -t 2 "rossetip" C-m
-tmux send-keys -t 2 "rossetmaster pr1012" C-m
-tmux send-keys -t 2 "cd ~/robothand_dataset_ws/src/DREAM" C-m
-tmux send-keys -t 2 "sh shell/ros_interface_timercam_1.sh trained_models/kp4_0510/kp4_0510.pth" C-m
+tmux send-keys -t 2 "roslaunch multi_device_view lsd_3d_remote.launch" C-m
 
 tmux send-keys -t 3 "echo 3" C-m
 tmux send-keys -t 3 "ssh heavens" C-m

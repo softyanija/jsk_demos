@@ -18,5 +18,5 @@
   <!-- <node pkg="tf" type="static_transform_publisher" name="r_gripper_r_keypoint4_link_broadcaster" args="0.0115 -0.0032 0.0 0 -0 0 r_gripper_r_finger_tip_link r_gripper_r_keypoint4_link 100" /> -->
 
   <!-- <node pkg="tf" type="static_transform_publisher" name="r_gripper_l_keypoint4_link_broadcaster" args="0.0115 0.0032 0.0 0 -0 0 r_gripper_l_finger_tip_link r_gripper_l_keypoint4_link 100" /> -->
-  
+
 </launch>

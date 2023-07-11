@@ -18,7 +18,6 @@ class Set_d405_tf:
     def estimate_tf(self):
         tf_buffer = tf2_ros.Buffer()
         tf_listener = tf2_ros.TransformListener(tf_buffer)
-
         try:
             #trans = tf_buffer.lookup_transform("base_link", "camera_link", rospy.Time(), rospy.Duration(3))
             b2g = tf_buffer.lookup_transform("base_link", "r_gripper_front", rospy.Time(), rospy.Duration(3))

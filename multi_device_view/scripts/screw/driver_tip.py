@@ -79,7 +79,7 @@ class Driver():
         tip_translation = end.translation + self.tip_length * normalized_direction
         
         self.get_tool_frame()
-        axis_convert = skrobot.coordinates.Coordinates([0, 0, 0], [0.5, 0.5, 0.5, 0.5])
+        axis_convert = skrobot.coordinates.Coordinates([0, 0, 0], [-0.707106781186547, 0, 0.707106781186547, 0])
         tip_frame_buf = skrobot.coordinates.Coordinates(tip_translation,
                                                          [self.tool_frame.transform.rotation.w,
                                                           self.tool_frame.transform.rotation.x,

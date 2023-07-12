@@ -21,6 +21,7 @@ class ScrewHanged():
         self.start_point = None
         self.end_point = None
         self.tip_frame = None
+        self.tool_frame = None
         self.tip_length = 0.00
         self.driver_tip_frame = None 
         self.rate = 5
@@ -35,6 +36,7 @@ class ScrewHanged():
         tf_buffer = tf2_ros.Buffer()
         tf_listener = tf2_ros.TransformListener(tf_buffer)
         self.driver_tip_frame = tf_buffer.lookup_transform("camera_color_optical_frame", "driver_tip_frame", rospy.Time(), rospy.Duration(3))
+        self.tool_frame = tf_buffer.lookup_transform("camera_color_optical_frame", "r_gripper_tool_frame", rospy.Time(), rospy.Duration(3))
 
     def select_line(self):
         if len(self.msg.points) == 0:
@@ -64,8 +66,10 @@ class ScrewHanged():
 
         edge_1 = self.msg.points[2*closest_i]
         edge_2 = self.msg.points[2*closest_i + 1]
-        range_1 = (driver_tip_frame_center.x - edge_1.x)**2 + (driver_tip_frame_center.y - edge_1.y)**2 + (driver_tip_frame_center.z - edge_1.z)**2
-        range_2 = (driver_tip_frame_center.x - edge_2.x)**2 + (driver_tip_frame_center.y - edge_2.y)**2 + (driver_tip_frame_center.z - edge_2.z)**2
+        # range_1 = (driver_tip_frame_center.x - edge_1.x)**2 + (driver_tip_frame_center.y - edge_1.y)**2 + (driver_tip_frame_center.z - edge_1.z)**2
+        # range_2 = (driver_tip_frame_center.x - edge_2.x)**2 + (driver_tip_frame_center.y - edge_2.y)**2 + (driver_tip_frame_center.z - edge_2.z)**2
+        range_1 = edge_1.y
+        range_2 = edge_2.y
 
         if range_1 < range_2:
             self.start = self.msg.points[2*closest_i]
@@ -84,7 +88,7 @@ class ScrewHanged():
         tip_translation = end.translation + self.tip_length * normalized_direction
         
         self.get_driver_tip_frame()
-        axis_convert = skrobot.coordinates.Coordinates([0, 0, 0], [0.5, 0.5, 0.5, 0.5])
+        axis_convert = skrobot.coordinates.Coordinates([0, 0, 0], [1, 0, 0, 0])
         tip_frame_buf = skrobot.coordinates.Coordinates(tip_translation,
                                                          [self.driver_tip_frame.transform.rotation.w,
                                                           self.driver_tip_frame.transform.rotation.x,

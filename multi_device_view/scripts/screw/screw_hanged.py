@@ -15,32 +15,37 @@ from geometry_msgs.msg import PoseStamped, PoseArray, WrenchStamped, Point, Tran
 from visualization_msgs.msg import Marker
 from dynamic_tf_publisher.srv import SetDynamicTF
 
-class Driver():
+class ScrewHanged():
     def __init__(self):
         self.msg = None
         self.start_point = None
         self.end_point = None
         self.tip_frame = None
-        self.tip_length = 0.0065
-        self.tool_frame = None 
+        self.tip_length = 0.00
+        self.driver_tip_frame = None 
         self.rate = 5
         self.tf_hz = 10
 
-    def get_tool_frame(self):
+    # def get_tool_frame(self):
+    #     tf_buffer = tf2_ros.Buffer()
+    #     tf_listener = tf2_ros.TransformListener(tf_buffer)
+    #     self.tool_frame = tf_buffer.lookup_transform("camera_color_optical_frame", "r_gripper_tool_frame", rospy.Time(), rospy.Duration(3))
+    
+    def get_driver_tip_frame(self):
         tf_buffer = tf2_ros.Buffer()
         tf_listener = tf2_ros.TransformListener(tf_buffer)
-        self.tool_frame = tf_buffer.lookup_transform("camera_color_optical_frame", "r_gripper_tool_frame", rospy.Time(), rospy.Duration(3))
+        self.driver_tip_frame = tf_buffer.lookup_transform("camera_color_optical_frame", "driver_tip_frame", rospy.Time(), rospy.Duration(3))
 
     def select_line(self):
         if len(self.msg.points) == 0:
             return
         center_list = []
-        self.get_tool_frame()
+        self.get_driver_tip_frame()
         
-        tool_frame_center = Point()
-        tool_frame_center.x = self.tool_frame.transform.translation.x
-        tool_frame_center.y = self.tool_frame.transform.translation.y
-        tool_frame_center.z = self.tool_frame.transform.translation.z
+        driver_tip_frame_center = Point()
+        driver_tip_frame_center.x = self.driver_tip_frame.transform.translation.x
+        driver_tip_frame_center.y = self.driver_tip_frame.transform.translation.y
+        driver_tip_frame_center.z = self.driver_tip_frame.transform.translation.z
 
         for i in range(int(len(self.msg.points)/2)):
             center_buf = Point()
@@ -52,15 +57,15 @@ class Driver():
         closest_i  = 0
         min_range = float("inf")
         for i in range(len(center_list)):
-            range_buf = (tool_frame_center.x - center_list[i].x)**2 + (tool_frame_center.y - center_list[i].y)**2 + (tool_frame_center.z - center_list[i].z)**2
+            range_buf = (driver_tip_frame_center.x - center_list[i].x)**2 + (driver_tip_frame_center.y - center_list[i].y)**2 + (driver_tip_frame_center.z - center_list[i].z)**2
             if min_range > range_buf:
                 closest_i = i
                 min_range = range_buf
 
         edge_1 = self.msg.points[2*closest_i]
         edge_2 = self.msg.points[2*closest_i + 1]
-        range_1 = (tool_frame_center.x - edge_1.x)**2 + (tool_frame_center.y - edge_1.y)**2 + (tool_frame_center.z - edge_1.z)**2
-        range_2 = (tool_frame_center.x - edge_2.x)**2 + (tool_frame_center.y - edge_2.y)**2 + (tool_frame_center.z - edge_2.z)**2
+        range_1 = (driver_tip_frame_center.x - edge_1.x)**2 + (driver_tip_frame_center.y - edge_1.y)**2 + (driver_tip_frame_center.z - edge_1.z)**2
+        range_2 = (driver_tip_frame_center.x - edge_2.x)**2 + (driver_tip_frame_center.y - edge_2.y)**2 + (driver_tip_frame_center.z - edge_2.z)**2
 
         if range_1 < range_2:
             self.start = self.msg.points[2*closest_i]
@@ -78,19 +83,19 @@ class Driver():
         normalized_direction = direction / np.linalg.norm(direction)
         tip_translation = end.translation + self.tip_length * normalized_direction
         
-        self.get_tool_frame()
+        self.get_driver_tip_frame()
         axis_convert = skrobot.coordinates.Coordinates([0, 0, 0], [0.5, 0.5, 0.5, 0.5])
         tip_frame_buf = skrobot.coordinates.Coordinates(tip_translation,
-                                                         [self.tool_frame.transform.rotation.w,
-                                                          self.tool_frame.transform.rotation.x,
-                                                          self.tool_frame.transform.rotation.y,
-                                                          self.tool_frame.transform.rotation.z])
+                                                         [self.driver_tip_frame.transform.rotation.w,
+                                                          self.driver_tip_frame.transform.rotation.x,
+                                                          self.driver_tip_frame.transform.rotation.y,
+                                                          self.driver_tip_frame.transform.rotation.z])
         self.tip_frame = tip_frame_buf.copy_worldcoords().transform(axis_convert)
 
     def pub_tip_frame_tf(self):
         tip_tf = TransformStamped()
         tip_tf.header.frame_id = "camera_color_optical_frame"
-        tip_tf.child_frame_id = "driver_tip_frame"
+        tip_tf.child_frame_id = "screw_tip_frame"
         tip_tf.transform.translation.x = self.tip_frame.translation[0]
         tip_tf.transform.translation.y = self.tip_frame.translation[1]
         tip_tf.transform.translation.z = self.tip_frame.translation[2]
@@ -112,11 +117,11 @@ class Driver():
         
 
 if __name__ == "__main__":
-    rospy.init_node("driver")
-    driver = Driver()
-    driver_subscriber = rospy.Subscriber("/driver/line_segment_detector/debug/line_marker", Marker, driver.cb)
+    rospy.init_node("screw_hanged")
+    screw_hanged = ScrewHanged()
+    screw_hanged_subscriber = rospy.Subscriber("/screw/line_segment_detector/debug/line_marker", Marker, screw_hanged.cb)
     rospy.sleep(1)
-    driver.get_tool_frame()
-    driver.select_line()
-    driver.calc_tip()
-    driver.pub_tip_frame_tf()
+    #screw_hanged.get_driver_tip_frame()
+    screw_hanged.select_line()
+    screw_hanged.calc_tip()
+    screw_hanged.pub_tip_frame_tf()

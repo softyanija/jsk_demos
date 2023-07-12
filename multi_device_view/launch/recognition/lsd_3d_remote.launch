@@ -6,7 +6,7 @@
   <arg name="driver_h_max" default="127" />
   <arg name="driver_h_min" default="67" />
   <arg name="driver_s_max" default="209" />
-  <arg name="driver_s_min" default="75" />
+  <arg name="driver_s_min" default="30" />
   <arg name="driver_i_max" default="163" />
   <arg name="driver_i_min" default="50" />
 
@@ -139,8 +139,6 @@
           pkg="nodelet" type="nodelet"
           args="load jsk_pcl/LineSegmentDetector $(arg manager)"
           output="screen">
-      <!-- <remap from="~input" to="$(arg FILTERED_CLOUD)" /> -->
-      <!-- <remap from="~input_indices" to="/euclidean_clustering/output" /> -->
       <remap from="~input" to="/extract_indices/output" />
       <remap from="~input_indices" to="euclidean_clustering/output" />
       <rosparam>

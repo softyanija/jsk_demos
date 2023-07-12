@@ -4,6 +4,7 @@ import skrobot
 import tf
 import tf2_ros
 import time
+import math
 
 from skrobot.coordinates import CascadedCoords
 from skrobot.coordinates import Coordinates
@@ -21,7 +22,8 @@ class Driver():
         self.start_point = None
         self.end_point = None
         self.tip_frame = None
-        self.tip_length = 0.0065
+        self.tip_length = 0.001
+        self.tool_frame_to_tip = 0.046
         self.tool_frame = None 
         self.rate = 5
         self.tf_hz = 10
@@ -50,12 +52,12 @@ class Driver():
             center_list.append(center_buf)
 
         closest_i  = 0
-        min_range = float("inf")
+        range_diff_min = float("inf")
         for i in range(len(center_list)):
-            range_buf = (tool_frame_center.x - center_list[i].x)**2 + (tool_frame_center.y - center_list[i].y)**2 + (tool_frame_center.z - center_list[i].z)**2
-            if min_range > range_buf:
+            range_diff = abs(math.sqrt((tool_frame_center.x - center_list[i].x)**2 + (tool_frame_center.y - center_list[i].y)**2 + (tool_frame_center.z - center_list[i].z)**2) - self.tool_frame_to_tip)
+            if range_diff_min > range_diff:
                 closest_i = i
-                min_range = range_buf
+                range_diff_min = range_diff
 
         edge_1 = self.msg.points[2*closest_i]
         edge_2 = self.msg.points[2*closest_i + 1]

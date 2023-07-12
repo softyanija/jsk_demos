@@ -3,17 +3,24 @@
   <arg name="gui" default="false"/>
   <arg name="manager" default="/camera/realsense2_camera_manager" />
 
-  <arg name="driver_h_max" default="127" />
-  <arg name="driver_h_min" default="67" />
-  <arg name="driver_s_max" default="209" />
-  <arg name="driver_s_min" default="30" />
-  <arg name="driver_i_max" default="163" />
-  <arg name="driver_i_min" default="50" />
+  <!-- <arg name="driver_h_max" default="127" /> -->
+  <!-- <arg name="driver_h_min" default="67" /> -->
+  <!-- <arg name="driver_s_max" default="209" /> -->
+  <!-- <arg name="driver_s_min" default="30" /> -->
+  <!-- <arg name="driver_i_max" default="163" /> -->
+  <!-- <arg name="driver_i_min" default="50" /> -->
+
+  <arg name="driver_h_max" default="83" />
+  <arg name="driver_h_min" default="-21" />
+  <arg name="driver_s_max" default="82" />
+  <arg name="driver_s_min" default="0" />
+  <arg name="driver_i_max" default="70" />
+  <arg name="driver_i_min" default="0" />
 
   <arg name="screw_h_max" default="35" />
   <arg name="screw_h_min" default="-24" />
   <arg name="screw_s_max" default="96" />
-  <arg name="screw_s_min" default="12" />
+  <arg name="screw_s_min" default="0" />
   <arg name="screw_i_max" default="171" />
   <arg name="screw_i_min" default="82" />
 

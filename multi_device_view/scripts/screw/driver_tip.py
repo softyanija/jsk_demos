@@ -90,6 +90,8 @@ class Driver():
         self.tip_frame = tip_frame_buf.copy_worldcoords().transform(axis_convert)
 
     def pub_tip_frame_tf(self):
+        self.select_line()
+        self.calc_tip()
         tip_tf = TransformStamped()
         tip_tf.header.frame_id = "camera_color_optical_frame"
         tip_tf.child_frame_id = "driver_tip_frame"

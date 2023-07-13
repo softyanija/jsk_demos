@@ -23,6 +23,7 @@ class ScrewHanged():
         self.tip_frame = None
         self.tool_frame = None
         self.tip_length = 0.00
+        self.range_limit = 0.008
         self.driver_tip_frame = None 
         self.rate = 5
         self.tf_hz = 10
@@ -60,7 +61,7 @@ class ScrewHanged():
         min_range = float("inf")
         for i in range(len(center_list)):
             range_buf = (driver_tip_frame_center.x - center_list[i].x)**2 + (driver_tip_frame_center.y - center_list[i].y)**2 + (driver_tip_frame_center.z - center_list[i].z)**2
-            if min_range > range_buf:
+            if (min_range > range_buf) and (self.range_limit ** 2 > range_buf):
                 closest_i = i
                 min_range = range_buf
 
@@ -99,7 +100,7 @@ class ScrewHanged():
     def pub_tip_frame_tf(self):
         tip_tf = TransformStamped()
         tip_tf.header.frame_id = "camera_color_optical_frame"
-        tip_tf.child_frame_id = "screw_tip_frame"
+        tip_tf.child_frame_id = "screw_induction_frame"
         tip_tf.transform.translation.x = self.tip_frame.translation[0]
         tip_tf.transform.translation.y = self.tip_frame.translation[1]
         tip_tf.transform.translation.z = self.tip_frame.translation[2]

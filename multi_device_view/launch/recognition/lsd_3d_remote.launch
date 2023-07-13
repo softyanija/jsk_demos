@@ -17,12 +17,12 @@
   <arg name="driver_i_max" default="70" />
   <arg name="driver_i_min" default="0" />
 
-  <arg name="screw_h_max" default="35" />
-  <arg name="screw_h_min" default="-24" />
-  <arg name="screw_s_max" default="96" />
-  <arg name="screw_s_min" default="0" />
-  <arg name="screw_i_max" default="171" />
-  <arg name="screw_i_min" default="82" />
+  <arg name="screw_h_max" default="8" />
+  <arg name="screw_h_min" default="-74" />
+  <arg name="screw_s_max" default="196" />
+  <arg name="screw_s_min" default="30" />
+  <arg name="screw_i_max" default="161" />
+  <arg name="screw_i_min" default="40" />
 
   <arg name="hole_h_max" default="0" />
   <arg name="hole_h_min" default="-83" />

@@ -18,7 +18,8 @@
             /camera/aligned_depth_to_color/camera_info
             /camera/aligned_depth_to_color/image_raw/compressedDepth
             /tf
-            /tf_static"
+            /tf_static
+            /right_endeffector/wrench"
         output="screen" />
 
 </launch>

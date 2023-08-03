@@ -1,9 +1,9 @@
 <launch>
   <node pkg="tf" type="static_transform_publisher" name="screw_hole_induced_broadcaster" args="-0.0105 -0.006 -0.002 0 -1.57 0 servo screw_hole_induced 100" />
 
-  <node pkg="tf" type="static_transform_publisher" name="screw_hole_induced_pre_broadcaster" args="-0.0125 -0.006 -0.002 0 -1.57 0 servo screw_hole_induced_pre 100" />
+  <node pkg="tf" type="static_transform_publisher" name="screw_hole_induced_pre_broadcaster" args="-0.0125 -0.006 -0.003 0 -1.57 0 servo screw_hole_induced_pre 100" />
 
-  <node pkg="tf" type="static_transform_publisher" name="r_hand_front_broadcaster" args="0.0165 0.0065 0.0136 1.57 0 0 r_gripper_r_finger_tip_link r_gripper_front 100" />
+  <node pkg="tf" type="static_transform_publisher" name="r_hand_front_broadcaster" args="0.0195 0.0065 0.0136 1.57 0 0 r_gripper_r_finger_tip_link r_gripper_front 100" />
 
   <node name="tf_publisher" pkg="dynamic_tf_publisher"
         type="tf_publish.py"  output="screen">
@@ -12,8 +12,10 @@
     </rosparam>
   </node>
   
-  <include file="$(find multi_device_view)/launch/recognition/apriltag.launch"/>
+  <!-- <include file="$(find multi_device_view)/launch/recognition/apriltag.launch"/> -->
 
   <include file="$(find multi_device_view)/launch/recognition/reconstruct_points_estimated.launch"/>
+
+  <include file="$(find virtual_force_publisher)/launch/dualarm_virtual_force_publisher.launch"/>
 
   </launch>

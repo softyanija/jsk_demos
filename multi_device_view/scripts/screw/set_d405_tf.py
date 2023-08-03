@@ -20,8 +20,8 @@ class Set_d405_tf:
         tf_listener = tf2_ros.TransformListener(tf_buffer)
         try:
             #trans = tf_buffer.lookup_transform("base_link", "camera_link", rospy.Time(), rospy.Duration(3))
-            b2g = tf_buffer.lookup_transform("base_link", "r_gripper_front", rospy.Time(), rospy.Duration(3))
-            g2c = tf_buffer.lookup_transform("r_gripper_front_apriltag", "camera_link", rospy.Time(), rospy.Duration(3))
+            b2g = tf_buffer.lookup_transform("base_link", "r_gripper_front", rospy.Time(0), rospy.Duration(3))
+            g2c = tf_buffer.lookup_transform("r_gripper_front_apriltag", "camera_link", rospy.Time(0), rospy.Duration(3))
             base_to_gripper = skrobot.coordinates.Coordinates([b2g.transform.translation.x,
                                                                b2g.transform.translation.y,
                                                                b2g.transform.translation.z],
@@ -38,20 +38,6 @@ class Set_d405_tf:
                                                                  g2c.transform.rotation.y,
                                                                  g2c.transform.rotation.z])
             
-            # base_to_gripper.translation = [b2g.transform.translation.x,
-            #                                b2g.transform.translation.y,
-            #                                b2g.transform.translation.z]
-            # base_to_gripper.quaternion = [b2g.transform.rotation.w,
-            #                               b2g.transform.rotation.x,
-            #                               b2g.transform.rotation.y,
-            #                               b2g.transform.rotation.z]
-            # gripper_to_camera.translation = [g2c.transform.translation.x,
-            #                                  g2c.transform.translation.y,
-            #                                  g2c.transform.translation.z]
-            # gripper_to_camera.quaternion = [g2c.transform.rotation.w,
-            #                                 g2c.transform.rotation.x,
-            #                                 g2c.transform.rotation.y,
-            #                                 g2c.transform.rotation.z]
 
             base_to_camera = base_to_gripper.copy_worldcoords().transform(gripper_to_camera)
             

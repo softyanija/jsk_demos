@@ -23,7 +23,7 @@ class Driver():
         self.end_point = None
         self.tip_frame = None
         self.tip_length = 0.001
-        self.tool_frame_to_tip = 0.046
+        self.tool_frame_to_tip = 0.032
         self.tool_frame = None 
         self.rate = 5
         self.tf_hz = 10
@@ -31,33 +31,44 @@ class Driver():
     def get_tool_frame(self):
         tf_buffer = tf2_ros.Buffer()
         tf_listener = tf2_ros.TransformListener(tf_buffer)
-        self.tool_frame = tf_buffer.lookup_transform("camera_color_optical_frame", "r_gripper_tool_frame", rospy.Time(), rospy.Duration(3))
+        self.tool_frame = tf_buffer.lookup_transform("camera_color_optical_frame", "r_gripper_tool_frame", rospy.Time(0), rospy.Duration(6))
 
     def select_line(self):
-        if len(self.msg.points) == 0:
-            return
-        center_list = []
         self.get_tool_frame()
+        count = 0
+        while 1:
+            print("count :" + str(count))
+            count += 1
+            if len(self.msg.points) == 0:
+                continue
+            center_list = []
+            
         
-        tool_frame_center = Point()
-        tool_frame_center.x = self.tool_frame.transform.translation.x
-        tool_frame_center.y = self.tool_frame.transform.translation.y
-        tool_frame_center.z = self.tool_frame.transform.translation.z
+            tool_frame_center = Point()
+            tool_frame_center.x = self.tool_frame.transform.translation.x
+            tool_frame_center.y = self.tool_frame.transform.translation.y
+            tool_frame_center.z = self.tool_frame.transform.translation.z
 
-        for i in range(int(len(self.msg.points)/2)):
-            center_buf = Point()
-            center_buf.x = (self.msg.points[2*i].x + self.msg.points[2*i].x)/2
-            center_buf.y = (self.msg.points[2*i].y + self.msg.points[2*i].y)/2
-            center_buf.z = (self.msg.points[2*i].z + self.msg.points[2*i].z)/2
-            center_list.append(center_buf)
+            for i in range(int(len(self.msg.points)/2)):
+                center_buf = Point()
+                center_buf.x = (self.msg.points[2*i].x + self.msg.points[2*i].x)/2
+                center_buf.y = (self.msg.points[2*i].y + self.msg.points[2*i].y)/2
+                center_buf.z = (self.msg.points[2*i].z + self.msg.points[2*i].z)/2
+                center_list.append(center_buf)
 
-        closest_i  = 0
-        range_diff_min = float("inf")
-        for i in range(len(center_list)):
-            range_diff = abs(math.sqrt((tool_frame_center.x - center_list[i].x)**2 + (tool_frame_center.y - center_list[i].y)**2 + (tool_frame_center.z - center_list[i].z)**2) - self.tool_frame_to_tip)
-            if range_diff_min > range_diff:
-                closest_i = i
-                range_diff_min = range_diff
+            closest_i  = 0
+            range_diff_min = float("inf")
+            for i in range(len(center_list)):
+                range_diff = abs(math.sqrt((tool_frame_center.x - center_list[i].x)**2 + (tool_frame_center.y - center_list[i].y)**2 + (tool_frame_center.z - center_list[i].z)**2) - self.tool_frame_to_tip)
+                print("range of index:" + str(i) + " is " + str(range_diff))
+                if range_diff_min > range_diff:
+                    closest_i = i
+                    range_diff_min = range_diff
+            print("range_diff_min is " + str(range_diff_min))
+            if range_diff_min < 0.006:
+                break
+            if count > 15:
+                break
 
         edge_1 = self.msg.points[2*closest_i]
         edge_2 = self.msg.points[2*closest_i + 1]

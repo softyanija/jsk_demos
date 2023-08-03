@@ -12,7 +12,7 @@
     </rosparam>
   </node>
   
-  <!-- <include file="$(find multi_device_view)/launch/recognition/apriltag.launch"/> -->
+  <include file="$(find multi_device_view)/launch/recognition/apriltag.launch"/>
 
   <include file="$(find multi_device_view)/launch/recognition/reconstruct_points_estimated.launch"/>
 

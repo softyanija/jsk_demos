@@ -3,13 +3,6 @@
   <arg name="gui" default="false"/>
   <arg name="manager" default="/camera/realsense2_camera_manager" />
 
-  <!-- <arg name="driver_h_max" default="127" /> -->
-  <!-- <arg name="driver_h_min" default="67" /> -->
-  <!-- <arg name="driver_s_max" default="209" /> -->
-  <!-- <arg name="driver_s_min" default="30" /> -->
-  <!-- <arg name="driver_i_max" default="163" /> -->
-  <!-- <arg name="driver_i_min" default="50" /> -->
-
   <arg name="driver_h_max" default="-15" />
   <arg name="driver_h_min" default="-128" />
   <arg name="driver_s_max" default="100" />
@@ -31,34 +24,34 @@
   <arg name="hole_i_max" default="196" />
   <arg name="hole_i_min" default="54" />
 
-  <arg name="INPUT_CLOUD" value="/remote/camera/depth_registered/points" />
+  <arg name="INPUT_CLOUD" value="/camera/depth_registered/points" />
   <arg name="CLIPPED_CLOUD" value="/attention_clipper/output" />
 
-  <node name="attention_clipper"
-          pkg="nodelet" type="nodelet"
-          args="load jsk_pcl/AttentionClipper $(arg manager)">
-      <remap from="~input/points" to="$(arg INPUT_CLOUD)" />
-      <rosparam>
-        frame_id: camera_color_optical_frame
-        use_multiple_attention: false
-        dimension_x: 0.1
-        dimension_y: 0.1
-        dimension_z: 0.15
-        initial_pos: [0.0, 0.0, 0.075]
-      </rosparam>
-  </node>
+  <!-- <node name="attention_clipper" -->
+  <!--         pkg="nodelet" type="nodelet" -->
+  <!--         args="load jsk_pcl/AttentionClipper $(arg manager)"> -->
+  <!--     <remap from="~input/points" to="$(arg INPUT_CLOUD)" /> -->
+  <!--     <rosparam> -->
+  <!--       frame_id: camera_color_optical_frame -->
+  <!--       use_multiple_attention: false -->
+  <!--       dimension_x: 0.1 -->
+  <!--       dimension_y: 0.1 -->
+  <!--       dimension_z: 0.15 -->
+  <!--       initial_pos: [0.0, 0.0, 0.1] -->
+  <!--     </rosparam> -->
+  <!-- </node> -->
 
-  <node name="extract_indices"
-        pkg="jsk_pcl_ros" type="extract_indices">
-    <remap from="~input" to="$(arg INPUT_CLOUD)" />
-    <remap from="~indices" to="attention_clipper/output/point_indices" />
-  </node>
+  <!-- <node name="extract_indices" -->
+  <!--       pkg="jsk_pcl_ros" type="extract_indices"> -->
+  <!--   <remap from="~input" to="$(arg INPUT_CLOUD)" /> -->
+  <!--   <remap from="~indices" to="attention_clipper/output/point_indices" /> -->
+  <!-- </node> -->
 
   <group ns="driver">
     <node name="hsi_color_filter"
           pkg="nodelet" type="nodelet"
           args="load jsk_pcl/HSIColorFilter $(arg manager)">
-      <remap from="~input" to="/extract_indices/output" />
+      <remap from="~input" to="$(arg INPUT_CLOUD)" />
       <rosparam>
         use_indices: false
         keep_organized: true
@@ -108,37 +101,40 @@
     </node>
   </group>
 
-  <group ns="screw">
-    <node name="hsi_color_filter"
+  <group ns="screw">    
+    <node name="attention_clipper"
           pkg="nodelet" type="nodelet"
-          args="load jsk_pcl/HSIColorFilter $(arg manager)">
-      <remap from="~input" to="/extract_indices/output" />
+          args="load jsk_pcl/AttentionClipper $(arg manager)">
+      <remap from="~input/points" to="$(arg INPUT_CLOUD)" />
       <rosparam>
-        use_indices: false
-        keep_organized: true
+        frame_id: r_gripper_tool_frame
+        use_multiple_attention: false
+        dimension_x: 0.009
+        dimension_y: 0.007
+        dimension_z: 0.007
+        initial_pos: [0.053, 0.0, 0.0]
       </rosparam>
-      <param name="h_limit_max" value="$(arg screw_h_max)" />
-      <param name="h_limit_min" value="$(arg screw_h_min)" />
-      <param name="s_limit_max" value="$(arg screw_s_max)" />
-      <param name="s_limit_min" value="$(arg screw_s_min)" />
-      <param name="i_limit_max" value="$(arg screw_i_max)" />
-      <param name="i_limit_min" value="$(arg screw_i_min)" />
+    </node>
+    
+    <node name="extract_indices"
+          pkg="jsk_pcl_ros" type="extract_indices">
+      <remap from="~input" to="$(arg INPUT_CLOUD)" />
+      <remap from="~indices" to="attention_clipper/output/point_indices" />
     </node>
 
     <node name="euclidean_clustering"
           pkg="nodelet" type="nodelet"
           args="load jsk_pcl/EuclideanClustering $(arg manager)"
           output="screen">
-      <remap from="~input" to="hsi_color_filter/output" />
-      <param name="tolerance" value="0.002" />
-      
+      <remap from="~input" to="extract_indices/output" />
+      <param name="tolerance" value="0.002" />      
     </node>
 
     <node name="euclidean_clustering_decomposer"
           pkg="nodelet" type="nodelet"
           args="load jsk_pcl/ClusterPointIndicesDecomposerZAxis $(arg manager)"
           output="screen">
-      <remap from="~input" to="hsi_color_filter/output" />
+      <remap from="~input" to="extract_indices/output" />
       <remap from="~target" to="euclidean_clustering/output" />
     </node>
 
@@ -146,14 +142,14 @@
           pkg="nodelet" type="nodelet"
           args="load jsk_pcl/LineSegmentDetector $(arg manager)"
           output="screen">
-      <remap from="~input" to="/extract_indices/output" />
+      <remap from="~input" to="extract_indices/output" />
       <remap from="~input_indices" to="euclidean_clustering/output" />
       <rosparam>
         outlier_threshold: 0.02
         max_iteration: 1000
         min_indices: 10
-        min_length: 0.005
-        line_width: 0.005
+        min_length: 0.003
+        line_width: 0.002
         approximate_sync: true
         queue_size: 10
       </rosparam>

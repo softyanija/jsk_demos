@@ -20,9 +20,9 @@
 #   ]
 standalone_tags:
   [
-  {id: 15, size: 0.01515, name: "servo"},
-  {id:  0, size: 0.01515, name: "r_gripper_front_apriltag"},
-  {id:  1, size: 0.01515, name: "rarm_hand_back"},
+  {id: 15, size: 0.01530, name: "servo"},
+  {id:  0, size: 0.01500, name: "r_gripper_front_apriltag"},
+  {id:  1, size: 0.01530, name: "rarm_hand_back"},
   ]
 # ## Tag bundle definitions
 # ### Remarks

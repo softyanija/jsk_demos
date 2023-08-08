@@ -14,7 +14,7 @@
   
   <include file="$(find multi_device_view)/launch/recognition/apriltag.launch"/>
 
-  <include file="$(find multi_device_view)/launch/recognition/reconstruct_points_estimated.launch"/>
+  <!-- <include file="$(find multi_device_view)/launch/recognition/reconstruct_points_estimated.launch"/> -->
 
   <include file="$(find virtual_force_publisher)/launch/dualarm_virtual_force_publisher.launch"/>
 

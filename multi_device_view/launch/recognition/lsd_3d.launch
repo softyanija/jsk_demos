@@ -17,13 +17,6 @@
   <arg name="screw_i_max" default="120" />
   <arg name="screw_i_min" default="40" />
 
-  <arg name="hole_h_max" default="0" />
-  <arg name="hole_h_min" default="-83" />
-  <arg name="hole_s_max" default="188" />
-  <arg name="hole_s_min" default="0" />
-  <arg name="hole_i_max" default="196" />
-  <arg name="hole_i_min" default="54" />
-
   <arg name="INPUT_CLOUD" value="/camera/depth_registered/points" />
   <arg name="CLIPPED_CLOUD" value="/attention_clipper/output" />
 
@@ -110,23 +103,42 @@
         frame_id: r_gripper_tool_frame
         use_multiple_attention: false
         dimension_x: 0.009
-        dimension_y: 0.007
-        dimension_z: 0.007
+        dimension_y: 0.009
+        dimension_z: 0.009
         initial_pos: [0.053, 0.0, 0.0]
       </rosparam>
     </node>
     
     <node name="extract_indices"
-          pkg="jsk_pcl_ros" type="extract_indices">
+          pkg="jsk_pcl_ros" type="extract_indices"
+          args="load jsk_pcl/ExtractIndices $(arg manager)"
+          output="screen">
       <remap from="~input" to="$(arg INPUT_CLOUD)" />
       <remap from="~indices" to="attention_clipper/output/point_indices" />
+    </node>
+
+    <node name="hsi_color_filter"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/HSIColorFilter $(arg manager)">
+      <remap from="~input" to="extract_indices/output" />
+      <rosparam>
+        use_indices: false
+        keep_organized: true
+      </rosparam>
+      <param name="h_limit_max" value="$(arg driver_h_max)" />
+      <param name="h_limit_min" value="$(arg driver_h_min)" />
+      <param name="s_limit_max" value="$(arg driver_s_max)" />
+      <param name="s_limit_min" value="$(arg driver_s_min)" />
+      <param name="i_limit_max" value="$(arg driver_i_max)" />
+      <param name="i_limit_min" value="$(arg driver_i_min)" />
     </node>
 
     <node name="euclidean_clustering"
           pkg="nodelet" type="nodelet"
           args="load jsk_pcl/EuclideanClustering $(arg manager)"
           output="screen">
-      <remap from="~input" to="extract_indices/output" />
+      <!-- <remap from="~input" to="extract_indices/output" /> -->
+      <remap from="~input" to="hsi_color_filter/output" />
       <param name="tolerance" value="0.002" />      
     </node>
 
@@ -152,36 +164,6 @@
         line_width: 0.002
         approximate_sync: true
         queue_size: 10
-      </rosparam>
-    </node>
-  </group>
-
-  <group ns="hole">
-    <node name="hsi_color_filter"
-          pkg="nodelet" type="nodelet"
-          args="load jsk_pcl/HSIColorFilter $(arg manager)">
-      <remap from="~input" to="/extract_indices/output" />
-      <rosparam>
-        use_indices: false
-        keep_organized: true
-      </rosparam>
-      <param name="h_limit_max" value="$(arg hole_h_max)" />
-      <param name="h_limit_min" value="$(arg hole_h_min)" />
-      <param name="s_limit_max" value="$(arg hole_s_max)" />
-      <param name="s_limit_min" value="$(arg hole_s_min)" />
-      <param name="i_limit_max" value="$(arg hole_i_max)" />
-      <param name="i_limit_min" value="$(arg hole_i_min)" />
-    </node>
-
-    <node name="torus_finder"
-          pkg="nodelet" type="nodelet"
-          args="standalone jsk_pcl/TorusFinder">
-      <remap from="~input" to="hsi_color_filter/output" />
-      <rosparam>
-        min_radius: 0.005
-        max_radius: 0.05
-        use_hint: false
-        outlier_threshold: 0.01
       </rosparam>
     </node>
   </group>

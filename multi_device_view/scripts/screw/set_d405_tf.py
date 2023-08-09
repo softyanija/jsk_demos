@@ -12,8 +12,7 @@ from dynamic_tf_publisher.srv import SetDynamicTF
 class Set_d405_tf:
     def __init__(self):
         self.estimated_tf = None
-        self.Rate = 5
-        self.tf_hz = 10
+        self.tf_hz = 100
 
     def estimate_tf(self):
         tf_buffer = tf2_ros.Buffer()
@@ -65,7 +64,6 @@ class Set_d405_tf:
             return
         except rospy.ServiceException as e:
             print("Service call failed: %s"%e)
-
 
 
 if __name__ == "__main__":

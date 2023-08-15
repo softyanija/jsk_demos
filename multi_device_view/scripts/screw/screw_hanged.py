@@ -13,6 +13,7 @@ from skrobot.interfaces.ros import PR2ROSRobotInterface
 from skrobot.interfaces.ros.tf_utils import tf_pose_to_coords
 from skrobot.interfaces.ros.tf_utils import geometry_pose_to_coords
 from geometry_msgs.msg import PoseStamped, PoseArray, WrenchStamped, Point, TransformStamped
+from jsk_recognition_msgs.msg import BoundingBoxArray
 from visualization_msgs.msg import Marker
 from dynamic_tf_publisher.srv import SetDynamicTF
 
@@ -26,87 +27,42 @@ class ScrewHanged():
         self.tool_frame = None
         self.tip_length = 0.00
         self.range_limit = 0.008
-        self.driver_tip_frame = None 
+        # self.driver_tip_frame = None 
         self.rate = 5
         self.tf_hz = 10
-    
-    def get_driver_tip_frame(self):
-        tf_buffer = tf2_ros.Buffer()
-        tf_listener = tf2_ros.TransformListener(tf_buffer)
-        self.driver_tip_frame = tf_buffer.lookup_transform("camera_color_optical_frame", "driver_tip_frame", rospy.Time(), rospy.Duration(5))
-        self.tool_frame = tf_buffer.lookup_transform("camera_color_optical_frame", "r_gripper_tool_frame", rospy.Time(), rospy.Duration(5))
-
-    def select_line(self):
-        count = 0
-        while 1:
-            self.get_driver_tip_frame()
-            print("count :" + str(count))
-            count += 1
-            if len(self.msg.points) == 0:
-                continue
-            center_list = []
-            self.get_driver_tip_frame()
-        
-            driver_tip_frame_center = Point()
-            driver_tip_frame_center.x = self.driver_tip_frame.transform.translation.x
-            driver_tip_frame_center.y = self.driver_tip_frame.transform.translation.y
-            driver_tip_frame_center.z = self.driver_tip_frame.transform.translation.z
-
-            for i in range(int(len(self.msg.points)/2)):
-                center_buf = Point()
-                center_buf.x = (self.msg.points[2*i].x + self.msg.points[2*i].x)/2
-                center_buf.y = (self.msg.points[2*i].y + self.msg.points[2*i].y)/2
-                center_buf.z = (self.msg.points[2*i].z + self.msg.points[2*i].z)/2
-                center_list.append(center_buf)
-
-            closest_i  = 0
-            min_range = float("inf")
-            for i in range(len(center_list)):
-                range_buf = (driver_tip_frame_center.x - center_list[i].x)**2 + (driver_tip_frame_center.y - center_list[i].y)**2 + (driver_tip_frame_center.z - center_list[i].z)**2
-                print("range of index:" + str(i) + " is " + str(range_buf))
-                if min_range > range_buf:
-                    closest_i = i
-                    min_range = range_buf
-            print("min_range is " +  str(min_range))
-            if min_range < 0.002:
-                break
-            if count > 100:
-                break
-            
-        edge_1 = self.msg.points[2*closest_i]
-        edge_2 = self.msg.points[2*closest_i + 1]
-        # range_1 = (driver_tip_frame_center.x - edge_1.x)**2 + (driver_tip_frame_center.y - edge_1.y)**2 + (driver_tip_frame_center.z - edge_1.z)**2
-        # range_2 = (driver_tip_frame_center.x - edge_2.x)**2 + (driver_tip_frame_center.y - edge_2.y)**2 + (driver_tip_frame_center.z - edge_2.z)**2
-        range_1 = edge_1.y
-        range_2 = edge_2.y
-
-        if range_1 < range_2:
-            self.start = self.msg.points[2*closest_i]
-            self.end = self.msg.points[2*closest_i + 1]
-        else:
-            self.start = self.msg.points[2*closest_i + 1]
-            self.end = self.msg.points[2*closest_i]
         
     def calc_tip(self):
-        start = skrobot.coordinates.Coordinates([self.start.x, self.start.y, self.start.z],
-                                                [1, 0, 0, 0])
-        end = skrobot.coordinates.Coordinates([self.end.x, self.end.y, self.end.z],
-                                              [1, 0, 0, 0])
-        direction = end.translation - start.translation
-        normalized_direction = direction / np.linalg.norm(direction)
-        tip_translation = end.translation + self.tip_length * normalized_direction
         
-        self.get_driver_tip_frame()
+        # if self.msg.boxes[0].pose.position.x == 0.0 and self.msg.boxes[0].pose.position.y == 0.0 and self.msg.boxes[0].pose.position.z == 0.0:
+        # return
+        print("hoge")
+        
+        pose_vector = Quaternion(self.msg.boxes[0].pose.orientation.w,
+                                 self.msg.boxes[0].pose.orientation.x,
+                                 self.msg.boxes[0].pose.orientation.y,
+                                 self.msg.boxes[0].pose.orientation.z)
+
+        tip_frame_rotation = skrobot.coordinates.Coordinates([0, 0, 0],
+                                                        [self.msg.boxes[0].pose.orientation.w,
+                                                         self.msg.boxes[0].pose.orientation.x,
+                                                         self.msg.boxes[0].pose.orientation.y,
+                                                         self.msg.boxes[0].pose.orientation.z])
+        trans_from_screw = np.array([self.msg.boxes[0].dimensions.x / 2, 0, 0])
+        tip_trans = np.dot(tip_frame_rotation.rotation, trans_from_screw)
+        
         axis_convert = skrobot.coordinates.Coordinates([0, 0, 0], [1, 0, 0, 0])
-        tip_frame_buf = skrobot.coordinates.Coordinates(tip_translation,
-                                                         [self.driver_tip_frame.transform.rotation.w,
-                                                          self.driver_tip_frame.transform.rotation.x,
-                                                          self.driver_tip_frame.transform.rotation.y,
-                                                          self.driver_tip_frame.transform.rotation.z])
+        tip_frame_buf = skrobot.coordinates.Coordinates([self.msg.boxes[0].pose.position.x + tip_trans[0],
+                                                         self.msg.boxes[0].pose.position.y + tip_trans[1],
+                                                         self.msg.boxes[0].pose.position.z + tip_trans[2]],
+                                                        [self.msg.boxes[0].pose.orientation.w,
+                                                         self.msg.boxes[0].pose.orientation.x,
+                                                         self.msg.boxes[0].pose.orientation.y,
+                                                         self.msg.boxes[0].pose.orientation.z])
+        print(tip_trans)
+        
         self.tip_frame = tip_frame_buf.copy_worldcoords().transform(axis_convert)
 
     def pub_tip_frame_tf(self):
-        self.select_line()
         self.calc_tip()
         tip_tf = TransformStamped()
         tip_tf.header.frame_id = "camera_color_optical_frame"
@@ -134,9 +90,11 @@ class ScrewHanged():
 if __name__ == "__main__":
     rospy.init_node("screw_hanged")
     screw_hanged = ScrewHanged()
-    screw_hanged_subscriber = rospy.Subscriber("/screw/line_segment_detector/debug/line_marker", Marker, screw_hanged.cb)
+    screw_hanged_subscriber = rospy.Subscriber("/screw/euclidean_clustering_decomposer/boxes", BoundingBoxArray, screw_hanged.cb)
     rospy.sleep(1)
     #screw_hanged.get_driver_tip_frame()
     screw_hanged.select_line()
     screw_hanged.calc_tip()
     screw_hanged.pub_tip_frame_tf()
+
+

@@ -11,9 +11,11 @@ import time
 from geometry_msgs.msg import PoseStamped, PoseArray, WrenchStamped
 from skrobot.coordinates import CascadedCoords
 from skrobot.coordinates import Coordinates
+from skrobot.coordinates.quaternion import Quaternion
 from skrobot.interfaces.ros import PR2ROSRobotInterface
 from skrobot.interfaces.ros.tf_utils import tf_pose_to_coords
 from skrobot.interfaces.ros.tf_utils import geometry_pose_to_coords
+from jsk_recognition_msgs.msg import BoundingBoxArray
 
 from utils import *
 from driver_tip import Driver
@@ -37,15 +39,15 @@ viewer = skrobot.viewers.TrimeshSceneViewer(resolution=(640, 480))
 viewer.add(robot)
 viewer.show()
 
-driver = Driver()
-driver_subscriber = rospy.Subscriber("/driver/line_segment_detector/debug/line_marker", Marker, driver.cb)
+# driver = Driver()
+# driver_subscriber = rospy.Subscriber("/driver/line_segment_detector/debug/line_marker", Marker, driver.cb)
 screw_hanged = ScrewHanged()
-screw_hanged_subscriber = rospy.Subscriber("/screw/line_segment_detector/debug/line_marker", Marker, screw_hanged.cb)
+screw_hanged_subscriber = rospy.Subscriber("/screw/euclidean_clustering_decomposer/boxes", BoundingBoxArray, screw_hanged.cb)
 
 tf_buffer = tf2_ros.Buffer()
 tf_listener = tf2_ros.TransformListener(tf_buffer)
 
-    #move to near screw
+#move to near screw
 induction_init_angle_vector = np.array([-1.5704848e+00,  4.5554123e+01,  4.2743446e+01, -1.5701544e+00,
                                             -3.7792927e+01, -3.9414707e+01, -7.8521786e+00, -1.4776426e+01,
                                             -2.9745804e+01,  1.0994394e+01, -6.0272266e+01, -4.9123852e+01,
@@ -63,7 +65,12 @@ robot.angle_vector(induction_init_angle_vector)
 ri.angle_vector(robot.angle_vector(), 4)
 ri.wait_interpolation()
 
+#grasp driver
+ri.move_gripper("rarm", 0.0118)
+
 #set d405 tf
 setter = Set_d405_tf()
 setter.estimate_tf()
 setter.set_estimated_tf()
+
+

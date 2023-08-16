@@ -14,6 +14,7 @@ from skrobot.coordinates import Coordinates
 from skrobot.interfaces.ros import PR2ROSRobotInterface
 from skrobot.interfaces.ros.tf_utils import tf_pose_to_coords
 from skrobot.interfaces.ros.tf_utils import geometry_pose_to_coords
+from jsk_recognition_msgs.msg import BoundingBoxArray
 
 from utils import *
 from driver_tip import Driver
@@ -21,32 +22,33 @@ from screw_hanged import ScrewHanged
 from set_d405_tf import Set_d405_tf
 from wrench import Wrench
 
-#def hoge
-
 rospy.init_node("inducdtion_screw")
 robot = skrobot.models.PR2()
 ri = PR2ROSRobotInterface(robot)
-# rarm_link_list = [
-#     r.r_shoulder_pan_link,
-#     r.r_shoulder_lift_link,
-#     r.r_upper_arm_roll_link,
-#     r.r_elbow_flex_link,
-#     r.r_forearm_roll_link, 
-#     r.r_wrist_flex_link,
-#     r.r_wrist_roll_link]
 
 viewer = skrobot.viewers.TrimeshSceneViewer(resolution=(640, 480))
 viewer.add(robot)
 viewer.show()
 
-driver = Driver()
-driver_subscriber = rospy.Subscriber("/driver/line_segment_detector/debug/line_marker", Marker, driver.cb)
+# driver = Driver()
+# driver_subscriber = rospy.Subscriber("/driver/line_segment_detector/debug/line_marker", Marker, driver.cb)
 screw_hanged = ScrewHanged()
-screw_hanged_subscriber = rospy.Subscriber("/screw/line_segment_detector/debug/line_marker", Marker, screw_hanged.cb)
+screw_hanged_subscriber = rospy.Subscriber("/screw/euclidean_clustering_decomposer/boxes", BoundingBoxArray, screw_hanged.cb)
 
 tf_buffer = tf2_ros.Buffer()
 tf_listener = tf2_ros.TransformListener(tf_buffer)
 #self.tool_frame = tf_buffer.lookup_transform("camera_color_optical_frame", "r_gripper_tool_frame", rospy.Time(), rospy.Duration(3))
+
+larm_end_coords = skrobot.coordinates.CascadedCoords(parent=robot.l_gripper_tool_frame, name="larm_end_coords")
+larm_move_target = larm_end_coords
+larm_link_list = [
+    robot.l_shoulder_pan_link,
+    robot.l_shoulder_lift_link,
+    robot.l_upper_arm_roll_link,
+    robot.l_elbow_flex_link,
+    robot.l_forearm_roll_link,
+    robot.l_wrist_flex_link,
+    robot.l_wrist_roll_link]
 
 #move to near screw
 induction_init_angle_vector = np.array([-1.5704848e+00,  4.5554123e+01,  4.2743446e+01, -1.5701544e+00,
@@ -67,27 +69,59 @@ ri.angle_vector(robot.angle_vector(), 4)
 ri.wait_interpolation()
 rospy.sleep(1)
 
+ri.move_gripper("rarm", 0.0118)
+
 #set d405 tf
 setter = Set_d405_tf()
 setter.estimate_tf()
 setter.set_estimated_tf()
 
+#grasp KXR by PR2 left hand
+arm_grasp_pre_tf = tf_buffer.lookup_transform("base_footprint", "arm_grasp_pre_frame", rospy.Time(), rospy.Duration(5))
+arm_grasp_tf = tf_buffer.lookup_transform("base_footprint", "arm_grasp_frame", rospy.Time(), rospy.Duration(5))
+
+arm_grasp_pre = skrobot.coordinates.Coordinates([arm_grasp_pre_tf.transform.translation.x,
+                                                 arm_grasp_pre_tf.transform.translation.y,
+                                                 arm_grasp_pre_tf.transform.translation.z],
+                                                [arm_grasp_pre_tf.transform.rotation.w,
+                                                 arm_grasp_pre_tf.transform.rotation.x,
+                                                 arm_grasp_pre_tf.transform.rotation.y,
+                                                 arm_grasp_pre_tf.transform.rotation.z])
+arm_grasp = skrobot.coordinates.Coordinates([arm_grasp_tf.transform.translation.x,
+                                                 arm_grasp_tf.transform.translation.y,
+                                                 arm_grasp_tf.transform.translation.z],
+                                                [arm_grasp_tf.transform.rotation.w,
+                                                 arm_grasp_tf.transform.rotation.x,
+                                                 arm_grasp_tf.transform.rotation.y,
+                                                 arm_grasp_tf.transform.rotation.z])
+
+robot.inverse_kinematics(
+    arm_grasp_pre,
+    link_list = larm_link_list,
+    move_target = larm_end_coords)
+ri.angle_vector(robot.angle_vector(), 5)
+ri.wait_interpolation()
+
+robot.inverse_kinematics(
+    arm_grasp,
+    link_list = larm_link_list,
+    move_target = larm_end_coords)
+ri.angle_vector(robot.angle_vector(), 5)
+ri.wait_interpolation()
+
 #induction_near_screw
 
-#
-    
-#姿勢合わせ 一旦後回し
-#while
+
 
 #adjust pos
-
 diff_range_mm = 100
 while diff_range_mm > 1:
-    driver.pub_tip_frame_tf()
-    screw_hanged.pub_tip_frame_tf()
 
-    screw_hole_induced_pre_tf = tf_buffer.lookup_transform("base_footprint", "screw_hole_induced_pre", rospy.Time(), rospy.Duration(5))
+    screw_hanged.pub_tip_frame_tf()
+    rospy.sleep(1)
+    
     screw_induction_tf = tf_buffer.lookup_transform("base_footprint", "screw_induction_frame", rospy.Time(), rospy.Duration(5))
+    screw_hole_induced_pre_tf = tf_buffer.lookup_transform("base_footprint", "screw_hole_induced_pre", rospy.Time(), rospy.Duration(5))
 
     pos_diff = [screw_hole_induced_pre_tf.transform.translation.x - screw_induction_tf.transform.translation.x,
                 screw_hole_induced_pre_tf.transform.translation.y - screw_induction_tf.transform.translation.y,
@@ -95,48 +129,57 @@ while diff_range_mm > 1:
 ]
     print("pos_diff: " + str(pos_diff))
 
+    pos_diff_reference = [i * 0.9 for i in pos_diff]
+
     robot.angle_vector(ri.angle_vector())
-    robot.rarm.move_end_pos(pos_diff, "world")
+    robot.rarm.move_end_pos(pos_diff_reference, "world")
 
     ri.angle_vector(robot.angle_vector(), 3)
     ri.wait_interpolation()
-    rospy.sleep(2)
+
+    rospy.sleep(1)
 
     diff_range_mm = math.sqrt((pos_diff[0]**2 +  pos_diff[1]**2 +  pos_diff[2]**2)) * 10**3
 
 
-# screw_hole_induced_pre_tf = tf_buffer.lookup_transform("base_footprint", "screw_hole_induced_pre", rospy.Time(), rospy.Duration(5))
-# screw_hole_induced_tf = tf_buffer.lookup_transform("base_footprint", "screw_hole_induced", rospy.Time(), rospy.Duration(5))
-# screw_hole_induced_diff = [screw_hole_induced_tf.transform.translation.x - screw_hole_induced_pre_tf.transform.translation.x,
-#                           screw_hole_induced_tf.transform.translation.y - screw_hole_induced_pre_tf.transform.translation.y,
-#                           screw_hole_induced_tf.transform.translation.z - screw_hole_induced_pre_tf.transform.translation.z]
+rospy.loginfo("Finished induction to screw_induced_pre")
 
-# robot.angle_vector(ri.angle_vector())
-# robot.rarm.move_end_pos(screw_hole_induced_diff, "world")
+#induction to screw_induced
+screw_hole_induced_pre_tf = tf_buffer.lookup_transform("base_footprint", "screw_hole_induced_pre", rospy.Time(), rospy.Duration(5))
+screw_hole_induced_tf = tf_buffer.lookup_transform("base_footprint", "screw_hole_induced", rospy.Time(), rospy.Duration(5))
+screw_hole_induced_diff = [screw_hole_induced_tf.transform.translation.x - screw_hole_induced_pre_tf.transform.translation.x,
+                          screw_hole_induced_tf.transform.translation.y - screw_hole_induced_pre_tf.transform.translation.y,
+                          screw_hole_induced_tf.transform.translation.z - screw_hole_induced_pre_tf.transform.translation.z]
 
-# ri.angle_vector(robot.angle_vector(), 3)
-# ri.wait_interpolation()
+robot.angle_vector(ri.angle_vector())
+robot.rarm.move_end_pos(screw_hole_induced_diff, "world")
 
-# wrench = Wrench()
-# wrench_subscriber = rospy.Subscriber("/right_endeffector/wrench", WrenchStamped, wrench.cb)
+ri.angle_vector(robot.angle_vector(), 3)
+ri.wait_interpolation()
 
-# times_limit = 4
-# counter_force_limit = -0.5
-# insert_range = [0, 0, -0.002]
-# rospy.sleep(1)
-# for i in range(times_limit):
-#     if wrench.fx < counter_force_limit:
-#         break
-#     robot.angle_vector(ri.angle_vector())
-#     robot.rarm.move_end_pos(insert_range, "world")
-#     ri.angle_vector(robot.angle_vector(), 3)
-#     ri.wait_interpolation()
+rospy.loginfo("Finished induction to screw_induced")
 
-# robot.angle_vector(ri.angle_vector())
-# wrist_angle = robot.l_wrist_roll_joint.joint_angle()
-# robot.l_wrist_roll_joint.joint_angle(wrist_angle + 3.14)
-# ri.angle_vector(robot.angle_vector(), 2)
-# ri.wait_interpolation()
+# fasten a screw
+wrench = Wrench()
+wrench_subscriber = rospy.Subscriber("/right_endeffector/wrench", WrenchStamped, wrench.cb)
+
+times_limit = 4
+counter_force_limit = -0.5
+insert_range = [0, 0, -0.002]
+rospy.sleep(1)
+for i in range(times_limit):
+    if wrench.fx < counter_force_limit:
+        break
+    robot.angle_vector(ri.angle_vector())
+    robot.rarm.move_end_pos(insert_range, "world")
+    ri.angle_vector(robot.angle_vector(), 3)
+    ri.wait_interpolation()
+
+robot.angle_vector(ri.angle_vector())
+wrist_angle = robot.r_wrist_roll_joint.joint_angle()
+robot.r_wrist_roll_joint.joint_angle(wrist_angle + 3.14)
+ri.angle_vector(robot.angle_vector(), 2)
+ri.wait_interpolation()
 
 # for i in range(16):
 #     print("loop" + str(i))

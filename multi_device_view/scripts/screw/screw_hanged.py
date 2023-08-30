@@ -23,6 +23,7 @@ class ScrewHanged():
         self.start = None
         self.end = None
         self.tip_frame = None
+        self.debug_frame = None
         self.tool_frame_to_tip = 0.05
         self.tool_frame = None
         self.tip_length = 0.00
@@ -33,9 +34,8 @@ class ScrewHanged():
         
     def calc_tip(self):
         
-        # if self.msg.boxes[0].pose.position.x == 0.0 and self.msg.boxes[0].pose.position.y == 0.0 and self.msg.boxes[0].pose.position.z == 0.0:
-        # return
-        print("hoge")
+        if self.msg.boxes == []:
+            return False
         
         pose_vector = Quaternion(self.msg.boxes[0].pose.orientation.w,
                                  self.msg.boxes[0].pose.orientation.x,
@@ -47,8 +47,20 @@ class ScrewHanged():
                                                          self.msg.boxes[0].pose.orientation.x,
                                                          self.msg.boxes[0].pose.orientation.y,
                                                          self.msg.boxes[0].pose.orientation.z])
-        trans_from_screw = np.array([self.msg.boxes[0].dimensions.x / 2, 0, 0])
+        self.debug_frame = skrobot.coordinates.Coordinates([self.msg.boxes[0].pose.position.x,
+                                                       self.msg.boxes[0].pose.position.y,
+                                                       self.msg.boxes[0].pose.position.z],
+                                                        [self.msg.boxes[0].pose.orientation.w,
+                                                         self.msg.boxes[0].pose.orientation.x,
+                                                         self.msg.boxes[0].pose.orientation.y,
+                                                         self.msg.boxes[0].pose.orientation.z])
+        
+        trans_from_screw = np.array([self.msg.boxes[0].dimensions.x / 2,
+                                     0,
+                                     (- self.msg.boxes[0].dimensions.z / 2) + 0.001])
         tip_trans = np.dot(tip_frame_rotation.rotation, trans_from_screw)
+        if tip_trans[1] < 0:
+            tip_trans[1] = tip_trans[1]
         
         axis_convert = skrobot.coordinates.Coordinates([0, 0, 0], [1, 0, 0, 0])
         tip_frame_buf = skrobot.coordinates.Coordinates([self.msg.boxes[0].pose.position.x + tip_trans[0],
@@ -79,6 +91,27 @@ class ScrewHanged():
         try:
             client = rospy.ServiceProxy("/set_dynamic_tf", SetDynamicTF)
             res = client(self.tf_hz, tip_tf)
+            return
+        except rospy.ServiceException as e:
+            print("Service call failed: %s"%e)
+
+    def pub_debug_frame_tf(self):
+        self.calc_tip()
+        debug_tf = TransformStamped()
+        debug_tf.header.frame_id = "camera_color_optical_frame"
+        debug_tf.child_frame_id = "screw_debug_frame"
+        debug_tf.transform.translation.x = self.debug_frame.translation[0]
+        debug_tf.transform.translation.y = self.debug_frame.translation[1]
+        debug_tf.transform.translation.z = self.debug_frame.translation[2]
+        debug_tf.transform.rotation.x = self.debug_frame.quaternion[1]
+        debug_tf.transform.rotation.y = self.debug_frame.quaternion[2]
+        debug_tf.transform.rotation.z = self.debug_frame.quaternion[3]
+        debug_tf.transform.rotation.w = self.debug_frame.quaternion[0]
+        
+        rospy.wait_for_service("/set_dynamic_tf")
+        try:
+            client = rospy.ServiceProxy("/set_dynamic_tf", SetDynamicTF)
+            res = client(self.tf_hz, debug_tf)
             return
         except rospy.ServiceException as e:
             print("Service call failed: %s"%e)

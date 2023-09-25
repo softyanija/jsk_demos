@@ -50,6 +50,7 @@ tmux send-keys -t 0 "echo 0" C-m
 tmux send-keys -t 0 "rossetmaster pr1012" C-m
 tmux send-keys -t 0 "rossetip" C-m
 tmux send-keys -t 0 "roscd multi_device_view" C-m
+tmux send-keys -t 0 "ipython3 -i -- scripts/screw/set_d405_tf.py" C-m
 
 tmux send-keys -t 1 "echo 1" C-m
 tmux send-keys -t 1 "rossetmaster pr1012" C-m

@@ -19,7 +19,9 @@
             /camera/aligned_depth_to_color/image_raw/compressedDepth
             /tf
             /tf_static
-            /right_endeffector/wrench"
+            /right_endeffector/wrench
+            /screw/attention_clipper/output/box_array
+            /screw/euclidean_clustering_decomposer/boxes"
         output="screen" />
 
 </launch>

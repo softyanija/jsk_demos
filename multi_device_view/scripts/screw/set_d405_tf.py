@@ -10,6 +10,7 @@ from geometry_msgs.msg import *
 from dynamic_tf_publisher.srv import SetDynamicTF
 
 class Set_d405_tf:
+
     def __init__(self):
         self.estimated_tf = None
         self.tf_hz = 100
@@ -18,7 +19,6 @@ class Set_d405_tf:
         tf_buffer = tf2_ros.Buffer()
         tf_listener = tf2_ros.TransformListener(tf_buffer)
         try:
-            #trans = tf_buffer.lookup_transform("base_link", "camera_link", rospy.Time(), rospy.Duration(3))
             b2g = tf_buffer.lookup_transform("base_link", "r_gripper_front", rospy.Time(0), rospy.Duration(3))
             g2c = tf_buffer.lookup_transform("r_gripper_front_apriltag", "camera_link", rospy.Time(0), rospy.Duration(3))
             base_to_gripper = skrobot.coordinates.Coordinates([b2g.transform.translation.x,
@@ -36,10 +36,9 @@ class Set_d405_tf:
                                                                  g2c.transform.rotation.x,
                                                                  g2c.transform.rotation.y,
                                                                  g2c.transform.rotation.z])
-            
 
             base_to_camera = base_to_gripper.copy_worldcoords().transform(gripper_to_camera)
-            
+
             new_tf = TransformStamped()
             new_tf.header.frame_id = "base_link"
             new_tf.child_frame_id = "camera_link"
@@ -50,7 +49,7 @@ class Set_d405_tf:
             new_tf.transform.rotation.y = base_to_camera.quaternion[2]
             new_tf.transform.rotation.z = base_to_camera.quaternion[3]
             new_tf.transform.rotation.w = base_to_camera.quaternion[0]
-            
+
             self.estimated_tf = new_tf
 
         except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):

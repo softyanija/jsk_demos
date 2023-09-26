@@ -47,5 +47,5 @@
 
   <include file="$(find multi_device_view)/launch/recognition/apriltag_rosbag.launch" />
 
-  <include file="$(find multi_device_view)/launch/recognition/lsd_3d.launch" />
+  <include file="$(find multi_device_view)/launch/recognition/pointcloud_processing.launch" />
 </launch>

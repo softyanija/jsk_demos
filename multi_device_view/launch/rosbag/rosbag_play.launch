@@ -1,3 +1,4 @@
+# play rosbag as is
 <launch>
   <arg name="rosbag" doc="rosbag file path" />
   <arg name="model" default="$(find pr2_description)/robots/pr2.urdf.xacro" />

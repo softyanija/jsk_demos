@@ -1,3 +1,4 @@
+# play rosbag with compressed topic back
 <launch>
   <arg name="rosbag" doc="rosbag file path" />
   <arg name="start" doc="start time" />

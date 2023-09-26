@@ -56,3 +56,5 @@ tmux send-keys -t 1 "echo 1" C-m
 tmux send-keys -t 1 "rossetmaster pr1012" C-m
 tmux send-keys -t 1 "rossetip" C-m
 tmux send-keys -t 1 "roscd multi_device_view" C-m
+
+tmux a

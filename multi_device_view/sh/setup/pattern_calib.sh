@@ -20,7 +20,6 @@ tmux send-keys -t 0 "roslaunch multi_device_view main.launch" C-m
 
 tmux send-keys -t 1 "echo 1" C-m
 tmux send-keys -t 1 "rossetmaster pr1012" C-m
-#tmux send-keys -t 1 "" C-m
 
 tmux send-keys -t 2 "echo 2" C-m
 tmux send-keys -t 2 "ssh heavens" C-m
@@ -49,4 +48,3 @@ tmux send-keys -t 0 "rossetmaster pr1012" C-m
 
 tmux send-keys -t 1 "echo 1" C-m
 tmux send-keys -t 1 "rossetmaster pr1012" C-m
-

@@ -20,26 +20,6 @@
   <arg name="INPUT_CLOUD" value="/camera/depth_registered/points" />
   <arg name="CLIPPED_CLOUD" value="/attention_clipper/output" />
 
-  <!-- <node name="attention_clipper" -->
-  <!--         pkg="nodelet" type="nodelet" -->
-  <!--         args="load jsk_pcl/AttentionClipper $(arg manager)"> -->
-  <!--     <remap from="~input/points" to="$(arg INPUT_CLOUD)" /> -->
-  <!--     <rosparam> -->
-  <!--       frame_id: camera_color_optical_frame -->
-  <!--       use_multiple_attention: false -->
-  <!--       dimension_x: 0.1 -->
-  <!--       dimension_y: 0.1 -->
-  <!--       dimension_z: 0.15 -->
-  <!--       initial_pos: [0.0, 0.0, 0.1] -->
-  <!--     </rosparam> -->
-  <!-- </node> -->
-
-  <!-- <node name="extract_indices" -->
-  <!--       pkg="jsk_pcl_ros" type="extract_indices"> -->
-  <!--   <remap from="~input" to="$(arg INPUT_CLOUD)" /> -->
-  <!--   <remap from="~indices" to="attention_clipper/output/point_indices" /> -->
-  <!-- </node> -->
-
   <group ns="driver">
     <node name="hsi_color_filter"
           pkg="nodelet" type="nodelet"

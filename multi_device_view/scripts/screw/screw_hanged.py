@@ -128,6 +128,5 @@ if __name__ == "__main__":
     screw_hanged = ScrewHanged()
     screw_hanged_subscriber = rospy.Subscriber("/screw/euclidean_clustering_decomposer/boxes", BoundingBoxArray, screw_hanged.cb)
     rospy.sleep(1)
-    screw_hanged.select_line()
     screw_hanged.calc_tip()
     screw_hanged.pub_tip_frame_tf()

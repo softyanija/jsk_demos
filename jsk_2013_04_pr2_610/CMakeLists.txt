@@ -6,7 +6,6 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   jsk_demo_common
   jsk_perception
-  pddl_planner
   roseus_smach
   roseus)
 
@@ -22,7 +21,7 @@ generate_messages(
 )
 
 catkin_package(
-CATKIN_DEPENDS geometry_msgs message_runtime roseus jsk_demo_common jsk_perception pddl_planner pr2eus roseus_smach
+CATKIN_DEPENDS geometry_msgs message_runtime roseus jsk_demo_common jsk_perception roseus_smach
 )
 
 ###########
@@ -54,6 +53,11 @@ if(CATKIN_ENABLE_TESTING)
   if(NOT $ENV{ROS_DISTRO} STREQUAL "hydro")
     find_package(roslaunch REQUIRED)
     roslaunch_add_file_check(launch/planner.launch)
-    add_rostest(test/test-demo-plan.test)
+    if($ENV{ROS_DISTRO} STREQUAL "indigo" OR
+        $ENV{ROS_DISTRO} STREQUAL "kinetic")
+      add_rostest(test/test-demo-plan-indigo.test)
+    else()
+      add_rostest(test/test-demo-plan.test)
+    endif ()
   endif ()
 endif()

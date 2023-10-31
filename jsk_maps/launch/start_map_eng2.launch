@@ -1,8 +1,10 @@
 <launch>
   <arg name="MACHINE" default="localhost" />
+  <arg name="keepout" default="false" />
   <arg name="launch_map_server" default="true" />
   <arg name="use_machine" default="false" />
   <arg name="use_pictogram" default="false" />
+  <arg name="use_publish_scene" default="true" />
 
   <machine name="localhost" address="localhost" if="$(arg use_machine)" />
 
@@ -10,6 +12,7 @@
         args="0 0 0 0 0 0 /world /eng2 100"/>
 
   <include file="$(find jsk_maps)/launch/include/start_map_eng2_main.xml">
+    <arg name="keepout" value="$(arg keepout)"/>
     <arg name="launch_map_server" value="$(arg launch_map_server)"/>
   </include>
 
@@ -28,5 +31,12 @@
         output="screen" >
     <param name="~scene" value="eng2" />
     <param name="~use_pictogram" value="$(arg use_pictogram)" />
+  </node>
+
+  <!-- for visualizing eus models on rviz -->
+  <node if="$(arg use_publish_scene)"
+        name="publish_eng2_scene" pkg="roseus" type="roseus"
+        args="$(find jsk_maps)/tools/publish_scene.l"
+        output="screen" >
   </node>
 </launch>

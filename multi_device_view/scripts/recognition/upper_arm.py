@@ -36,6 +36,9 @@ class UpperArmHole():
         self.debug_image_raw = None
         self.bridge = CvBridge()
         self.pub_debug_image_raw = rospy.Publisher(self.camera + "/upper_arm_hole/debug_image_raw", Image, queue_size=10)
+        self.pub_equ_image = rospy.Publisher(self.camera + "/upper_arm_hole/equalizehist_image", Image, queue_size=10)
+        self.pub_threshold_image = rospy.Publisher(self.camera + "/upper_arm_hole/threshold_image", Image, queue_size=10)
+        self.pub_ellipse_image = rospy.Publisher(self.camera + "/upper_arm_hole/ellipse_image", Image, queue_size=10)
 
         self.subscribe()
 
@@ -59,11 +62,43 @@ class UpperArmHole():
                 pass
                 
             if(self.sub_image is not None):
-                print(self.sub_image.shape)
-                print(type(self.sub_image))
-                self.debug_image_raw = self.bridge.cv2_to_imgmsg(self.sub_image, "bgr8")
+ 
+                
+                #pdb.set_trace()
+                gray_img = cv2.cvtColor(self.sub_image, cv2.COLOR_BGR2GRAY)
+                gray_img = cv2.GaussianBlur(gray_img, (5, 5), 0)
+                
+                equ_hist = cv2.equalizeHist(gray_img)
+                equ_img = np.hstack((gray_img, equ_hist))
+                equ_height, equ_width = equ_img.shape
+                equ_img_clip = equ_img[:, equ_width//2:equ_width]
+
+                ret, threshold_image = cv2.threshold(equ_img_clip, 25, 255, cv2.THRESH_BINARY)
+
+                contours, _ = cv2.findContours(threshold_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+                #print(contours)
+
+                ellipse_drawed_image = self.sub_image.copy()
+                #pdb.set_trace()
+                for i, cnt in enumerate(contours):
+                    if len(cnt) >= 5: 
+                        ellipse = cv2.fitEllipse(cnt)
+                        cx = int(ellipse[0][0])
+                        cy = int(ellipse[0][1])
+                        try:
+                            ellipse_drawed_image  = cv2.ellipse(ellipse_drawed_image, ellipse, (255,0,0),2)
+                        except Exception as e:
+                            pdb.set_trace()
+                        cv2.drawMarker(ellipse_drawed_image, (cx,cy), (0,0,255), markerType=cv2.MARKER_CROSS, markerSize=10, thickness=1)
+                
+                self.debug_image_raw = self.bridge.cv2_to_imgmsg(self.sub_image)
                 
                 self.pub_debug_image_raw.publish(self.debug_image_raw)
+                self.pub_equ_image.publish(self.bridge.cv2_to_imgmsg(equ_img_clip))
+                self.pub_threshold_image.publish(self.bridge.cv2_to_imgmsg(threshold_image))
+                self.pub_ellipse_image.publish(self.bridge.cv2_to_imgmsg(ellipse_drawed_image, "bgr8"))
+                
+                
             else:
                 rospy.logwarn("not recieve image")
 

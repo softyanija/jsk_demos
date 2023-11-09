@@ -31,7 +31,7 @@ for i, cnt in enumerate(contours):
         size_buff = width * height
         index_buff = i
 
-x, y, width, height = cv2.boundingRect(contours[i])
+x, y, width, height = cv2.boundingRect(contours[index_buff])
 cv2.rectangle(roi_image, (x, y), (x + width, y + height), color=(0, 255, 0), thickness=4)
 
 cv2.imshow("Difference raw", diff)

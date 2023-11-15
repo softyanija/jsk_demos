@@ -9,7 +9,7 @@ import math
 import cv2
 import pdb
 from cv_bridge import CvBridge
-
+from numpy import pi
 
 from skrobot.coordinates import CascadedCoords
 from skrobot.coordinates import Coordinates
@@ -22,8 +22,8 @@ from jsk_recognition_msgs.msg import BoundingBoxArray
 from dynamic_tf_publisher.srv import SetDynamicTF
 from sensor_msgs.msg import Image
 from std_msgs.msg import Header
-from numpy import pi
-
+from std_srvs.srv import Empty
+from std_srvs.srv import EmptyResponse
 
 class UpperArmHole():
 
@@ -38,11 +38,16 @@ class UpperArmHole():
         self.diff_before = None
         self.diff_after = None
         self.capture_hole = False
+        self.background_image = None
         self.pub_debug_image_raw = rospy.Publisher(self.camera + "/upper_arm_hole/debug_image_raw", Image, queue_size=10)
         self.pub_equ_image = rospy.Publisher(self.camera + "/upper_arm_hole/equalizehist_image", Image, queue_size=10)
         self.pub_threshold_image = rospy.Publisher(self.camera + "/upper_arm_hole/threshold_image", Image, queue_size=10)
         self.pub_ellipse_image = rospy.Publisher(self.camera + "/upper_arm_hole/ellipse_image", Image, queue_size=10)
+        self.pub_background_image = rospy.Publisher(self.camera + "/upper_arm_hole/background_image", Image, queue_size=10)
         self.trace_hole_image = rospy.Publisher(self.camera + "/upper_arm_hole/trace_hole_image", Image, queue_size=10)
+
+        self.service_name = "/" + camera + "/set_background"
+        self.service = rospy.Service(self.service_name, Empty, self.set_backgound_image)
 
         self.subscribe()
 
@@ -50,7 +55,11 @@ class UpperArmHole():
     def subscribe(self):
         sub_image = rospy.Subscriber(self.camera + "/color/image_rect_color", Image, self.cb)
 
-    
+    def set_backgound_image(self, req):
+        rospy.loginfo("set background image")
+        self.background_image = self.sub_image.copy()
+        return EmptyResponse()
+        
     def cb(self, image):
         self.sub_image = self.bridge.imgmsg_to_cv2(image, "bgr8")
         self.header = image.header
@@ -88,11 +97,18 @@ class UpperArmHole():
         cv2.imwrite("/home/amabe/rosbag/diff.png", diff)
         ret, diff = cv2.threshold(diff, 45, 255, cv2.THRESH_BINARY)
         cv2.imwrite("/home/amabe/rosbag/diff_th.png", diff)
+
+    
         
 
         
     def run(self):
         rate = rospy.Rate(10)
+
+        rospy.loginfo("Waiting for service call...")
+        rospy.wait_for_service(self.service_name)
+        rospy.loginfo("Service is now available")
+        
         while not rospy.is_shutdown():
             try:
                 rate.sleep()
@@ -103,7 +119,6 @@ class UpperArmHole():
 
             self.capture_hole = True
             if((self.sub_image is not None) and (self.capture_hole == True)):
- 
                 
                 #pdb.set_trace()
                 gray_img = cv2.cvtColor(self.sub_image, cv2.COLOR_BGR2GRAY)
@@ -115,8 +130,6 @@ class UpperArmHole():
                 equ_img_clip = equ_img[:, equ_width//2:equ_width]
 
                 ret, threshold_image = cv2.threshold(equ_img_clip, 25, 255, cv2.THRESH_BINARY)
-
-                # ellipse_contours, _ = cv2.findContours(_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
                 ellipse_contours, _ = cv2.findContours(threshold_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -136,18 +149,19 @@ class UpperArmHole():
                                 ellipse_drawed_image  = cv2.ellipse(ellipse_drawed_image, ellipse, (255,0,0),2)
                             except Exception as e:
                                 pdb.set_trace()
-                            #cv2.drawMarker(ellipse_drawed_image, (cx,cy), (0,0,255), markerType=cv2.MARKER_CROSS, markerSize=10, thickness=1)
-                
+
+                if self.background_image is not None:
+                    self.pub_background_image.publish(self.bridge.cv2_to_imgmsg(self.background_image, "bgr8"))
+                    
                 self.debug_image_raw = self.bridge.cv2_to_imgmsg(self.sub_image, "bgr8")
-                
                 self.pub_debug_image_raw.publish(self.debug_image_raw)
                 self.pub_equ_image.publish(self.bridge.cv2_to_imgmsg(equ_img_clip))
                 self.pub_threshold_image.publish(self.bridge.cv2_to_imgmsg(threshold_image))
                 self.pub_ellipse_image.publish(self.bridge.cv2_to_imgmsg(ellipse_drawed_image, "bgr8"))
+                
                 self.trace_hole_image.publish(self.bridge.cv2_to_imgmsg(ellipse_drawed_image, "bgr8"))
                 
-                
-                
+
             else:
                 rospy.logwarn("not recieve image")
 

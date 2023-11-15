@@ -39,6 +39,7 @@ class UpperArmHole():
         self.diff_after = None
         self.capture_hole = False
         self.background_image = None
+        self.background_is_set = False
         self.pub_debug_image_raw = rospy.Publisher(self.camera + "/upper_arm_hole/debug_image_raw", Image, queue_size=10)
         self.pub_equ_image = rospy.Publisher(self.camera + "/upper_arm_hole/equalizehist_image", Image, queue_size=10)
         self.pub_threshold_image = rospy.Publisher(self.camera + "/upper_arm_hole/threshold_image", Image, queue_size=10)
@@ -58,6 +59,7 @@ class UpperArmHole():
     def set_backgound_image(self, req):
         rospy.loginfo("set background image")
         self.background_image = self.sub_image.copy()
+        self.background_is_set = True
         return EmptyResponse()
         
     def cb(self, image):
@@ -119,11 +121,10 @@ class UpperArmHole():
 
             self.capture_hole = True
             if((self.sub_image is not None) and (self.capture_hole == True)):
-                
                 #pdb.set_trace()
                 gray_img = cv2.cvtColor(self.sub_image, cv2.COLOR_BGR2GRAY)
                 gray_img = cv2.GaussianBlur(gray_img, (5, 5), 0)
-                
+
                 equ_hist = cv2.equalizeHist(gray_img)
                 equ_img = np.hstack((gray_img, equ_hist))
                 equ_height, equ_width = equ_img.shape
@@ -131,37 +132,38 @@ class UpperArmHole():
 
                 ret, threshold_image = cv2.threshold(equ_img_clip, 25, 255, cv2.THRESH_BINARY)
 
-                ellipse_contours, _ = cv2.findContours(threshold_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
-                ellipse_drawed_image = self.sub_image.copy()
-                #pdb.set_trace()
-                ellipse_list = []
-                for i, cnt in enumerate(ellipse_contours):
-                    if len(cnt) >= 5: 
-                        ellipse = cv2.fitEllipse(cnt)
-                        if (not math.isnan(ellipse[0][0])) and (not math.isnan(ellipse[0][1])) and (not math.isnan(ellipse[1][0])) and (not math.isnan(ellipse[1][1])):
-                            ellipse_list.append(ellipse)
-                            #nan is not eliminated
-                            cx = int(ellipse[0][0])
-                            cy = int(ellipse[0][1])
-                            # pdb.set_trace()
-                            try:
-                                ellipse_drawed_image  = cv2.ellipse(ellipse_drawed_image, ellipse, (255,0,0),2)
-                            except Exception as e:
-                                pdb.set_trace()
-
-                if self.background_image is not None:
-                    self.pub_background_image.publish(self.bridge.cv2_to_imgmsg(self.background_image, "bgr8"))
-                    
-                self.debug_image_raw = self.bridge.cv2_to_imgmsg(self.sub_image, "bgr8")
-                self.pub_debug_image_raw.publish(self.debug_image_raw)
+                self.pub_debug_image_raw.publish(self.bridge.cv2_to_imgmsg(self.sub_image, "bgr8"))
                 self.pub_equ_image.publish(self.bridge.cv2_to_imgmsg(equ_img_clip))
                 self.pub_threshold_image.publish(self.bridge.cv2_to_imgmsg(threshold_image))
-                self.pub_ellipse_image.publish(self.bridge.cv2_to_imgmsg(ellipse_drawed_image, "bgr8"))
-                
-                self.trace_hole_image.publish(self.bridge.cv2_to_imgmsg(ellipse_drawed_image, "bgr8"))
-                
 
+                if self.background_is_set:
+                    ellipse_contours, _ = cv2.findContours(threshold_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+                    ellipse_drawed_image = self.sub_image.copy()
+                    #pdb.set_trace()
+                    ellipse_list = []
+                    for i, cnt in enumerate(ellipse_contours):
+                        if len(cnt) >= 5: 
+                            ellipse = cv2.fitEllipse(cnt)
+                            if (not math.isnan(ellipse[0][0])) and (not math.isnan(ellipse[0][1])) and (not math.isnan(ellipse[1][0])) and (not math.isnan(ellipse[1][1])):
+                                ellipse_list.append(ellipse)
+                                #nan is not eliminated
+                                cx = int(ellipse[0][0])
+                                cy = int(ellipse[0][1])
+                                # pdb.set_trace()
+                                try:
+                                    ellipse_drawed_image  = cv2.ellipse(ellipse_drawed_image, ellipse, (255,0,0),2)
+                                except Exception as e:
+                                    pdb.set_trace()
+
+                    
+                    self.pub_ellipse_image.publish(self.bridge.cv2_to_imgmsg(ellipse_drawed_image, "bgr8"))
+                
+                    self.trace_hole_image.publish(self.bridge.cv2_to_imgmsg(ellipse_drawed_image, "bgr8"))
+                    
+                    if self.background_image is not None:
+                        self.pub_background_image.publish(self.bridge.cv2_to_imgmsg(self.background_image, "bgr8"))
+                
             else:
                 rospy.logwarn("not recieve image")
 

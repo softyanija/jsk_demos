@@ -119,7 +119,6 @@ class UpperArmHole():
                 # ellipse_contours, _ = cv2.findContours(_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
                 ellipse_contours, _ = cv2.findContours(threshold_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-                #print(contours)
 
                 ellipse_drawed_image = self.sub_image.copy()
                 #pdb.set_trace()
@@ -127,17 +126,19 @@ class UpperArmHole():
                 for i, cnt in enumerate(ellipse_contours):
                     if len(cnt) >= 5: 
                         ellipse = cv2.fitEllipse(cnt)
-                        ellipse_list.append(ellipse)
-                        cx = int(ellipse[0][0])
-                        cy = int(ellipse[0][1])
-                        # pdb.set_trace()
-                        try:
-                            ellipse_drawed_image  = cv2.ellipse(ellipse_drawed_image, ellipse, (255,0,0),2)
-                        except Exception as e:
-                            pdb.set_trace()
-                        cv2.drawMarker(ellipse_drawed_image, (cx,cy), (0,0,255), markerType=cv2.MARKER_CROSS, markerSize=10, thickness=1)
+                        if (not math.isnan(ellipse[0][0])) and (not math.isnan(ellipse[0][1])) and (not math.isnan(ellipse[1][0])) and (not math.isnan(ellipse[1][1])):
+                            ellipse_list.append(ellipse)
+                            #nan is not eliminated
+                            cx = int(ellipse[0][0])
+                            cy = int(ellipse[0][1])
+                            # pdb.set_trace()
+                            try:
+                                ellipse_drawed_image  = cv2.ellipse(ellipse_drawed_image, ellipse, (255,0,0),2)
+                            except Exception as e:
+                                pdb.set_trace()
+                            #cv2.drawMarker(ellipse_drawed_image, (cx,cy), (0,0,255), markerType=cv2.MARKER_CROSS, markerSize=10, thickness=1)
                 
-                self.debug_image_raw = self.bridge.cv2_to_imgmsg(self.sub_image)
+                self.debug_image_raw = self.bridge.cv2_to_imgmsg(self.sub_image, "bgr8")
                 
                 self.pub_debug_image_raw.publish(self.debug_image_raw)
                 self.pub_equ_image.publish(self.bridge.cv2_to_imgmsg(equ_img_clip))

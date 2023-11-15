@@ -122,9 +122,9 @@ while True:
 
                     ellipse_param = np.array([l[0:2] for l in ellipse_list])
                     new_centers = []
-                if ellipse_max_index is not None:
-                    ellipse = cv2.fitEllipse(ellipse_contours[ellipse_max_index])
-                    ellipse_limit_image  = cv2.ellipse(ellipse_limit_image, ellipse, (255,0,0), 2)
+            if ellipse_max_index is not None:
+                ellipse = cv2.fitEllipse(ellipse_contours[ellipse_max_index])
+                ellipse_limit_image  = cv2.ellipse(ellipse_limit_image, ellipse, (255,0,0), 2)
                     
             cv2.imshow("ellipse", ellipse_limit_image)
             cv2.imshow("before", gray_img_before)

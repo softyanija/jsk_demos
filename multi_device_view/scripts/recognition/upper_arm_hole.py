@@ -59,7 +59,6 @@ class UpperArmHole():
         self.service = rospy.Service(self.service_name, Empty, self.set_backgound_image)
 
         self.subscribe()
-
         
     def subscribe(self):
         sub_image = rospy.Subscriber(self.camera + "/color/image_rect_color", Image, self.cb)
@@ -136,7 +135,7 @@ class UpperArmHole():
                 equ_height, equ_width = equ_img.shape
                 equ_img_clip = equ_img[:, equ_width//2:equ_width]
 
-                ret, threshold_image = cv2.threshold(equ_img_clip, 70, 255, cv2.THRESH_BINARY)
+                ret, threshold_image = cv2.threshold(equ_img_clip, 120, 255, cv2.THRESH_BINARY)
 
                 self.pub_debug_image_raw.publish(self.bridge.cv2_to_imgmsg(self.sub_image, "bgr8"))
                 if self.debug_mode == "debug":
@@ -164,10 +163,7 @@ class UpperArmHole():
 
                     if index_buff is not None:
                         x, y, width, height = cv2.boundingRect(diff_contours[index_buff])
-                        print("(x,y,w,h) = {} {}".format(x, y, width, height))
                         cv2.rectangle(roi_image, (x, y), (x + width, y + height), color=(0, 255, 0), thickness=4)
-                        
-
 
 
                         mask_roi = np.zeros_like(diff_thresholded)
@@ -184,7 +180,7 @@ class UpperArmHole():
                         ellipse_list = []
                         x_range_min = 10
                         x_range_max = 250
-                        cv2.rectangle(ellipse_drawed_image, (x + x_range_min, y), (x + x_range_max, y + height), (255, 0, 0), 4, cv2.LINE_AA)
+                        cv2.rectangle(ellipse_drawed_image, (x + x_range_min, y + height//10), (x + x_range_max, y + height*9//10), (255, 0, 0), 4, cv2.LINE_AA)
                         ellipse_max_index = None
                         ellipse_max_size = 0
                         for i, cnt in enumerate(ellipse_contours):
@@ -197,7 +193,7 @@ class UpperArmHole():
                                     cy = int(ellipse[0][1])
                                     w = int(ellipse[1][0])
                                     h = int(ellipse[1][1])
-                                    if (h * w > 300) and (h * w < 2000) and (cx > x + x_range_min) and(cx < x + x_range_max):
+                                    if (h * w > 300) and (h * w < 4000) and (cx > x + x_range_min) and (cx < x + x_range_max) and (cy > y + height//10) and (cy < y + height*9//10):
                                         if h * w > ellipse_max_size:
                                             ellipse_max_size = h * w
                                             ellipse_max_index = i
@@ -233,18 +229,19 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
 
+    parser.add_argument("module_name", type=str, help="module_name")
     parser.add_argument("--debug", type=str, help="flag to launch in debug mode")
+    
     rospy.init_node("upper_arm_hole", anonymous=True)
 
     args = parser.parse_args()
 
     if args.debug == "True" or args.debug == "true":
         print("launch in debug mode")
-        upper_arm_hole = UpperArmHole("module_0", "debug")
+        upper_arm_hole = UpperArmHole(args.module_name, "debug")
     else:
         print("launch in normal mode")
-        upper_arm_hole = UpperArmHole("module_0", "normal")
+        upper_arm_hole = UpperArmHole(args.module_name, "normal")
 
     upper_arm_hole.run()
-    # upper_arm_hole_subscriber = rospy.Subsciriber("/module_0/color/image_rect_color", sensor/Image, upper_arm_hole.cb)
     

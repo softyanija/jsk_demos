@@ -25,6 +25,7 @@ from sensor_msgs.msg import Image
 from std_msgs.msg import Header
 from std_srvs.srv import Empty
 from std_srvs.srv import EmptyResponse
+from multi_device_view.msg import Ellipse
 
 class UpperArmHole():
 
@@ -52,6 +53,7 @@ class UpperArmHole():
         self.pub_diff_image = rospy.Publisher(self.camera + "/upper_arm_hole/diff_image", Image, queue_size=10)
         self.pub_roi_image = rospy.Publisher(self.camera + "/upper_arm_hole/roi_image", Image, queue_size=10)
         self.pub_masked_image = rospy.Publisher(self.camera + "/upper_arm_hole/masked_image", Image, queue_size=10)
+        self.pub_ellipse = rospy.Publisher(self.camera + "/upper_arm_hole/ellipse", Ellipse, queue_size=10)
 
         self.service_name = "/" + camera + "/set_background"
         self.service = rospy.Service(self.service_name, Empty, self.set_backgound_image)
@@ -202,6 +204,19 @@ class UpperArmHole():
 
                         if ellipse_max_index is not None:
                             ellipse = cv2.fitEllipse(ellipse_contours[ellipse_max_index])
+
+                            ellipse_msg = Ellipse()
+                            ellipse_msg.header.stamp = rospy.Time.now()
+                            ellipse_msg.position.x = ellipse[0][0]
+                            ellipse_msg.position.y = ellipse[0][1]
+                            ellipse_msg.position.z = 0
+                            
+                            ellipse_msg.major_axis = ellipse[1][0]
+                            ellipse_msg.minor_axis = ellipse[1][1]
+                            ellipse_msg.angle = ellipse[2]
+
+                            self.pub_ellipse.publish(ellipse_msg)
+
                             ellipse_drawed_image  = cv2.ellipse(ellipse_drawed_image, ellipse, (0, 255, 0), 3)
 
                         self.pub_ellipse_image.publish(self.bridge.cv2_to_imgmsg(ellipse_drawed_image, "bgr8"))

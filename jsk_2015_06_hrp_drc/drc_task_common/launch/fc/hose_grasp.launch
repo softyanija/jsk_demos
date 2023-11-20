@@ -1,6 +1,0 @@
-<launch>
-  <group ns="hose_grasp_recognition">
-    <include file="$(find drc_task_common)/launch/fc/centroid_of_pointcloud_in_rect.launch">
-    </include>
-  </group>
-</launch>

@@ -1,2 +1,0 @@
-geometry_msgs/PoseStamped marker_pose_stamped
-jsk_interactive_marker/MarkerDimensions marker_dim

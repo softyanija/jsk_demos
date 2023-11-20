@@ -1,6 +1,5 @@
 import numpy as np
 import rospy
-import skrobot
 import sys
 import tf
 import tf2_ros
@@ -12,12 +11,6 @@ from cv_bridge import CvBridge
 from numpy import pi
 import argparse
 
-from skrobot.coordinates import CascadedCoords
-from skrobot.coordinates import Coordinates
-from skrobot.coordinates.quaternion import Quaternion
-from skrobot.interfaces.ros import PR2ROSRobotInterface
-from skrobot.interfaces.ros.tf_utils import tf_pose_to_coords
-from skrobot.interfaces.ros.tf_utils import geometry_pose_to_coords
 from geometry_msgs.msg import PoseStamped, PoseArray, WrenchStamped, Point, TransformStamped
 from jsk_recognition_msgs.msg import BoundingBoxArray
 from dynamic_tf_publisher.srv import SetDynamicTF

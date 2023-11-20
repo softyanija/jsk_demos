@@ -13,6 +13,7 @@ import argparse
 
 from geometry_msgs.msg import PoseStamped, PoseArray, WrenchStamped, Point, TransformStamped
 from jsk_recognition_msgs.msg import BoundingBoxArray
+from jsk_recognition_msgs.msg import RotatedRectStamped
 from dynamic_tf_publisher.srv import SetDynamicTF
 from sensor_msgs.msg import Image
 from std_msgs.msg import Header
@@ -46,7 +47,7 @@ class UpperArmHole():
         self.pub_diff_image = rospy.Publisher(self.camera + "/upper_arm_hole/diff_image", Image, queue_size=10)
         self.pub_roi_image = rospy.Publisher(self.camera + "/upper_arm_hole/roi_image", Image, queue_size=10)
         self.pub_masked_image = rospy.Publisher(self.camera + "/upper_arm_hole/masked_image", Image, queue_size=10)
-        self.pub_ellipse = rospy.Publisher(self.camera + "/upper_arm_hole/ellipse", Ellipse, queue_size=10)
+        self.pub_ellipse = rospy.Publisher(self.camera + "/upper_arm_hole/ellipse", RotatedRectStamped, queue_size=10)
 
         self.service_name = "/" + camera + "/set_background"
         self.service = rospy.Service(self.service_name, Empty, self.set_backgound_image)
@@ -194,15 +195,14 @@ class UpperArmHole():
                         if ellipse_max_index is not None:
                             ellipse = cv2.fitEllipse(ellipse_contours[ellipse_max_index])
 
-                            ellipse_msg = Ellipse()
+                            ellipse_msg = RotatedRectStamped()
                             ellipse_msg.header.stamp = rospy.Time.now()
-                            ellipse_msg.position.x = ellipse[0][0]
-                            ellipse_msg.position.y = ellipse[0][1]
-                            ellipse_msg.position.z = 0
+                            ellipse_msg.rect.x = ellipse[0][0]
+                            ellipse_msg.rect.y = ellipse[0][1]
                             
-                            ellipse_msg.major_axis = ellipse[1][0]
-                            ellipse_msg.minor_axis = ellipse[1][1]
-                            ellipse_msg.angle = ellipse[2]
+                            ellipse_msg.rect.width = ellipse[1][0]
+                            ellipse_msg.rect.height = ellipse[1][1]
+                            ellipse_msg.rect.angle = ellipse[2]
 
                             self.pub_ellipse.publish(ellipse_msg)
 

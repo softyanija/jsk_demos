@@ -35,7 +35,7 @@ try:
 
         # cv2.imshow("equalize", equ_img_clip)
         # cv2.imshow("thresholded", threshold_image)
-        #cv2.imshow("depth", depth_frame)
+        cv2.imshow("depth", depth_image)
         cv2.imshow("depth_colormap", depth_colormap)
         # cv2.imshow("ellipse", ellipse_drawed_image)
 

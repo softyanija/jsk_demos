@@ -20,23 +20,36 @@ try:
         
         frames = pipeline.wait_for_frames()
 
+        color_frame = frames.get_color_frame()
         depth_frame = frames.get_depth_frame()
+        color_image = np.asanyarray(color_frame.get_data())
         depth_image = np.asanyarray(depth_frame.get_data())
         depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.08), cv2.COLORMAP_JET)
 
-        # gray_img = cv2.cvtColor(frames, cv2.COLOR_BGR2GRAY)
-        # gray_img = cv2.medianBlur(gray_img, 3)
-    
-        # equ_hist = cv2.equalizeHist(gray_img)
-        # equ_img = np.hstack((gray_img, equ_hist))
-        # equ_height, equ_width = equ_img.shape
-        # equ_img_clip = equ_img[:, equ_width//2:equ_width]
-        # _, threshold_image = cv2.threshold(equ_img_clip, 130, 255, cv2.THRESH_BINARY)
+        mask = np.copy(depth_image)
+        th_range_min = 700
+        th_range_max = 1000
+        mask[mask < th_range_min] = 0
+        mask[mask <= th_range_max] = 255
+        mask[mask > th_range_max] = 0
+        mask = mask.astype(np.uint8)
+
+        mask_color = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
+
+        #pdb.set_trace()
+        #_, mask = cv2.threshold(depth_image, 50, 255, cv2.THRESH_BINARY)
+        # mask_color = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
+        # pdb.set_trace()
+        cliped_image = cv2.bitwise_and(color_image, mask_color)
 
         # cv2.imshow("equalize", equ_img_clip)
-        # cv2.imshow("thresholded", threshold_image)
+
+        cv2.imshow("color", color_image)
         cv2.imshow("depth", depth_image)
+        cv2.imshow("thresholded", mask)
+        cv2.imshow("mask_color", mask_color)
         cv2.imshow("depth_colormap", depth_colormap)
+        cv2.imshow("cliped_colormap", cliped_image)
         # cv2.imshow("ellipse", ellipse_drawed_image)
 
         if cv2.waitKey(1) & 0xFF == ord("q"):

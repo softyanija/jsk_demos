@@ -13,7 +13,7 @@
   <node name="rosbag_play" pkg="rosbag" type="play"
         args="$(arg rosbag) -s $(arg start) -u $(arg range) -l --clock"/>
 
-  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find multi_device_view)/config/rviz/module_0.rviz"/>
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find multi_device_view)/cfg/rviz/module_0.rviz"/>
 
   <group ns="$(arg device)">
     <node if="$(arg create_manager)"

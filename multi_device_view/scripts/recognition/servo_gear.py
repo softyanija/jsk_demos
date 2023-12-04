@@ -21,7 +21,7 @@ from std_srvs.srv import Empty
 from std_srvs.srv import EmptyResponse
 from multi_device_view.msg import Ellipse
 from dynamic_reconfigure.server import Server
-#from multi_device_view.cfg import MultiDeviceViewConfig
+
 
 class ServoGear():
 
@@ -46,38 +46,29 @@ class ServoGear():
         self.pub_debug_depth_image = rospy.Publisher(self.camera + "/" + self.recognition_object + "/debug_depth_image", Image, queue_size=10)
         self.pub_mask_depth = rospy.Publisher(self.camera + "/" + self.recognition_object + "/mask_depth", Image, queue_size=10)
         self.pub_mask_depth_test = rospy.Publisher(self.camera + "/" + self.recognition_object + "/mask_depth_test", Image, queue_size=10)
+        self.pub_mask_applied_image = rospy.Publisher(self.camera + "/" + self.recognition_object + "/mask_applied_image", Image, queue_size=10)
 
         self.subscribe()
 
-        srv = Server(MultiDeviceViewConfig, self.reconfigure_cb)
-        self.range_th_min = 400
-        self.range_th_max = 800
-        srv.update_configuration({
-            "range_th_min": self.range_th_min,
-            "range_th_max": self.range_th_max
-            })
-        
-        #rospy.set_param(self.camera + "/" + self.recognition_object + "/" + "range_th_min", 400)
-        #rospy.set_param(self.camera + "/" + self.recognition_object + "/" + "range_th_max", 800)
-        
+
     def subscribe(self):
         sub_color_image = rospy.Subscriber(self.camera + "/color/image_rect_color", Image, self.color_cb)
         sub_depth_image = rospy.Subscriber(self.camera + "/depth/image_rect_raw", Image, self.depth_cb)
-        
+        sub_mask_image = rospy.Subscriber(self.camera + "/" + self.recognition_object + "/multiply_mask_image/output", Image, self.mask_cb)
+
+
     def color_cb(self, image):
         self.sub_color_image = self.bridge.imgmsg_to_cv2(image, "bgr8")
-        self.header = image.header
+        self.color_header = image.header
 
     def depth_cb(self, image):
         self.sub_depth_image = self.bridge.imgmsg_to_cv2(image, "16UC1")
-        self.header = image.header
+        self.depth_header = image.header
 
-    def reconfigure_cb(self, config, level):
-        rospy.loginfo("Reconfigure Request: {range_th_min}, {range_th_max}".format(**config))
-        self.range_th_min = config['range_th_min']
-        self.range_th_max = config['range_th_max']
-        return config
-        
+    def mask_cb(self, image):
+        self.sub_mask_image = self.bridge.imgmsg_to_cv2(image, "16UC1")
+        self.mask_header = image.header
+
     def run(self):
         rate = rospy.Rate(5)
 
@@ -86,39 +77,29 @@ class ServoGear():
         while not rospy.is_shutdown():
             try:
                 rate.sleep()
-                
             except rospy.ROSTimeMovedBackwardsException as e:
                 rospy.logwarn("cought {}".format(e))
                 pass
             
-            if (self.sub_color_image is not None) and (self.sub_depth_image is not None):
+            if (self.sub_color_image is not None) and (self.sub_depth_image is not None) and (self.sub_mask_image is not None):
                 #pdb.set_trace()
-                # self.range_th_min = rospy.get_param(self.camera + "/" + self.recognition_object + "/" + "range_th_min")
-                # self.range_th_max = rospy.get_param(self.camera + "/" + self.recognition_object + "/" + "range_th_max")
-                # self.range_th_min = rospy.get_param("range_th_min")
-                # self.range_th_max = rospy.get_param("range_th_max")
-                print("min:{}, max:{}".format(self.range_th_min, self.range_th_max))
-                mask_depth = np.copy(self.sub_depth_image)
-                mask_depth[self.sub_depth_image < self.range_th_min] = 0
-                mask_depth[self.sub_depth_image <= self.range_th_max] = 255
-                mask_depth[self.sub_depth_image > self.range_th_max] = 0
-                # mask_depth[mask_depth < self.range_th_min] = 0
-                # mask_depth[mask_depth <= self.range_th_max] = 255
-                # mask_depth[mask_depth > self.range_th_max] = 0
-                mask_depth = mask_depth.astype(np.uint8)
-
+                '''
                 debug_image_raw_msg = self.bridge.cv2_to_imgmsg(self.sub_color_image, "bgr8")
                 debug_image_raw_msg.header = self.header
-                self.pub_debug_image_raw.publish(debug_image_raw_msg)
-                
+                self.pub_debug_image_raw.publish(debug_image_raw_msg)                
                 self.pub_debug_depth_image.publish(self.bridge.cv2_to_imgmsg(self.sub_depth_image, "16UC1"))
 
                 mask_depth_msg = self.bridge.cv2_to_imgmsg(mask_depth, "8UC1")
-                mask_depth_msg.header = self.header
+                mask_depth_msg.header = self.mask_header
                 
                 self.pub_mask_depth.publish(mask_depth_msg)
-                
+                '''
                 #self.pub_mask_depth_test.publish(self.bridge.cv2_to_imgmsg(mask_depth_test, "16UC1"))
+                mask = self.sub_mask_image.astype(np.uint8)
+                mask_color = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
+                #pdb.set_trace()
+                mask_applied_image = cv2.bitwise_and(self.sub_color_image, mask_color)
+                self.pub_mask_applied_image.publish(self.bridge.cv2_to_imgmsg(mask_applied_image, "bgr8"))
                 
             else:
                 rospy.logwarn("not recieve image")

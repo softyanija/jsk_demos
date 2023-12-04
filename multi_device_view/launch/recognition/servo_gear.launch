@@ -1,0 +1,42 @@
+<launch>
+  <arg name="DEVICE" default="module_0"/>
+
+  <group ns="$(arg DEVICE)">
+    <group ns="servo_gear">
+      <include file="$(find opencv_apps)/launch/hsv_color_filter.launch">
+        <arg name="image" value="/$(arg DEVICE)/color/image_rect_color"/> 
+        <arg name="h_limit_max" default="262"/>
+		<arg name="h_limit_min" default="134"/>
+		<arg name="s_limit_max" default="159"/>
+		<arg name="s_limit_min" default="43"/>
+		<arg name="v_limit_max" default="130"/>
+		<arg name="v_limit_min" default="45"/>
+      </include>
+
+      <node name="multiply_mask_image"
+            pkg="jsk_perception" type="multiply_mask_image">
+        <remap from="~input/src2" to="mask_depth" />
+        <remap from="~input/src1" to="/module_0/servo_gear/hsv_color_filter/image" />
+        <rosparam>
+          approximate_sync: true
+          clip: false
+        </rosparam>
+      </node>
+
+      <node name="depth_image_filter"
+            pkg="jsk_perception" type="depth_image_filter.py"
+            clear_params="true"
+            output="screen" >
+        <remap from="~input" to="/$(arg DEVICE)/depth/image_rect_raw"/>
+        <rosparam subst_value="true">
+          threshold: 0.13
+        </rosparam>
+      </node>
+
+      <!-- <include file="$(find jsk_perception)/sample/sample_depth_image_filter.launch"> -->
+      <!--   <arg name="INPUT_IMAGE" value="/$(arg DEVICE)/color/image_rect_color"/> -->
+      <!--   <arg name="INPUT_DEPTH_IMAGE" value="/$(arg DEVICE)/depth/image_rect_raw"/> -->
+      <!-- </include> -->
+    </group>
+  </group>
+</launch>

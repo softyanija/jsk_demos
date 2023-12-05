@@ -7,6 +7,7 @@ import time
 import math
 import cv2
 import pdb
+import message_filters
 from cv_bridge import CvBridge
 from numpy import pi
 import argparse
@@ -35,6 +36,7 @@ class ServoGear():
         self.debug_mode = False
         self.sub_color_image = None
         self.sub_depth_image = None
+        self.sub_mask_image = None
         self.debug_image_raw = None
         self.bridge = CvBridge()
         self.diff_before = None
@@ -43,31 +45,45 @@ class ServoGear():
         self.background_image = None
         self.background_is_set = False
         self.pub_debug_image_raw = rospy.Publisher(self.camera + "/" + self.recognition_object + "/debug_image_raw", Image, queue_size=10)
-        self.pub_debug_depth_image = rospy.Publisher(self.camera + "/" + self.recognition_object + "/debug_depth_image", Image, queue_size=10)
-        self.pub_mask_depth = rospy.Publisher(self.camera + "/" + self.recognition_object + "/mask_depth", Image, queue_size=10)
-        self.pub_mask_depth_test = rospy.Publisher(self.camera + "/" + self.recognition_object + "/mask_depth_test", Image, queue_size=10)
-        self.pub_mask_applied_image = rospy.Publisher(self.camera + "/" + self.recognition_object + "/mask_applied_image", Image, queue_size=10)
-
+        self.pub_debug_image_matching = rospy.Publisher(self.camera + "/" + self.recognition_object + "/debug_image_matching", Image, queue_size=10)
+        #self.pub_debug_depth_image = rospy.Publisher(self.camera + "/" + self.recognition_object + "/debug_depth_image", Image, queue_size=10)
+        #self.pub_mask_depth = rospy.Publisher(self.camera + "/" + self.recognition_object + "/mask_depth", Image, queue_size=10)
+        #self.pub_mask_depth_test = rospy.Publisher(self.camera + "/" + self.recognition_object + "/mask_depth_test", Image, queue_size=10)
+        
         self.subscribe()
 
-
     def subscribe(self):
-        sub_color_image = rospy.Subscriber(self.camera + "/color/image_rect_color", Image, self.color_cb)
-        sub_depth_image = rospy.Subscriber(self.camera + "/depth/image_rect_raw", Image, self.depth_cb)
-        sub_mask_image = rospy.Subscriber(self.camera + "/" + self.recognition_object + "/multiply_mask_image/output", Image, self.mask_cb)
+        sub_color_image = message_filters.Subscriber(self.camera + "/color/image_rect_color", Image)
+        sub_depth_image = message_filters.Subscriber(self.camera + "/depth/image_rect_raw", Image)
+        sub_mask_image = message_filters.Subscriber(self.camera + "/" + self.recognition_object + "/multiply_mask_image/output", Image)
+        self.subs = [sub_color_image, sub_depth_image, sub_mask_image]
+        sync = message_filters.ApproximateTimeSynchronizer(fs=self.subs, queue_size=5, slop=1)
+        sync.registerCallback(self.callback)
 
 
-    def color_cb(self, image):
-        self.sub_color_image = self.bridge.imgmsg_to_cv2(image, "bgr8")
-        self.color_header = image.header
+    def callback(self, color, depth, mask):
+        self.sub_color_image = self.bridge.imgmsg_to_cv2(color, "bgr8")
+        self.sub_depth_image = self.bridge.imgmsg_to_cv2(depth, "16UC1")
+        self.sub_mask_image = self.bridge.imgmsg_to_cv2(mask, "16UC1")
+        self.header = color.header
+    
+    # def subscribe(self):
+    #     sub_color_image = rospy.Subscriber(self.camera + "/color/image_rect_color", Image, self.color_cb)
+    #     sub_depth_image = rospy.Subscriber(self.camera + "/depth/image_rect_raw", Image, self.depth_cb)
+    #     sub_mask_image = rospy.Subscriber(self.camera + "/" + self.recognition_object + "/multiply_mask_image/output", Image, self.mask_cb)
 
-    def depth_cb(self, image):
-        self.sub_depth_image = self.bridge.imgmsg_to_cv2(image, "16UC1")
-        self.depth_header = image.header
+    # def color_cb(self, image):
+    #     self.sub_color_image = self.bridge.imgmsg_to_cv2(image, "bgr8")
+    #     self.color_header = image.header
 
-    def mask_cb(self, image):
-        self.sub_mask_image = self.bridge.imgmsg_to_cv2(image, "16UC1")
-        self.mask_header = image.header
+    # def depth_cb(self, image):
+    #     self.sub_depth_image = self.bridge.imgmsg_to_cv2(image, "16UC1")
+    #     self.depth_header = image.header
+
+    # def mask_cb(self, image):
+    #     self.sub_mask_image = self.bridge.imgmsg_to_cv2(image, "16UC1")
+    #     self.mask_header = image.header
+
 
     def run(self):
         rate = rospy.Rate(5)
@@ -82,6 +98,8 @@ class ServoGear():
                 pass
             
             if (self.sub_color_image is not None) and (self.sub_depth_image is not None) and (self.sub_mask_image is not None):
+                result_image = self.sub_color_image.copy()
+
                 #pdb.set_trace()
                 '''
                 debug_image_raw_msg = self.bridge.cv2_to_imgmsg(self.sub_color_image, "bgr8")
@@ -95,11 +113,10 @@ class ServoGear():
                 self.pub_mask_depth.publish(mask_depth_msg)
                 '''
                 #self.pub_mask_depth_test.publish(self.bridge.cv2_to_imgmsg(mask_depth_test, "16UC1"))
-                mask = self.sub_mask_image.astype(np.uint8)
-                mask_color = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
-                #pdb.set_trace()
-                mask_applied_image = cv2.bitwise_and(self.sub_color_image, mask_color)
-                self.pub_mask_applied_image.publish(self.bridge.cv2_to_imgmsg(mask_applied_image, "bgr8"))
+
+                # self.pub_mask_applied_image.publish(self.bridge.cv2_to_imgmsg(candidate_area_color, "bgr8"))
+                self.pub_debug_image_raw.publish(self.bridge.cv2_to_imgmsg(self.sub_color_image, "bgr8"))
+                self.pub_debug_image_matching.publish(self.bridge.cv2_to_imgmsg(result_image, "bgr8"))
                 
             else:
                 rospy.logwarn("not recieve image")

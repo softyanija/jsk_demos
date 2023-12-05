@@ -3,25 +3,27 @@
 
   <group ns="$(arg DEVICE)">
     <group ns="servo_gear">
-      <include file="$(find opencv_apps)/launch/hsv_color_filter.launch">
-        <arg name="image" value="/$(arg DEVICE)/color/image_rect_color"/> 
-        <arg name="h_limit_max" default="262"/>
-		<arg name="h_limit_min" default="134"/>
-		<arg name="s_limit_max" default="159"/>
-		<arg name="s_limit_min" default="43"/>
-		<arg name="v_limit_max" default="130"/>
-		<arg name="v_limit_min" default="45"/>
-      </include>
-
-      <node name="multiply_mask_image"
-            pkg="jsk_perception" type="multiply_mask_image">
-        <remap from="~input/src2" to="mask_depth" />
-        <remap from="~input/src1" to="/module_0/servo_gear/hsv_color_filter/image" />
+      <node name="gaussian_blur"
+            pkg="nodelet" type="nodelet"
+            args="standalone jsk_perception/GaussianBlur">
+        <remap from="~input" to="/$(arg DEVICE)/color/image_rect_color"/>
         <rosparam>
-          approximate_sync: true
-          clip: false
+          kernel_size: 3
+          sigma_x: 1.0
+          sigma_y: 1.0
         </rosparam>
       </node>
+      
+      <include file="$(find opencv_apps)/launch/hsv_color_filter.launch">
+        <!-- <arg name="image" value="/$(arg DEVICE)/color/image_rect_color"/> -->
+        <arg name="image" value="gaussian_blur/output"/> 
+        <arg name="h_limit_max" default="260"/>
+		<arg name="h_limit_min" default="150"/>
+		<arg name="s_limit_max" default="180"/>
+		<arg name="s_limit_min" default="55"/>
+		<arg name="v_limit_max" default="120"/>
+		<arg name="v_limit_min" default="30"/>
+      </include>
 
       <node name="depth_image_filter"
             pkg="jsk_perception" type="depth_image_filter.py"
@@ -33,10 +35,28 @@
         </rosparam>
       </node>
 
-      <!-- <include file="$(find jsk_perception)/sample/sample_depth_image_filter.launch"> -->
-      <!--   <arg name="INPUT_IMAGE" value="/$(arg DEVICE)/color/image_rect_color"/> -->
-      <!--   <arg name="INPUT_DEPTH_IMAGE" value="/$(arg DEVICE)/depth/image_rect_raw"/> -->
-      <!-- </include> -->
+      <node name="multiply_mask_image"
+            pkg="jsk_perception" type="multiply_mask_image">
+        <remap from="~input/src1" to="depth_image_filter/output/mask" />
+        <remap from="~input/src2" to="hsv_color_filter/image" />
+        <rosparam>
+          approximate_sync: true
+        </rosparam>
+      </node>
+
+      <node name="mask_image_to_rect"
+        pkg="jsk_perception" type="mask_image_to_rect">
+        <remap from="~input" to="multiply_mask_image/output" />
+        <rosparam>
+          rect_type: 1
+        </rosparam>
+      </node>
+
+      <node name="draw_rects"
+            pkg="jsk_perception" type="draw_rects">
+        <remap from="~input" to="/$(arg DEVICE)/color/image_rect_color" />
+        <remap from="~input/rects" to="mask_image_to_rect/output" />
+      </node>
     </group>
   </group>
 </launch>

@@ -3,20 +3,10 @@
 
   <group ns="$(arg DEVICE)">
     <group ns="servo_gear">
-      <node name="gaussian_blur"
-            pkg="nodelet" type="nodelet"
-            args="standalone jsk_perception/GaussianBlur">
-        <remap from="~input" to="/$(arg DEVICE)/color/image_rect_color"/>
-        <rosparam>
-          kernel_size: 3
-          sigma_x: 1.0
-          sigma_y: 1.0
-        </rosparam>
-      </node>
       
       <include file="$(find opencv_apps)/launch/hsv_color_filter.launch">
-        <!-- <arg name="image" value="/$(arg DEVICE)/color/image_rect_color"/> -->
-        <arg name="image" value="gaussian_blur/output"/> 
+        
+        <arg name="image" value="/$(arg DEVICE)/color/image_rect_color"/> 
         <arg name="h_limit_max" default="260"/>
 		<arg name="h_limit_min" default="150"/>
 		<arg name="s_limit_max" default="180"/>
@@ -48,7 +38,7 @@
         pkg="jsk_perception" type="mask_image_to_rect">
         <remap from="~input" to="multiply_mask_image/output" />
         <rosparam>
-          rect_type: 1
+          rect_type: 0
         </rosparam>
       </node>
 

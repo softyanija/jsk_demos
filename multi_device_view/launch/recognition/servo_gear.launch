@@ -8,11 +8,11 @@
         
         <arg name="image" value="/$(arg DEVICE)/color/image_rect_color"/> 
         <arg name="h_limit_max" default="260"/>
-		<arg name="h_limit_min" default="150"/>
-		<arg name="s_limit_max" default="180"/>
-		<arg name="s_limit_min" default="55"/>
+		<arg name="h_limit_min" default="120"/>
+		<arg name="s_limit_max" default="230"/>
+		<arg name="s_limit_min" default="20"/>
 		<arg name="v_limit_max" default="120"/>
-		<arg name="v_limit_min" default="30"/>
+		<arg name="v_limit_min" default="0"/>
       </include>
 
       <node name="depth_image_filter"

@@ -7,6 +7,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   sensor_msgs
   message_generation
+  dynamic_reconfigure
  )
 
 add_message_files(
@@ -20,6 +21,9 @@ generate_messages(
   geometry_msgs
   )
 
+generate_dynamic_reconfigure_options(
+  cfg/MultiDeviceView.cfg
+)
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES ros_lecture

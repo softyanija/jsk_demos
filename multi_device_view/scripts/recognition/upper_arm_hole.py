@@ -10,6 +10,7 @@ import pdb
 from cv_bridge import CvBridge
 from numpy import pi
 import argparse
+import os
 
 from geometry_msgs.msg import PoseStamped, PoseArray, WrenchStamped, Point, TransformStamped
 from jsk_recognition_msgs.msg import BoundingBoxArray
@@ -29,6 +30,7 @@ class UpperArmHole():
                  **kwargs):
         
         self.camera = camera
+        self.recognition_object = "upper_arm_hole"
         self.debug_mode = debug_mode
         self.sub_image = None
         self.gray_img = None
@@ -39,21 +41,22 @@ class UpperArmHole():
         self.capture_hole = False
         self.background_image = None
         self.background_is_set = False
-        self.pub_debug_image_raw = rospy.Publisher(self.camera + "/upper_arm_hole/debug_image_raw", Image, queue_size=10)
-        self.pub_equ_image = rospy.Publisher(self.camera + "/upper_arm_hole/equalizehist_image", Image, queue_size=10)
-        self.pub_threshold_image = rospy.Publisher(self.camera + "/upper_arm_hole/threshold_image", Image, queue_size=10)
-        self.pub_ellipse_image = rospy.Publisher(self.camera + "/upper_arm_hole/ellipse_image", Image, queue_size=10)
-        self.pub_background_image = rospy.Publisher(self.camera + "/upper_arm_hole/background_image", Image, queue_size=10)
-        self.pub_diff_image = rospy.Publisher(self.camera + "/upper_arm_hole/diff_image", Image, queue_size=10)
-        self.pub_roi_image = rospy.Publisher(self.camera + "/upper_arm_hole/roi_image", Image, queue_size=10)
-        self.pub_masked_image = rospy.Publisher(self.camera + "/upper_arm_hole/masked_image", Image, queue_size=10)
-        self.pub_ellipse = rospy.Publisher(self.camera + "/upper_arm_hole/ellipse", RotatedRectStamped, queue_size=10)
+        self.pub_debug_image_raw = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "debug_image_raw"), Image, queue_size=10)
+        self.pub_equ_image = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "equalizehist_image"), Image, queue_size=10)
+        self.pub_threshold_image = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "threshold_image"), Image, queue_size=10)
+        self.pub_ellipse_image = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "ellipse_image"), Image, queue_size=10)
+        self.pub_background_image = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "background_image"), Image, queue_size=10)
+        self.pub_diff_image = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "diff_image"), Image, queue_size=10)
+        self.pub_roi_image = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "roi_image"), Image, queue_size=10)
+        self.pub_masked_image = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "masked_image"), Image, queue_size=10)
+        self.pub_upper_arm_hole_result = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "guide_point"), RotatedRectStamped, queue_size=10)
 
         self.service_name = "/" + camera + "/set_background"
         self.service = rospy.Service(self.service_name, Empty, self.set_backgound_image)
 
         self.subscribe()
-        
+
+
     def subscribe(self):
         sub_image = rospy.Subscriber(self.camera + "/color/image_rect_color", Image, self.cb)
 
@@ -204,7 +207,7 @@ class UpperArmHole():
                             ellipse_msg.rect.height = ellipse[1][1]
                             ellipse_msg.rect.angle = ellipse[2]
 
-                            self.pub_ellipse.publish(ellipse_msg)
+                            self.pub_upper_arm_hole_result.publish(ellipse_msg)
 
                             ellipse_drawed_image  = cv2.ellipse(ellipse_drawed_image, ellipse, (0, 255, 0), 3)
 

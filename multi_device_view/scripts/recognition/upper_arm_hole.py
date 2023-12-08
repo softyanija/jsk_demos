@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import numpy as np
 import rospy
 import sys
@@ -223,21 +225,14 @@ class UpperArmHole():
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument("module_name", type=str, help="module_name")
-    parser.add_argument("--debug", type=str, help="flag to launch in debug mode")
-    
     rospy.init_node("upper_arm_hole", anonymous=True)
+    
+    parser = argparse.ArgumentParser()
+    parser.add_argument("module_name", type=str, help="module_name")
 
     args = parser.parse_args()
 
-    if args.debug == "True" or args.debug == "true":
-        print("launch in debug mode")
-        upper_arm_hole = UpperArmHole(args.module_name, "debug")
-    else:
-        print("launch in normal mode")
-        upper_arm_hole = UpperArmHole(args.module_name, "normal")
+    upper_arm_hole = UpperArmHole(args.module_name, "normal")
 
     upper_arm_hole.run()
     

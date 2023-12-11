@@ -48,4 +48,13 @@
       </node>
     </group>
   </group>
+
+  <!-- <node name="servo_gear" pkg="multi_device_view" type="servo_gear.py" args="$(arg DEVICE)" output="screen"/> -->
+
+  <!-- <node name="upper_arm_hole" pkg="multi_device_view" type="upper_arm_hole.py" args="$(arg DEVICE)" output="screen"/> -->
+
+  <node name="servo_gear" pkg="multi_device_view" type="servo_gear.py" args="module_0" output="screen"/>
+
+  <node name="upper_arm_hole" pkg="multi_device_view" type="upper_arm_hole.py" args="module_0" output="screen"/>
+  
 </launch>

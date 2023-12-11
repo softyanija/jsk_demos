@@ -5,7 +5,6 @@
     <group ns="servo_gear">
       
       <include file="$(find opencv_apps)/launch/hsv_color_filter.launch">
-        
         <arg name="image" value="/$(arg DEVICE)/color/image_rect_color"/> 
         <arg name="h_limit_max" default="260"/>
 		<arg name="h_limit_min" default="120"/>

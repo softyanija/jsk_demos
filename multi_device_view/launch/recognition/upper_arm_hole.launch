@@ -1,0 +1,63 @@
+<launch>
+  <arg name="DEVICE" default="module_0"/>
+
+  <group ns="$(arg DEVICE)">
+    <group ns="upper_arm_hole">
+      <include file="$(find opencv_apps)/launch/hsv_color_filter.launch">
+        <arg name="image" value="/$(arg DEVICE)/color/image_rect_color"/> 
+        <arg name="h_limit_max" default="260"/>
+		<arg name="h_limit_min" default="120"/>
+		<arg name="s_limit_max" default="230"/>
+		<arg name="s_limit_min" default="20"/>
+		<arg name="v_limit_max" default="120"/>
+		<arg name="v_limit_min" default="0"/>
+      </include>
+    </group>
+    
+    <group ns="upper_arm_pre">
+      
+      <include file="$(find opencv_apps)/launch/hsv_color_filter.launch">
+        <arg name="image" value="/$(arg DEVICE)/color/image_rect_color"/> 
+        <arg name="h_limit_max" default="300"/>
+		<arg name="h_limit_min" default="85"/>
+		<arg name="s_limit_max" default="255"/>
+		<arg name="s_limit_min" default="75"/>
+		<arg name="v_limit_max" default="70"/>
+		<arg name="v_limit_min" default="0"/>
+      </include>
+
+      <node name="depth_image_filter"
+            pkg="jsk_perception" type="depth_image_filter.py"
+            clear_params="true"
+            output="screen" >
+        <remap from="~input" to="/$(arg DEVICE)/depth/image_rect_raw"/>
+        <rosparam subst_value="true">
+          threshold: 0.13
+        </rosparam>
+      </node>
+
+      <node name="multiply_mask_image"
+            pkg="jsk_perception" type="multiply_mask_image">
+        <remap from="~input/src1" to="depth_image_filter/output/mask" />
+        <remap from="~input/src2" to="hsv_color_filter/image" />
+        <rosparam>
+          approximate_sync: true
+        </rosparam>
+      </node>
+
+      <node name="mask_image_to_rect"
+        pkg="jsk_perception" type="mask_image_to_rect">
+        <remap from="~input" to="multiply_mask_image/output" />
+        <rosparam>
+          rect_type: 0
+        </rosparam>
+      </node>
+
+      <node name="draw_rects"
+            pkg="jsk_perception" type="draw_rects">
+        <remap from="~input" to="/$(arg DEVICE)/color/image_rect_color" />
+        <remap from="~input/rects" to="mask_image_to_rect/output" />
+      </node>
+    </group>
+  </group>
+</launch>

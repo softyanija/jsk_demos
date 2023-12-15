@@ -144,6 +144,7 @@ class UpperArmHole():
                     if self.sub_parts_rect is not None:
 
                         rect_image_buf = self.sub_color_image.copy()
+                        
 #                        contours, _ = cv2.findContours(diff, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
                         contours, _ = cv2.findContours(self.sub_morphology_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
                         # pdb.set_trace()
@@ -152,22 +153,17 @@ class UpperArmHole():
                             rect = cv2.minAreaRect(cnt)
                             box = cv2.boxPoints(rect)
                             box = np.intp(box)
-                            rect_image_buf = cv2.drawContours(rect_image_buf,[box],0,(0,0,255),2)
+                            is_in_area = False
+                            
+                            if (rect[0][1] < 150) and (rect[1][0] * rect[1][1] > 300):
+                                is_in_area = True
 
-                        # for rotated_rect in self.sub_parts_rect:
-                        #     radius = math.sqrt(rotated_rect.size.width**2 + rotated_rect.size.width**2) / 2
-                        #     x = rotated_rect.center.x - radius * math.cos(math.radians(rotated_rect.angle))
-                        #     y = rotated_rect.center.y - radius * math.sin(math.radians(rotated_rect.angle))
-                        #     rect_box2d = ((x, y), (rotated_rect.size.width, rotated_rect.size.height), rotated_rect.angle) 
-                        #     box_points = cv2.boxPoints(rect_box2d)
-                        #     box_points = np.intp(box_points)
-
-                        #     cv2.polylines(rect_image_buf, [box_points], isClosed=True, color=(0, 255, 0), thickness=2)
+                            if is_in_area == 0:
+                                rect_image_buf = cv2.drawContours(rect_image_buf,[box],0,(255,0,0),2)
+                            else:
+                                rect_image_buf = cv2.drawContours(rect_image_buf,[box],0,(0,0,255),2)
 
                         self.pub_rect_image.publish(self.bridge.cv2_to_imgmsg(rect_image_buf, "bgr8"))
-
-                    #  print(self.sub_parts_rect)
-
                     
 
             else:

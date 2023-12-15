@@ -40,6 +40,7 @@ class UpperArmHole():
         self.sub_depth_image = None
         self.sub_mask_image = None
         self.sub_parts_rect = None
+        self.sub_morphology_image = None
         self.background_image = None
         self.gray_img = None
         self.debug_image_raw = None
@@ -60,6 +61,7 @@ class UpperArmHole():
         self.pub_diff_image = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "diff_image"), Image, queue_size=10)
         self.pub_roi_image = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "roi_image"), Image, queue_size=10)
         self.pub_masked_image = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "masked_image"), Image, queue_size=10)
+        self.pub_rect_image = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "rect_image"), Image, queue_size=10)
         self.pub_upper_arm_hole_result = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "guide_point"), RotatedRectStamped, queue_size=10)
 
         self.service_name = "/" + camera + "/set_background"
@@ -67,6 +69,7 @@ class UpperArmHole():
 
         self.multi_subscribe()
         self.rects_subscribe()
+        self.morphology_subscribe()
 
 
     def multi_subscribe(self):
@@ -89,9 +92,16 @@ class UpperArmHole():
 
     def rects_subscribe(self):
         rospy.Subscriber(self.camera + "/" + self.recognition_object +  "/general_contours/rectangles", RotatedRectArrayStamped, self.rects_callback)
-        
+
     def rects_callback(self, rects):
         self.sub_parts_rect = rects.rects
+
+    def morphology_subscribe(self):
+        rospy.Subscriber(self.camera + "/" + self.recognition_object +  "/morphology/image", Image, self.morphology_callback)
+        
+    def morphology_callback(self, image):
+        self.sub_morphology_image = cv2.cvtColor(self.bridge.imgmsg_to_cv2(image, "bgr8"), cv2.COLOR_BGR2GRAY)
+
 
 
     def set_backgound_image(self, req):
@@ -100,7 +110,6 @@ class UpperArmHole():
         self.background_image = self.sub_mask_image.copy()
         self.background_is_set = True
         return EmptyResponse()
-
 
         
     def run(self):
@@ -130,6 +139,32 @@ class UpperArmHole():
                     diff_msg.header = self.header
                     self.pub_diff_image.publish(diff_msg)
                     self.pub_backround_image.publish(self.bridge.cv2_to_imgmsg(self.background_image))
+                    
+
+                    if self.sub_parts_rect is not None:
+
+                        rect_image_buf = self.sub_color_image.copy()
+#                        contours, _ = cv2.findContours(diff, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+                        contours, _ = cv2.findContours(self.sub_morphology_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+                        # pdb.set_trace()
+                        
+                        for cnt in contours:
+                            rect = cv2.minAreaRect(cnt)
+                            box = cv2.boxPoints(rect)
+                            box = np.intp(box)
+                            rect_image_buf = cv2.drawContours(rect_image_buf,[box],0,(0,0,255),2)
+
+                        # for rotated_rect in self.sub_parts_rect:
+                        #     radius = math.sqrt(rotated_rect.size.width**2 + rotated_rect.size.width**2) / 2
+                        #     x = rotated_rect.center.x - radius * math.cos(math.radians(rotated_rect.angle))
+                        #     y = rotated_rect.center.y - radius * math.sin(math.radians(rotated_rect.angle))
+                        #     rect_box2d = ((x, y), (rotated_rect.size.width, rotated_rect.size.height), rotated_rect.angle) 
+                        #     box_points = cv2.boxPoints(rect_box2d)
+                        #     box_points = np.intp(box_points)
+
+                        #     cv2.polylines(rect_image_buf, [box_points], isClosed=True, color=(0, 255, 0), thickness=2)
+
+                        self.pub_rect_image.publish(self.bridge.cv2_to_imgmsg(rect_image_buf, "bgr8"))
 
                     #  print(self.sub_parts_rect)
 

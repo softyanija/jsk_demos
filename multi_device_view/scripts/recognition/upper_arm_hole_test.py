@@ -45,8 +45,6 @@ class UpperArmHole():
         self.gray_img = None
         self.debug_image_raw = None
         self.bridge = CvBridge()
-        self.diff_before = None
-        self.diff_after = None
         self.capture_hole = False
         self.background_image = None
         self.background_is_set = False

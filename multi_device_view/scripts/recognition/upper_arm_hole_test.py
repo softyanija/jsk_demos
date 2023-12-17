@@ -48,6 +48,9 @@ class UpperArmHole():
         self.capture_hole = False
         self.background_image = None
         self.background_is_set = False
+
+        self.parts_detect_rect = ((150, 20), (650, 200))
+
         self.pub_debug_image_raw = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "debug_image_raw"), Image, queue_size=10)
         self.pub_debug_depth = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "debug_depth"), Image, queue_size=10)
         self.pub_backround_image = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "background_image"), Image, queue_size=10)
@@ -142,22 +145,24 @@ class UpperArmHole():
                     if self.sub_parts_rect is not None:
 
                         rect_image_buf = self.sub_color_image.copy()
-                        
-#                        contours, _ = cv2.findContours(diff, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
                         contours, _ = cv2.findContours(self.sub_morphology_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
                         # pdb.set_trace()
+                        rect_image_buf = cv2.rectangle(rect_image_buf, self.parts_detect_rect[0],self.parts_detect_rect[1], (0, 255, 0), thickness=2)
                         
                         for cnt in contours:
                             rect = cv2.minAreaRect(cnt)
                             box = cv2.boxPoints(rect)
                             box = np.intp(box)
                             is_in_area = False
+                            # center = (rect[0])
                             
-                            if (rect[0][1] < 150) and (rect[1][0] * rect[1][1] > 300):
+                            if (rect[0][0] > self.parts_detect_rect[0][0]) and (rect[0][0] < self.parts_detect_rect[1][0]) and (rect[0][1] > self.parts_detect_rect[0][1]) and (rect[0][1] < self.parts_detect_rect[1][1]) and (rect[1][0] * rect[1][1] > 300):
+                            # if (rect[0][1] < self.sub_parts_rect[1) and (rect[1][0] * rect[1][1] > 300):
                                 is_in_area = True
 
                             if is_in_area == 0:
                                 rect_image_buf = cv2.drawContours(rect_image_buf,[box],0,(255,0,0),2)
+                                # rect_image_buf = cv2.circle(rect_image_buf, )
                             else:
                                 rect_image_buf = cv2.drawContours(rect_image_buf,[box],0,(0,0,255),2)
 

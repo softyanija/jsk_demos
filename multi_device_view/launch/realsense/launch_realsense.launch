@@ -1,0 +1,19 @@
+<launch>
+
+  <arg name="camera" default="module_0"/>
+  
+  <include file="$(find realsense2_camera)/launch/rs_rgbd.launch" >
+    <arg name="camera"         value="$(arg camera)"/>
+    <arg name='usb_port_id'       value=""/>
+    <arg name="tf_prefix"         value="$(arg camera)"/>
+    <arg name="color_width"       value="848"/>
+    <arg name="color_height"      value="480"/>
+    <arg name="color_fps"         value="5"/>
+    <arg name="depth_width"       value="848"/>
+    <arg name="depth_height"      value="480"/>
+    <arg name="depth_fps"         value="5"/>
+    <arg name="enable_infra1"     value="true"/>
+    <arg name="enable_infra2"     value="true"/>
+    
+  </include>
+</launch>

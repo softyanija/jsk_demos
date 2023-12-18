@@ -41,6 +41,7 @@ class UpperArmHole():
         self.sub_mask_image = None
         self.sub_parts_rect = None
         self.sub_morphology_image = None
+        self.sub_hsv_image = None
         self.background_image = None
         self.gray_img = None
         self.debug_image_raw = None
@@ -49,13 +50,12 @@ class UpperArmHole():
         self.background_image = None
         self.background_is_set = False
 
-        self.parts_detect_rect = ((150, 20), (650, 200))
+        self.parts_detect_rect = ((150, 20), (650, 160))
 
         self.pub_debug_image_raw = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "debug_image_raw"), Image, queue_size=10)
         self.pub_debug_depth = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "debug_depth"), Image, queue_size=10)
         self.pub_backround_image = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "background_image"), Image, queue_size=10)
-        self.pub_diff_image = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "diff_image"), Image, queue_size=10)
-        
+        self.pub_diff_image = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "diff_image"), Image, queue_size=10)        
         self.pub_threshold_image = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "threshold_image"), Image, queue_size=10)
         self.pub_ellipse_image = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "ellipse_image"), Image, queue_size=10)
         self.pub_background_image = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "background_image"), Image, queue_size=10)
@@ -64,6 +64,7 @@ class UpperArmHole():
         self.pub_masked_image = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "masked_image"), Image, queue_size=10)
         self.pub_rect_image = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "rect_image"), Image, queue_size=10)
         self.pub_upper_arm_hole_result = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "guide_point"), RotatedRectStamped, queue_size=10)
+        self.pub_upper_arm_hole_result_image = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "guide_point", "image"), Image, queue_size=10)
 
         self.service_name = "/" + camera + "/set_background"
         self.service = rospy.Service(self.service_name, Empty, self.set_backgound_image)
@@ -71,6 +72,7 @@ class UpperArmHole():
         self.multi_subscribe()
         self.rects_subscribe()
         self.morphology_subscribe()
+        self.hsv_subscribe()
 
 
     def multi_subscribe(self):
@@ -97,12 +99,21 @@ class UpperArmHole():
     def rects_callback(self, rects):
         self.sub_parts_rect = rects.rects
 
+
     def morphology_subscribe(self):
         rospy.Subscriber(self.camera + "/" + self.recognition_object +  "/morphology/image", Image, self.morphology_callback)
-        
+
+
     def morphology_callback(self, image):
         self.sub_morphology_image = cv2.cvtColor(self.bridge.imgmsg_to_cv2(image, "bgr8"), cv2.COLOR_BGR2GRAY)
 
+
+    def hsv_subscribe(self):
+        rospy.Subscriber(self.camera + "/" + self.recognition_object +  "/hsv_color_filter/image", Image, self.hsv_callback)
+
+
+    def hsv_callback(self, image):
+        self.sub_hsv_image = self.bridge.imgmsg_to_cv2(image, "8UC1")
 
 
     def set_backgound_image(self, req):
@@ -111,6 +122,63 @@ class UpperArmHole():
         self.background_image = self.sub_mask_image.copy()
         self.background_is_set = True
         return EmptyResponse()
+
+    def sort_box(self, box):
+        min_index = np.argmin((np.sum(box, axis=1)))
+        sorted_box = []
+        for i in range(box.shape[0]):
+            if i == 0:
+                sorted_box = box[(min_index + i) % box.shape[0]].reshape(1,2)
+            else:
+                sorted_box = np.append(sorted_box, box[(min_index + i) % box.shape[0]].reshape(1,2), axis=0)
+                
+        return sorted_box
+
+
+    def return_max_ellipe(self, reference, box):
+        guide_ellipse = None
+        drawed_image  = self.sub_color_image.copy()
+        ellipse_contours, _ = cv2.findContours(reference, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        ellipse_list = []
+        ellipse_max_index = None
+        ellipse_max_size = 0
+        ellipse_limit_max = 400
+        ellipse_limit_min = 100
+        box = self.sort_box(box)
+        # pdb.set_trace()
+        box_vec_x = box[1] - box[0]
+        box_vec_y = box[3] - box[0]
+        limit = ((0, 0.5), (0, 1))
+        limit_box = np.array((box[0] + box_vec_x * limit[0][0] + box_vec_y * limit[1][0],
+                              box[0] + box_vec_x * limit[0][1] + box_vec_y * limit[1][0],
+                              box[0] + box_vec_x * limit[0][1] + box_vec_y * limit[1][1],
+                              box[0] + box_vec_x * limit[0][0] + box_vec_y * limit[1][1])).astype(int)
+        # pdb.set_trace()
+        drawed_image = cv2.drawContours(drawed_image, [limit_box], 0, (255, 0 ,0) , 2)
+        # drawed_image = cv2.drawContours(drawed_image, [box], 0, (255, 0 ,0) , 2)
+        for i, cnt in enumerate(ellipse_contours):
+            if len(cnt) >= 5:
+                ellipse = cv2.fitEllipse(cnt)
+                if (not math.isnan(ellipse[0][0])) and (not math.isnan(ellipse[0][1])) and (not math.isnan(ellipse[1][0]))and (not math.isnan(ellipse[1][1])):
+                    cx = int(ellipse[0][0])
+                    cy = int(ellipse[0][1])
+                    w = int(ellipse[1][0])
+                    h = int(ellipse[1][1])
+                    drawed_image = cv2.ellipse(drawed_image, ellipse, (0, 255, 0), 1)
+                    if (h * w > ellipse_max_size) and (h * w < ellipse_limit_max):
+                        ellipse_max_size = h * w
+                        ellipse_max_index = i
+
+        print(ellipse_max_size)
+        if ellipse_max_size > ellipse_limit_min:
+            guide_ellipse = cv2.fitEllipse(ellipse_contours[ellipse_max_index])
+            # print("guide_ellipse : " + str(guide_ellipse) )
+            print(box)
+            drawed_image = cv2.ellipse(drawed_image, guide_ellipse, (0, 0, 255), 3)
+        
+        
+
+        return guide_ellipse, drawed_image
 
         
     def run(self):
@@ -148,24 +216,45 @@ class UpperArmHole():
                         contours, _ = cv2.findContours(self.sub_morphology_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
                         # pdb.set_trace()
                         rect_image_buf = cv2.rectangle(rect_image_buf, self.parts_detect_rect[0],self.parts_detect_rect[1], (0, 255, 0), thickness=2)
+                        max_size = 0
+                        max_index = None
+                        max_box = None
                         
-                        for cnt in contours:
+                        for i, cnt in enumerate(contours):
                             rect = cv2.minAreaRect(cnt)
                             box = cv2.boxPoints(rect)
                             box = np.intp(box)
-                            is_in_area = False
-                            # center = (rect[0])
                             
                             if (rect[0][0] > self.parts_detect_rect[0][0]) and (rect[0][0] < self.parts_detect_rect[1][0]) and (rect[0][1] > self.parts_detect_rect[0][1]) and (rect[0][1] < self.parts_detect_rect[1][1]) and (rect[1][0] * rect[1][1] > 300):
-                            # if (rect[0][1] < self.sub_parts_rect[1) and (rect[1][0] * rect[1][1] > 300):
-                                is_in_area = True
-
-                            if is_in_area == 0:
-                                rect_image_buf = cv2.drawContours(rect_image_buf,[box],0,(255,0,0),2)
+                                if rect[1][0] * rect[1][1] > max_size:
+                                    max_index = i
+                                    max_size = rect[1][0] * rect[1][1]
+                                    max_box = box
+                                    
+                                rect_image_buf = cv2.drawContours(rect_image_buf,[box],0,(0,0,255),1)
                                 # rect_image_buf = cv2.circle(rect_image_buf, )
                             else:
-                                rect_image_buf = cv2.drawContours(rect_image_buf,[box],0,(0,0,255),2)
+                                rect_image_buf = cv2.drawContours(rect_image_buf,[box],0,(255,0,0),1)
+                        
+                        # mask_roi = cv2.cvtColor(np.zeros_like(rect_image_buf), cv2.COLOR_BGR2GRAY)
+                        mask_roi = np.zeros_like(self.sub_morphology_image)
+                        morphology_image_buf = self.sub_morphology_image
+                        
+                        if max_box is not None:
+                            rect_image_buf = cv2.drawContours(rect_image_buf,[max_box],0,(0,0,255),3)
+                            mask_roi = cv2.drawContours(mask_roi, [max_box], 0,255, cv2.FILLED)
 
+                            # pdb.set_trace()
+                            masked_image =cv2.bitwise_and(self.sub_hsv_image, mask_roi)
+                            # self.pub_masked_image.publish(self.bridge.cv2_to_imgmsg(masked_image, "mono8"))
+                            self.pub_masked_image.publish(self.bridge.cv2_to_imgmsg(masked_image, "mono8"))
+                            ellipse, upper_arm_hole_result_image = self.return_max_ellipe(masked_image, max_box)
+                            # print(ellipse)
+                            
+                            self.pub_upper_arm_hole_result_image.publish(self.bridge.cv2_to_imgmsg(upper_arm_hole_result_image, "bgr8"))
+                            # pdb.set_trace()
+
+                   
                         self.pub_rect_image.publish(self.bridge.cv2_to_imgmsg(rect_image_buf, "bgr8"))
                     
 

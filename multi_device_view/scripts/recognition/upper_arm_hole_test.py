@@ -24,7 +24,7 @@ from sensor_msgs.msg import Image
 from std_msgs.msg import Header
 from std_srvs.srv import Empty
 from std_srvs.srv import EmptyResponse
-from multi_device_view.msg import Ellipse
+
 
 class UpperArmHole():
 
@@ -52,13 +52,9 @@ class UpperArmHole():
 
         self.parts_detect_rect = ((150, 20), (650, 160))
 
-        self.pub_debug_image_raw = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "debug_image_raw"), Image, queue_size=10)
         self.pub_debug_depth = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "debug_depth"), Image, queue_size=10)
         self.pub_backround_image = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "background_image"), Image, queue_size=10)
-        self.pub_diff_image = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "diff_image"), Image, queue_size=10)        
-        self.pub_threshold_image = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "threshold_image"), Image, queue_size=10)
-        self.pub_ellipse_image = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "ellipse_image"), Image, queue_size=10)
-        self.pub_background_image = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "background_image"), Image, queue_size=10)
+        self.pub_diff_image = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "diff_image"), Image, queue_size=10)
         self.pub_diff_image = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "diff_image"), Image, queue_size=10)
         self.pub_roi_image = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "roi_image"), Image, queue_size=10)
         self.pub_masked_image = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "masked_image"), Image, queue_size=10)
@@ -79,7 +75,6 @@ class UpperArmHole():
         sub_color_image = message_filters.Subscriber(self.camera + "/color/image_rect_color", Image)
         sub_depth_image = message_filters.Subscriber(self.camera + "/depth/image_rect_raw", Image)
         sub_mask_image = message_filters.Subscriber(self.camera + "/" + self.recognition_object + "_pre" + "/multiply_mask_image/output", Image)
-        # pdb.set_trace()
 
         self.subs = [sub_color_image, sub_depth_image, sub_mask_image]
         sync = message_filters.ApproximateTimeSynchronizer(fs=self.subs, queue_size=5, slop=1)
@@ -89,7 +84,6 @@ class UpperArmHole():
         self.sub_color_image = self.bridge.imgmsg_to_cv2(color, "bgr8")
         self.sub_depth_image = self.bridge.imgmsg_to_cv2(depth, "16UC1")
         self.sub_mask_image = self.bridge.imgmsg_to_cv2(mask, "8UC1")
-        
         self.header = color.header
 
 
@@ -118,7 +112,6 @@ class UpperArmHole():
 
     def set_backgound_image(self, req):
         rospy.loginfo("set background image")
-        # self.background_image = self.sub_depth_image.copy()
         self.background_image = self.sub_mask_image.copy()
         self.background_is_set = True
         return EmptyResponse()
@@ -145,17 +138,16 @@ class UpperArmHole():
         ellipse_limit_max = 400
         ellipse_limit_min = 100
         box = self.sort_box(box)
-        # pdb.set_trace()
         box_vec_x = box[1] - box[0]
         box_vec_y = box[3] - box[0]
-        limit = ((0, 0.5), (0, 1))
+        limit = ((0, 0.5), (0.4, 1))
         limit_box = np.array((box[0] + box_vec_x * limit[0][0] + box_vec_y * limit[1][0],
                               box[0] + box_vec_x * limit[0][1] + box_vec_y * limit[1][0],
                               box[0] + box_vec_x * limit[0][1] + box_vec_y * limit[1][1],
                               box[0] + box_vec_x * limit[0][0] + box_vec_y * limit[1][1])).astype(int)
-        # pdb.set_trace()
+
         drawed_image = cv2.drawContours(drawed_image, [limit_box], 0, (255, 0 ,0) , 2)
-        # drawed_image = cv2.drawContours(drawed_image, [box], 0, (255, 0 ,0) , 2)
+
         for i, cnt in enumerate(ellipse_contours):
             if len(cnt) >= 5:
                 ellipse = cv2.fitEllipse(cnt)
@@ -165,18 +157,13 @@ class UpperArmHole():
                     w = int(ellipse[1][0])
                     h = int(ellipse[1][1])
                     drawed_image = cv2.ellipse(drawed_image, ellipse, (0, 255, 0), 1)
-                    if (h * w > ellipse_max_size) and (h * w < ellipse_limit_max):
+                    if (h * w > ellipse_max_size) and (h * w < ellipse_limit_max) and (cx > limit_box[0][0]) and (cx < limit_box[2][0]) and (cy > limit_box[0][1]) and (cy < limit_box[2][1]):
                         ellipse_max_size = h * w
                         ellipse_max_index = i
 
-        print(ellipse_max_size)
         if ellipse_max_size > ellipse_limit_min:
             guide_ellipse = cv2.fitEllipse(ellipse_contours[ellipse_max_index])
-            # print("guide_ellipse : " + str(guide_ellipse) )
-            print(box)
             drawed_image = cv2.ellipse(drawed_image, guide_ellipse, (0, 0, 255), 3)
-        
-        
 
         return guide_ellipse, drawed_image
 
@@ -197,24 +184,21 @@ class UpperArmHole():
                 pass
 
             if self.sub_color_image is not None:
-                # pdb.set_trace()
                 self.pub_debug_depth.publish(self.bridge.cv2_to_imgmsg(self.sub_depth_image))
                 
                 if self.background_is_set:
 
-                    # diff = cv2.absdiff(self.background_image, self.sub_depth_image)
                     diff = cv2.absdiff(self.background_image, self.sub_mask_image)
                     diff_msg = self.bridge.cv2_to_imgmsg(diff, "mono8")
                     diff_msg.header = self.header
                     self.pub_diff_image.publish(diff_msg)
                     self.pub_backround_image.publish(self.bridge.cv2_to_imgmsg(self.background_image))
-                    
+                    ellipse = None
 
                     if self.sub_parts_rect is not None:
 
                         rect_image_buf = self.sub_color_image.copy()
                         contours, _ = cv2.findContours(self.sub_morphology_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-                        # pdb.set_trace()
                         rect_image_buf = cv2.rectangle(rect_image_buf, self.parts_detect_rect[0],self.parts_detect_rect[1], (0, 255, 0), thickness=2)
                         max_size = 0
                         max_index = None
@@ -232,11 +216,10 @@ class UpperArmHole():
                                     max_box = box
                                     
                                 rect_image_buf = cv2.drawContours(rect_image_buf,[box],0,(0,0,255),1)
-                                # rect_image_buf = cv2.circle(rect_image_buf, )
+
                             else:
                                 rect_image_buf = cv2.drawContours(rect_image_buf,[box],0,(255,0,0),1)
                         
-                        # mask_roi = cv2.cvtColor(np.zeros_like(rect_image_buf), cv2.COLOR_BGR2GRAY)
                         mask_roi = np.zeros_like(self.sub_morphology_image)
                         morphology_image_buf = self.sub_morphology_image
                         
@@ -244,19 +227,23 @@ class UpperArmHole():
                             rect_image_buf = cv2.drawContours(rect_image_buf,[max_box],0,(0,0,255),3)
                             mask_roi = cv2.drawContours(mask_roi, [max_box], 0,255, cv2.FILLED)
 
-                            # pdb.set_trace()
                             masked_image =cv2.bitwise_and(self.sub_hsv_image, mask_roi)
-                            # self.pub_masked_image.publish(self.bridge.cv2_to_imgmsg(masked_image, "mono8"))
                             self.pub_masked_image.publish(self.bridge.cv2_to_imgmsg(masked_image, "mono8"))
                             ellipse, upper_arm_hole_result_image = self.return_max_ellipe(masked_image, max_box)
-                            # print(ellipse)
                             
                             self.pub_upper_arm_hole_result_image.publish(self.bridge.cv2_to_imgmsg(upper_arm_hole_result_image, "bgr8"))
-                            # pdb.set_trace()
 
-                   
-                        self.pub_rect_image.publish(self.bridge.cv2_to_imgmsg(rect_image_buf, "bgr8"))
-                    
+                        if ellipse is not None:
+                            guide_point_msg = RotatedRectStamped()
+                            guide_point_msg.header.stamp = rospy.Time.now()
+                            guide_point_msg.rect.x = ellipse[0][0]
+                            guide_point_msg.rect.y = ellipse[0][1]
+                            
+                            guide_point_msg.rect.width = ellipse[1][0]
+                            guide_point_msg.rect.height = ellipse[1][1]
+                            guide_point_msg.rect.angle = ellipse[2]                            
+                            self.pub_upper_arm_hole_result.publish(guide_point_msg)
+                        self.pub_rect_image.publish(self.bridge.cv2_to_imgmsg(rect_image_buf, "bgr8"))                    
 
             else:
                 rospy.logwarn("not recieve image")

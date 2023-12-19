@@ -195,6 +195,9 @@ class UpperArmHole():
                     self.pub_backround_image.publish(self.bridge.cv2_to_imgmsg(self.background_image))
                     ellipse = None
 
+                    mask_roi = np.zeros_like(self.sub_morphology_image)
+                    upper_arm_hole_result_image  = self.sub_color_image.copy()
+
                     if self.sub_parts_rect is not None:
 
                         rect_image_buf = self.sub_color_image.copy()
@@ -219,8 +222,7 @@ class UpperArmHole():
 
                             else:
                                 rect_image_buf = cv2.drawContours(rect_image_buf,[box],0,(255,0,0),1)
-                        
-                        mask_roi = np.zeros_like(self.sub_morphology_image)
+
                         morphology_image_buf = self.sub_morphology_image
                         
                         if max_box is not None:
@@ -230,8 +232,6 @@ class UpperArmHole():
                             masked_image =cv2.bitwise_and(self.sub_hsv_image, mask_roi)
                             self.pub_masked_image.publish(self.bridge.cv2_to_imgmsg(masked_image, "mono8"))
                             ellipse, upper_arm_hole_result_image = self.return_max_ellipe(masked_image, max_box)
-                            
-                            self.pub_upper_arm_hole_result_image.publish(self.bridge.cv2_to_imgmsg(upper_arm_hole_result_image, "bgr8"))
 
                         if ellipse is not None:
                             guide_point_msg = RotatedRectStamped()
@@ -243,6 +243,7 @@ class UpperArmHole():
                             guide_point_msg.rect.height = ellipse[1][1]
                             guide_point_msg.rect.angle = ellipse[2]                            
                             self.pub_upper_arm_hole_result.publish(guide_point_msg)
+                        self.pub_upper_arm_hole_result_image.publish(self.bridge.cv2_to_imgmsg(upper_arm_hole_result_image, "bgr8"))
                         self.pub_rect_image.publish(self.bridge.cv2_to_imgmsg(rect_image_buf, "bgr8"))                    
 
             else:

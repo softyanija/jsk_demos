@@ -21,6 +21,12 @@
         <arg name="morph_size" value="5" />
 	<arg name="debug_view" default="$(arg debug_view)"/>
       </include>
+      
+      <include file="$(find opencv_apps)/launch/general_contours.launch">
+        <arg name="image" value="morphology/image"/>
+        <arg name="debug_view" default="$(arg debug_view)"/>
+      </include>
+
     </group>
     
     <group ns="upper_arm_hole_pre">

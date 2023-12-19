@@ -56,7 +56,6 @@ class UpperArmHole():
         self.pub_backround_image = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "background_image"), Image, queue_size=10)
         self.pub_diff_image = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "diff_image"), Image, queue_size=10)
         self.pub_diff_image = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "diff_image"), Image, queue_size=10)
-        self.pub_roi_image = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "roi_image"), Image, queue_size=10)
         self.pub_masked_image = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "masked_image"), Image, queue_size=10)
         self.pub_rect_image = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "rect_image"), Image, queue_size=10)
         self.pub_upper_arm_hole_result = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "guide_point"), RotatedRectStamped, queue_size=10)
@@ -196,6 +195,7 @@ class UpperArmHole():
                     ellipse = None
 
                     mask_roi = np.zeros_like(self.sub_morphology_image)
+                    masked_image = np.zeros_like(self.sub_morphology_image)
                     upper_arm_hole_result_image  = self.sub_color_image.copy()
 
                     if self.sub_parts_rect is not None:
@@ -230,7 +230,6 @@ class UpperArmHole():
                             mask_roi = cv2.drawContours(mask_roi, [max_box], 0,255, cv2.FILLED)
 
                             masked_image =cv2.bitwise_and(self.sub_hsv_image, mask_roi)
-                            self.pub_masked_image.publish(self.bridge.cv2_to_imgmsg(masked_image, "mono8"))
                             ellipse, upper_arm_hole_result_image = self.return_max_ellipe(masked_image, max_box)
 
                         if ellipse is not None:
@@ -243,6 +242,7 @@ class UpperArmHole():
                             guide_point_msg.rect.height = ellipse[1][1]
                             guide_point_msg.rect.angle = ellipse[2]                            
                             self.pub_upper_arm_hole_result.publish(guide_point_msg)
+                        self.pub_masked_image.publish(self.bridge.cv2_to_imgmsg(masked_image, "mono8"))
                         self.pub_upper_arm_hole_result_image.publish(self.bridge.cv2_to_imgmsg(upper_arm_hole_result_image, "bgr8"))
                         self.pub_rect_image.publish(self.bridge.cv2_to_imgmsg(rect_image_buf, "bgr8"))                    
 

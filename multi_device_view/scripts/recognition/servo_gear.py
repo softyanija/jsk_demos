@@ -36,7 +36,7 @@ class ServoGear():
         self.sub_depth_image = None
         self.sub_mask_image = None
         self.roi = None
-        self.roi_top_offset = 10
+        self.roi_top_offset = 25
         self.debug_image_raw = None
         self.bridge = CvBridge()
         self.diff_before = None
@@ -45,9 +45,9 @@ class ServoGear():
         self.background_image = None
         self.background_is_set = False
         self.reference_image_path = rospack.get_path("multi_device_view") + "/scripts/template_image/servo_gear_template.png"
-        self.pub_debug_image_raw = rospy.Publisher(self.camera + "/" + self.recognition_object + "/debug_image_raw", Image, queue_size=10)
-        self.pub_debug_image_matching = rospy.Publisher(self.camera + "/" + self.recognition_object + "/debug_image_matching", Image, queue_size=10)
-        self.pub_servo_gear_result = rospy.Publisher(self.camera + "/" + self.recognition_object + "/target_point", RotatedRectStamped, queue_size=10)
+        self.pub_debug_image_raw = rospy.Publisher(self.camera + "/" + self.recognition_object + "/debug_image_raw", Image, queue_size=3)
+        self.pub_debug_image_matching = rospy.Publisher(self.camera + "/" + self.recognition_object + "/target_point/image", Image, queue_size=3)
+        self.pub_servo_gear_result = rospy.Publisher(self.camera + "/" + self.recognition_object + "/target_point", RotatedRectStamped, queue_size=3)
         
         self.subscribe()
 
@@ -86,18 +86,17 @@ class ServoGear():
             except rospy.ROSTimeMovedBackwardsException as e:
                 rospy.logwarn("cought {}".format(e))
                 pass
-            
+
             if (self.sub_color_image is not None) and (self.sub_depth_image is not None) and (self.sub_mask_image is not None):
 
-                #roi_x, roi_y, roi_w, roi_h = 83, 79, 750, 284
                 roi = self.roi[0]
                 roi_x, roi_y, roi_w, roi_h = roi.x, roi.y - self.roi_top_offset, roi.width, roi.height 
                 cliped_image = self.sub_color_image.copy()[roi_y:roi_y+roi_h, roi_x:roi_x+roi_w]
-
                 result = None
                 result_image = self.sub_color_image.copy()
-                result = cv2.matchTemplate(cliped_image, reference_image, cv2.TM_CCOEFF_NORMED)
-                #result = cv2.matchTemplate(self.ub_color_image, reference_image, cv2.TM_CCORR_NORMED)
+
+                if (cliped_image.shape[0] > reference_image.shape[0]) and (cliped_image.shape[1] > reference_image.shape[1]):
+                    result = cv2.matchTemplate(cliped_image, reference_image, cv2.TM_CCOEFF_NORMED)
 
                 if result is not None:
                     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)

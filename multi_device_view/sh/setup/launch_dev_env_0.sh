@@ -54,7 +54,7 @@ tmux send-keys -t 0 "source ~/robothand_dataset_ws/devel/setup.bash bash" C-m
 tmux send-keys -t 0 "roscd multi_device_view/launch/recognition"
 # tmux send-keys -t 0 "emacs -nw " C-m
 tmux send-keys -t 0 "rossetip" C-m
-tmux send-keys -t 0 "roslaunch multi_device_view launch_realsense.launch"
+tmux send-keys -t 0 "roslaunch multi_device_view launch_realsense.launch camera:=$DEVICE"
 
 tmux send-keys -t 1 "echo 1" C-m
 tmux send-keys -t 1 "source ~/robothand_dataset_ws/devel/setup.bash bash" C-m

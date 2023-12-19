@@ -1,26 +1,30 @@
 <launch>
   <arg name="DEVICE" default="module_0"/>
+  <arg name="debug_view" default="false"/>
 
   <group ns="$(arg DEVICE)">
     <group ns="upper_arm_hole">
       <include file="$(find opencv_apps)/launch/hsv_color_filter.launch">
-        <arg name="image" value="/$(arg DEVICE)/color/image_rect_color"/> 
-        <arg name="h_limit_max" default="340"/>
-		<arg name="h_limit_min" default="0"/>
-		<arg name="s_limit_max" default="256"/>
-		<arg name="s_limit_min" default="20"/>
-		<arg name="v_limit_max" default="80"/>
-		<arg name="v_limit_min" default="0"/>
-      </include>
+      <arg name="image" value="/$(arg DEVICE)/color/image_rect_color"/> 
+      <arg name="h_limit_max" default="340"/>
+      <arg name="h_limit_min" default="0"/>
+      <arg name="s_limit_max" default="256"/>
+      <arg name="s_limit_min" default="20"/>
+      <arg name="v_limit_max" default="80"/>
+      <arg name="v_limit_min" default="0"/>
+      <arg name="debug_view" default="$(arg debug_view)"/>
+    </include>
       
       <include file="$(find opencv_apps)/launch/morphology.launch">
         <arg name="image" value="diff_image" />
         <arg name="morph_operator" value="1" />
         <arg name="morph_size" value="5" />
+	<arg name="debug_view" default="$(arg debug_view)"/>
       </include>
 
       <include file="$(find opencv_apps)/launch/general_contours.launch">
         <arg name="image" value="morphology/image"/>
+	<arg name="debug_view" default="$(arg debug_view)"/>
       </include>
       <node name="mask_image_to_rect"
             pkg="jsk_perception" type="mask_image_to_rect">
@@ -46,6 +50,7 @@
 		<arg name="s_limit_min" default="25"/>
 		<arg name="v_limit_max" default="70"/>
 		<arg name="v_limit_min" default="0"/>
+		<arg name="debug_view" default="$(arg debug_view)"/>
       </include>
 
       <node name="depth_image_filter"

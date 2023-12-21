@@ -1,0 +1,53 @@
+<launch>
+  <arg name="rosbag" doc="rosbag file path" />
+  <arg name="start" doc="start time" />
+  <arg name="range" doc="time range" />
+  <arg name="create_manager" default="true" />
+  <arg name="manager" default="realsense2_camera_manager" />
+  
+  <rosparam param="/use_sim_time">
+    true
+  </rosparam>
+  
+  <node name="rosbag_play" pkg="rosbag" type="play"
+        args="$(arg rosbag) -s $(arg start) -u $(arg range) -l --clock"/>
+
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find multi_device_view)/config/rviz/module_images.rviz"/>
+
+  <group ns="module_0">
+    
+    <node if="$(arg create_manager)"
+          pkg="nodelet" type="nodelet" name="$(arg manager)"
+          args="manager" output="screen" />
+
+    <node name="republish" pkg="image_transport" type="republish" args="compressed raw">
+      <remap from="in" to="color/image_rect_color" />
+      <remap from="out" to="color/image_rect_color" />
+    </node>
+
+    <node name="depth_image_republish" pkg="image_transport" type="republish" args="compressedDepth raw">
+      <remap from="in" to="aligned_depth_to_color/image_raw" />
+      <remap from="out" to="aligned_depth_to_color/image_raw" />
+    </node>
+    
+  </group>
+  
+  <group ns="module_1">
+    
+    <node if="$(arg create_manager)"
+          pkg="nodelet" type="nodelet" name="$(arg manager)"
+          args="manager" output="screen" />
+
+    <node name="republish" pkg="image_transport" type="republish" args="compressed raw">
+      <remap from="in" to="color/image_rect_color" />
+      <remap from="out" to="color/image_rect_color" />
+    </node>
+
+    <node name="depth_image_republish" pkg="image_transport" type="republish" args="compressedDepth raw">
+      <remap from="in" to="aligned_depth_to_color/image_raw" />
+      <remap from="out" to="aligned_depth_to_color/image_raw" />
+    </node>
+    
+  </group>
+
+</launch>

@@ -72,7 +72,7 @@ class UpperArmHole():
 
     def multi_subscribe(self):
         sub_color_image = message_filters.Subscriber(self.camera + "/color/image_rect_color", Image)
-        sub_depth_image = message_filters.Subscriber(self.camera + "/depth/image_rect_raw", Image)
+        sub_depth_image = message_filters.Subscriber(self.camera + "/aligned_depth_to_color/image_raw", Image)
         sub_mask_image = message_filters.Subscriber(self.camera + "/" + self.recognition_object + "_pre" + "/multiply_mask_image/output", Image)
 
         self.subs = [sub_color_image, sub_depth_image, sub_mask_image]

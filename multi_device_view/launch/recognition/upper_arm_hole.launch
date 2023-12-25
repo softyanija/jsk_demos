@@ -46,7 +46,7 @@
             pkg="jsk_perception" type="depth_image_filter.py"
             clear_params="true"
             output="screen" >
-        <remap from="~input" to="/$(arg DEVICE)/depth/image_rect_raw"/>
+        <remap from="~input" to="/$(arg DEVICE)/aligned_depth_to_color/image_raw"/>
         <rosparam subst_value="true">
           threshold: 0.13
         </rosparam>

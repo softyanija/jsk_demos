@@ -91,16 +91,19 @@ class ServoGear():
 
                 try:
                     roi = self.roi[0]
-                except IndexError:
+                    roi_x, roi_y, roi_w, roi_h = roi.x, roi.y - self.roi_top_offset, roi.width, roi.height
+                    cliped_image = self.sub_color_image.copy()[roi_y:roi_y+roi_h, roi_x:roi_x+roi_w]
+
+                    result = None
+
+                    if (cliped_image.shape[0] >= reference_image.shape[0]) and (cliped_image.shape[1] >= reference_image.shape[1]):
+                        result = cv2.matchTemplate(cliped_image, reference_image, cv2.TM_CCOEFF_NORMED)
+
+                    result_image = self.sub_color_image.copy()
+                    #result = cv2.matchTemplate(self.ub_color_image, reference_image, cv2.TM_CCORR_NORMED)
+
+                except Exception:
                     pdb.set_trace()
-
-                roi_x, roi_y, roi_w, roi_h = roi.x, roi.y - self.roi_top_offset, roi.width, roi.height 
-                cliped_image = self.sub_color_image.copy()[roi_y:roi_y+roi_h, roi_x:roi_x+roi_w]
-
-                result = None
-                result_image = self.sub_color_image.copy()
-                result = cv2.matchTemplate(cliped_image, reference_image, cv2.TM_CCOEFF_NORMED)
-                #result = cv2.matchTemplate(self.ub_color_image, reference_image, cv2.TM_CCORR_NORMED)
 
                 if result is not None:
                     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)

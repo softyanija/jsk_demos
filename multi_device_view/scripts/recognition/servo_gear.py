@@ -89,8 +89,11 @@ class ServoGear():
             
             if (self.sub_color_image is not None) and (self.sub_depth_image is not None) and (self.sub_mask_image is not None):
 
-                #roi_x, roi_y, roi_w, roi_h = 83, 79, 750, 284
-                roi = self.roi[0]
+                try:
+                    roi = self.roi[0]
+                except IndexError:
+                    pdb.set_trace()
+
                 roi_x, roi_y, roi_w, roi_h = roi.x, roi.y - self.roi_top_offset, roi.width, roi.height 
                 cliped_image = self.sub_color_image.copy()[roi_y:roi_y+roi_h, roi_x:roi_x+roi_w]
 

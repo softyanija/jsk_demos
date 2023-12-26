@@ -14,13 +14,22 @@
       <arg name="v_limit_min" default="0"/>
       <arg name="debug_view" default="$(arg debug_view)"/>
     </include>
-      
-      <include file="$(find opencv_apps)/launch/morphology.launch">
-        <arg name="image" value="diff_image" />
-        <arg name="morph_operator" value="1" />
-        <arg name="morph_size" value="5" />
-	<arg name="debug_view" default="$(arg debug_view)"/>
-      </include>
+    <group ns="inter">  
+    <include file="$(find opencv_apps)/launch/morphology.launch">
+      <arg name="image" value="/$(arg DEVICE)/upper_arm_hole/diff_image" />
+      <arg name="morph_operator" value="0" />
+      <arg name="morph_element" value="0" />
+      <arg name="morph_size" value="3" />
+	  <arg name="debug_view" default="$(arg debug_view)"/>
+    </include>
+    </group>
+    <include file="$(find opencv_apps)/launch/morphology.launch">
+      <arg name="image" value="inter/morphology/image" />
+      <arg name="morph_operator" value="1" />
+      <arg name="morph_element" value="2" />
+      <arg name="morph_size" value="12" />
+	  <arg name="debug_view" default="$(arg debug_view)"/>
+    </include>
       
       <include file="$(find opencv_apps)/launch/general_contours.launch">
         <arg name="image" value="morphology/image"/>

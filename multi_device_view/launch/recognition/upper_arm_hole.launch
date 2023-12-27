@@ -27,7 +27,7 @@
       <arg name="image" value="inter/morphology/image" />
       <arg name="morph_operator" value="1" />
       <arg name="morph_element" value="2" />
-      <arg name="morph_size" value="12" />
+      <arg name="morph_size" value="21" />
 	  <arg name="debug_view" default="$(arg debug_view)"/>
     </include>
       

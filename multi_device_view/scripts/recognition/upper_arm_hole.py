@@ -50,7 +50,7 @@ class UpperArmHole():
         self.background_image = None
         self.background_is_set = False
 
-        self.parts_detect_rect = ((150, 20), (650, 160))
+        self.parts_detect_rect = ((300, 50), (650, 300))
 
         self.pub_debug_depth = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "debug_depth"), Image, queue_size=10)
         self.pub_backround_image = rospy.Publisher(os.path.join(self.camera, self.recognition_object, "background_image"), Image, queue_size=10)
@@ -134,12 +134,13 @@ class UpperArmHole():
         ellipse_list = []
         ellipse_max_index = None
         ellipse_max_size = 0
-        ellipse_limit_max = 400
+        ellipse_limit_max = 800
         ellipse_limit_min = 100
         box = self.sort_box(box)
         box_vec_x = box[1] - box[0]
         box_vec_y = box[3] - box[0]
-        limit = ((0, 0.5), (0.4, 1))
+        # limit = ((0, 0.5), (0.4, 1))
+        limit = ((0, 0.5), (0, 1))
         limit_box = np.array((box[0] + box_vec_x * limit[0][0] + box_vec_y * limit[1][0],
                               box[0] + box_vec_x * limit[0][1] + box_vec_y * limit[1][0],
                               box[0] + box_vec_x * limit[0][1] + box_vec_y * limit[1][1],

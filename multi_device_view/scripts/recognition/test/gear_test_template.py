@@ -14,6 +14,7 @@ profile = pipeline.start(config)
 
 reference_img = cv2.imread("../template_image/servo_gear_template.png")
 reference_h, reference_w, _ = reference_img.shape
+threshold = 0.93
 
 try:
     while True:
@@ -25,15 +26,22 @@ try:
         
         #pdb.set_trace()
 
-        result = cv2.matchTemplate(color_image, reference_img,cv2.TM_CCORR_NORMED)
+        result = cv2.matchTemplate(color_image, reference_img, cv2.TM_CCORR_NORMED)
+        loc = np.where(result >= threshold)
+)
+        for pt in zip(*loc[::-1]):
+            cv2.rectangle(color_image, pt, (pt[0] + reference_w, pt[1] + reference_h), (255, 255, 0), 2)
+            cv2.circle(color_image, (pt[0] + reference_w//2, pt[1] ), 2, (0, 0, 255), -1)
+
+
+        '''
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
-        cv2.minMaxLoc(result)
-        
         top_left = max_loc
         bottom_right = (top_left[0] + reference_w, top_left[1] + reference_h)
         guided_point = (top_left[0] + reference_w // 2, top_left[1] )
         cv2.rectangle(color_image, top_left, bottom_right, (255, 255, 0), 2)
         cv2.circle(color_image, guided_point, 2, (0, 0, 255), -1)
+        '''
 
         # cv2.imshow("equalize", equ_img_clip)
 
@@ -48,5 +56,5 @@ try:
             break
     
 finally:
-    pdb.set_trace()
+    #pdb.set_trace()
     pipeline.stop()

@@ -52,7 +52,14 @@ try:
         cv2.imshow("cliped_colormap", cliped_image)
         # cv2.imshow("ellipse", ellipse_drawed_image)
 
-        if cv2.waitKey(1) & 0xFF == ord("q"):
+        key = cv2.waitKey(1) & 0xFF
+        
+        if key == ord("f"):
+            cv2.imwrite("../debug_image/gear_test/gear_test_cap_color.png", color_image)
+            cv2.imwrite("../debug_image/gear_test/gear_test_cap_cliped.png", cliped_image)
+            print("saved image")
+        elif key == ord("q"):
+            print()
             cv2.destroyAllWindows()
             break
     

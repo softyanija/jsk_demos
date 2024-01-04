@@ -20,6 +20,7 @@
 #   ]
 standalone_tags:
   [
+  {id:  5, size: 0.016500, name: "module_0_kxr_arm"},
   {id:  6, size: 0.015000, name: "module_0_l_gripper_front_apriltag"},
   {id:  7, size: 0.015000, name: "module_0_r_gripper_front_apriltag"}
   

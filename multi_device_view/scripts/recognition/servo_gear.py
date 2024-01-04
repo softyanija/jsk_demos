@@ -44,7 +44,7 @@ class ServoGear():
         self.capture_hole = False
         self.background_image = None
         self.background_is_set = False
-        self.reference_image_path = rospack.get_path("multi_device_view") + "/scripts/template_image/servo_gear_template.png"
+        self.reference_image_path = rospack.get_path("multi_device_view") + "/scripts/template_image/servo_gear/servo_gear_cliped.png"
         self.pub_debug_image_raw = rospy.Publisher(self.camera + "/" + self.recognition_object + "/debug_image_raw", Image, queue_size=10)
         self.pub_debug_image_matching = rospy.Publisher(self.camera + "/" + self.recognition_object + "/debug_image_matching", Image, queue_size=10)
         self.pub_servo_gear_result = rospy.Publisher(self.camera + "/" + self.recognition_object + "/target_point", RotatedRectStamped, queue_size=10)
@@ -75,9 +75,9 @@ class ServoGear():
 
         rospy.loginfo("start to recognize servo gear")
 
-        reference_image = cv2.imread(self.reference_image_path)
+        reference_image = cv2.cvtColor(cv2.imread(self.reference_image_path), cv2.COLOR_BGR2GRAY)
         rospy.loginfo("reading template from {}".format(self.reference_image_path))
-        reference_h, reference_w, _ = reference_image.shape
+        reference_h, reference_w, = reference_image.shape
         threshold = 0.93
         
         while not rospy.is_shutdown():
@@ -92,8 +92,7 @@ class ServoGear():
                 try:
                     roi = self.roi[0]
                     roi_x, roi_y, roi_w, roi_h = roi.x, roi.y - self.roi_top_offset, roi.width, roi.height
-                    cliped_image = self.sub_color_image.copy()[roi_y:roi_y+roi_h, roi_x:roi_x+roi_w]
-
+                    cliped_image = cv2.cvtColor(self.sub_color_image.copy()[roi_y:roi_y+roi_h, roi_x:roi_x+roi_w], cv2.COLOR_BGR2GRAY)
                     result = None
 
                     if (cliped_image.shape[0] >= reference_image.shape[0]) and (cliped_image.shape[1] >= reference_image.shape[1]):
@@ -102,14 +101,16 @@ class ServoGear():
                     result_image = self.sub_color_image.copy()
                     #result = cv2.matchTemplate(self.ub_color_image, reference_image, cv2.TM_CCORR_NORMED)
 
-                except Exception:
-                    pdb.set_trace()
+                except Exception as e:
+                    # pdb.set_trace()
+                    rospy.loginfo(e)
 
                 if result is not None:
+                    h_bias = 9
                     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
                     top_left = (max_loc[0] + roi_x, max_loc[1] + roi_y)
                     bottom_right = (top_left[0] + reference_w, top_left[1] + reference_h)
-                    target_point = (top_left[0] + reference_w // 2, top_left[1] )
+                    target_point = (top_left[0] + reference_w // 2, top_left[1] + h_bias)
                 
                     cv2.rectangle(result_image, top_left, bottom_right, (255, 255, 0), 1)
                     cv2.rectangle(result_image, (roi_x, roi_y), (roi_x + roi_w, roi_y + roi_h), (0, 0, 255), 2)

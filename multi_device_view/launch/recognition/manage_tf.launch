@@ -1,0 +1,16 @@
+<launch>
+  <node pkg="tf" type="static_transform_publisher" name="rarm_kxr_arm_broadcaster" args="0.0 0.0 0.0 0 0 0 rarm_kxr_arm kxr_arm 100" />
+  
+  <node pkg="tf" type="static_transform_publisher" name="module_0_kxr_arm_broadcaster" args="0.0 0.0 0.0 0 0 0 module_0_kxr_arm kxr_arm 100" />
+
+  <node pkg="tf" type="static_transform_publisher" name="screw_gear_broadcaster" args="-0.075 0.004 0.005 0 0 0 kxr_arm servo_gear 100" />
+
+
+  <node name="tf_publisher" pkg="dynamic_tf_publisher"
+        type="tf_publish.py"  output="screen">
+    <rosparam>
+      use_cache: false
+    </rosparam>
+  </node>
+
+  </launch>

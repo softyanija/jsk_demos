@@ -1,0 +1,66 @@
+<launch>
+
+  <arg name="camera" default="module_1"/>
+  <!-- <arg name="serial_no" default=""/ >-->
+      
+  <include file="$(find realsense2_camera)/launch/rs_rgbd.launch" >
+    <arg name="camera"         value="$(arg camera)"/>
+    <arg name='usb_port_id'       value=""/>
+    <arg name="serial_no"         value="230322275380"/>
+    <arg name="tf_prefix"         value="$(arg camera)"/>
+    <arg name="color_width"       value="848"/>
+    <arg name="color_height"      value="480"/>
+    <arg name="color_fps"         value="5"/>
+    <arg name="depth_width"       value="848"/>
+    <arg name="depth_height"      value="480"/>
+    <arg name="depth_fps"         value="5"/>
+    <arg name="enable_infra1"     value="true"/>
+    <arg name="enable_infra2"     value="true"/>
+    
+  </include>
+
+  <!-- <rosparam subst_value="true"> -->
+  <!--   <!-\- To detect apriltag clearly, change the following value-\-> -->
+  <!--   <!-\- You can use dynamic reconfigure to manually change the value-\-> -->
+  <!--   camera/stereo_module/exposure: 12345 -->
+
+  <!--   <!-\- disable/reduce compress level to reduce CPU usage-\-> -->
+  <!--   <!-\- For detail settings, see https://github.com/jsk-ros-pkg/jsk_robot/blob/7317e91e02728b281a47a6157c1067351314778a/jsk_fetch_robot/jsk_fetch_startup/config/image_transport_plugins_params.yaml -\-> -->
+  <!--   $(arg camera): -->
+  <!--     aligned_depth_to_color: -->
+  <!--       image_raw: -->
+  <!--         disable_pub_plugins: -->
+  <!--           - 'image_transport/compressed' -->
+  <!--           - 'image_transport/theora' -->
+  <!--         compressed/png_level: 5 -->
+  <!--         compressedDepth/png_level: 5 -->
+  <!--     color: -->
+  <!--       image_raw: -->
+  <!--         disable_pub_plugins: -->
+  <!--           - 'image_transport/compressed' -->
+  <!--           - 'image_transport/theora' -->
+  <!--           - 'image_transport/compressedDepth' -->
+  <!--         compressed/png_level: 5 -->
+  <!--         compressedDepth/png_level: 5 -->
+  <!--       image_rect_color: -->
+  <!--         disable_pub_plugins: -->
+  <!--           - 'image_transport/theora' -->
+  <!--           - 'image_transport/compressedDepth' -->
+  <!--         compressed/png_level: 5 -->
+  <!--         compressedDepth/png_level: 5 -->
+  <!--     depth: -->
+  <!--       image_rect_raw: -->
+  <!--         disable_pub_plugins: -->
+  <!--           - 'image_transport/compressed' -->
+  <!--           - 'image_transport/theora' -->
+  <!--           - 'image_transport/compressedDepth' -->
+  <!--         compressed/png_level: 5 -->
+  <!--         compressedDepth/png_level: 5 -->
+  <!--   tag_detections_image: -->
+  <!--     disable_pub_plugins: -->
+  <!--       - 'image_transport/theora' -->
+  <!--       - 'image_transport/compressedDepth' -->
+  <!--     compressed/png_level: 5 -->
+  <!--     compressedDepth/png_level: 5 -->
+  <!-- </rosparam> -->
+</launch>

@@ -14,11 +14,12 @@ from skrobot.coordinates import Coordinates
 from skrobot.interfaces.ros import PR2ROSRobotInterface
 from skrobot.interfaces.ros.tf_utils import tf_pose_to_coords
 from skrobot.interfaces.ros.tf_utils import geometry_pose_to_coords
-
 from geometry_msgs.msg import PoseStamped, PoseArray, WrenchStamped
 from jsk_recognition_msgs.msg import BoundingBoxArray
+from param import *
 
-def get_tag_coordinates(tag_name, camera_position):
+
+def get_tag_coordinates(camera_position, tag_name):
     # camera_position:{rarm, larm, head}
     tf_buffer = tf2_ros.Buffer()
     tf_listener = tf2_ros.TransformListener(tf_buffer)
@@ -119,7 +120,7 @@ tag_is_found = False
 for i in range(4):
     for j in range(3):
         j += 1
-        tag_coordinates = get_tag_coordinates("kxr_arm", "rarm")
+        tag_coordinates = get_tag_coordinates("rarm", "kxr_arm")
         if tag_coordinates is not None:
             rospy.loginfo("Found arm tag")
             tag_is_found = True
@@ -149,9 +150,53 @@ robot.inverse_kinematics(
     grasp_pos,
     link_list=rarm_link_list,
     move_target=rarm_end_coords)
+robot.rarm.move_end_pos([-0.04, 0, 0], "local")
 ri.angle_vector(robot.angle_vector(), 4)
 ri.wait_interpolation()
 rospy.sleep(1)
+
+# grasp kxr arm
+ri.angle_vector(robot.angle_vector(), 4)
+ri.wait_interpolation()
+rospy.sleep(1)
+ri.move_gripper("rarm", 0.0118)
+
+
+# search stored_modules 
+robot.larm.angle_vector(search_stored_module_larm_vector)
+ri.angle_vector(robot.angle_vector(), 4)
+ri.wait_interpolation()
+
+
+module_0_coordinates = None
+while module_0_coordinates is None:
+    module_0_coordinates = get_tag_coordinates("larm", "module_0")
+
+module_0_grasp_pos = module_0_coordinates.copy_worldcoords().transform(module_tag_to_grasp_pos)
+
+robot.larm.angle_vector(grasp_module_neutral_larm_vector)
+ri.angle_vector(robot.angle_vector(), 4)
+ri.wait_interpolation()
+
+
+robot.inverse_kinematics(
+    module_0_grasp_pos,
+    link_list=larm_link_list,
+    move_target=larm_end_coords)
+ri.angle_vector(robot.angle_vector(), 4)
+ri.wait_interpolation()
+rospy.sleep(1)
+
+robot.larm.move_end_pos([0.054, 0, 0], "local")
+ri.angle_vector(robot.angle_vector(), 3)
+ri.wait_interpolation()
+
+# grasp module
+ri.move_gripper("larm", 0.019)
+
+robot.larm.move_end_pos([-0.100, 0, 0], "local")
+ri.angle_vector(robot.angle_vector(), 4)
+ri.wait_interpolation()
 
 
 # ri.move_gripper("larm", 0.06)

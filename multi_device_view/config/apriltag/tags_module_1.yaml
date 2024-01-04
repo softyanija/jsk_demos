@@ -20,8 +20,8 @@
 #   ]
 standalone_tags:
   [
-  {id:  6, size: 0.15000, name: "module_1_l_gripper_front_apriltag"},
-  {id:  7, size: 0.15000, name: "module_1_r_gripper_front_apriltag"}
+  {id:  6, size: 0.015000, name: "module_1_l_gripper_front_apriltag"},
+  {id:  7, size: 0.015000, name: "module_1_r_gripper_front_apriltag"}
   
   ]
 # ## Tag bundle definitions

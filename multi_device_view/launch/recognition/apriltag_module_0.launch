@@ -5,7 +5,7 @@
   <!-- configure camera input -->
   <arg name="camera_name" default="/module_0" />
   <arg name="camera_frame" default="module_0_color_optical_frame" />
-  <arg name="image_topic" default="image_rect_color" />
+  <arg name="image_topic" default="color/image_rect_color" />
   <arg name="queue_size" default="1" />
 
   <!-- apriltag_ros continuous detection node -->
@@ -18,7 +18,7 @@
     <param name="queue_size" type="int" value="$(arg queue_size)" />
 
     <!-- load parameters (incl. tag family, tags, etc.) -->
-    <rosparam command="load" file="$(find multi_device_view)/config/apriltag/settings_larm.yaml"/>
-    <rosparam command="load" file="$(find multi_device_view)/config/apriltag/tags_larm.yaml"/>
+    <rosparam command="load" file="$(find multi_device_view)/config/apriltag/settings_module_0.yaml"/>
+    <rosparam command="load" file="$(find multi_device_view)/config/apriltag/tags_module_0.yaml"/>
   </node>
 </launch>

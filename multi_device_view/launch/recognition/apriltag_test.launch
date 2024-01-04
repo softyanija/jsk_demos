@@ -3,8 +3,8 @@
   <arg name="launch_prefix" default="" />
 
   <!-- configure camera input -->
-  <arg name="camera_name" default="/module_1" />
-  <arg name="camera_frame" default="module_1_color_optical_frame" />
+  <arg name="camera_name" default="/test" />
+  <arg name="camera_frame" default="test_color_optical_frame" />
   <arg name="image_topic" default="color/image_rect_color" />
   <arg name="queue_size" default="1" />
 
@@ -18,7 +18,7 @@
     <param name="queue_size" type="int" value="$(arg queue_size)" />
 
     <!-- load parameters (incl. tag family, tags, etc.) -->
-    <rosparam command="load" file="$(find multi_device_view)/config/apriltag/settings_module_1.yaml"/>
-    <rosparam command="load" file="$(find multi_device_view)/config/apriltag/tags_module_1.yaml"/>
+    <rosparam command="load" file="$(find multi_device_view)/config/apriltag/settings_rarm.yaml"/>
+    <rosparam command="load" file="$(find multi_device_view)/config/apriltag/tags_rarm.yaml"/>
   </node>
 </launch>

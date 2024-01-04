@@ -6,4 +6,13 @@
   <group ns="larm">
     <include file="$(find multi_device_view)/launch/recognition/apriltag_larm.launch"/>
   </group>
+
+  <group ns="module_0">
+    <include file="$(find multi_device_view)/launch/recognition/apriltag_module_0.launch"/>
+  </group>
+
+  <group ns="module_1">
+    <include file="$(find multi_device_view)/launch/recognition/apriltag_module_1.launch"/>
+  </group>
+  
 </launch>

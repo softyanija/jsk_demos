@@ -43,6 +43,27 @@ def get_tag_coordinates(camera_position, tag_name):
 
     return base_to_tag
 
+def get_tf_coordinates(tf_name):
+    tf_buffer = tf2_ros.Buffer()
+    tf_listener = tf2_ros.TransformListener(tf_buffer)
+    b2t = None
+    try:
+        b2t = tf_buffer.lookup_transform("base_link", tf_name, rospy.Time(), rospy.Duration(3))
+        base_to_tf = skrobot.coordinates.Coordinates([b2t.transform.translation.x,
+                                                       b2t.transform.translation.y,
+                                                       b2t.transform.translation.z],
+                                                      [b2t.transform.rotation.w,
+                                                       b2t.transform.rotation.x,
+                                                       b2t.transform.rotation.y,
+                                                       b2t.transform.rotation.z]
+            )
+    except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
+        rospy.logwarn("Failed to get transform")
+        base_to_tf = None
+        # pdb.set_trace()
+
+    return base_to_tf
+
 
 rospy.init_node("attatch_upper_arm")
 robot = skrobot.models.PR2()
@@ -170,6 +191,7 @@ ri.wait_interpolation()
 
 module_0_coordinates = None
 while module_0_coordinates is None:
+    rospy.loginfo("getting module_0 pos")
     module_0_coordinates = get_tag_coordinates("larm", "module_0")
 
 module_0_grasp_pos = module_0_coordinates.copy_worldcoords().transform(module_tag_to_grasp_pos)
@@ -197,6 +219,20 @@ ri.move_gripper("larm", 0.019)
 robot.larm.move_end_pos([-0.100, 0, 0], "local")
 ri.angle_vector(robot.angle_vector(), 4)
 ri.wait_interpolation()
+
+# calc camera position
+servo_gear_coordinates = None
+while servo_gear_coordinates is None:
+    rospy.loginfo("getting servo_gear pos")
+    module_0_coordinates = get_tf_coordinates("servo_gear")
+
+table_top_z = 0.73 
+module_0_pos = module_0_coordinates.transform(servo_gear_to_module_0)
+module_1_pos = module_1_coordinates.transform(servo_gear_to_module_1)    
+
+module_0_pos.translation([module_0_pos.translation[0], module_0_pos.translation[1], table_top_z])
+module_1_pos.translation([module_1_pos.translation[0], module_1_pos.translation[1], table_top_z])
+
 
 
 # ri.move_gripper("larm", 0.06)

@@ -18,7 +18,7 @@ from jsk_recognition_msgs.msg import RotatedRectStamped
 from jsk_recognition_msgs.msg import RectArray
 from sensor_msgs.msg import Image
 from std_msgs.msg import Header
-from multi_device_view.msg import Ellipse
+
 
 rospack = rospkg.RosPack()
 
@@ -44,7 +44,8 @@ class ServoGear():
         self.capture_hole = False
         self.background_image = None
         self.background_is_set = False
-        self.reference_image_path = rospack.get_path("multi_device_view") + "/scripts/template_image/servo_gear/servo_gear_cliped.png"
+        self.reference_image_path_0 = rospack.get_path("multi_device_view") + "/scripts/template_image/servo_gear/servo_gear_0_reference.png"
+        self.reference_image_path_1 = rospack.get_path("multi_device_view") + "/scripts/template_image/servo_gear/servo_gear_1_reference.png"
         self.pub_debug_image_raw = rospy.Publisher(self.camera + "/" + self.recognition_object + "/debug_image_raw", Image, queue_size=10)
         self.pub_debug_image_matching = rospy.Publisher(self.camera + "/" + self.recognition_object + "/debug_image_matching", Image, queue_size=10)
         self.pub_servo_gear_result = rospy.Publisher(self.camera + "/" + self.recognition_object + "/target_point", RotatedRectStamped, queue_size=10)
@@ -75,9 +76,14 @@ class ServoGear():
 
         rospy.loginfo("start to recognize servo gear")
 
-        reference_image = cv2.cvtColor(cv2.imread(self.reference_image_path), cv2.COLOR_BGR2GRAY)
-        rospy.loginfo("reading template from {}".format(self.reference_image_path))
-        reference_h, reference_w, = reference_image.shape
+        reference_image_0 = cv2.cvtColor(cv2.imread(self.reference_image_path_0), cv2.COLOR_BGR2GRAY)
+        reference_image_1 = cv2.cvtColor(cv2.imread(self.reference_image_path_1), cv2.COLOR_BGR2GRAY)
+
+        # reference_image_mirror = cv2.flip(reference_image, 1)
+        # rospy.loginfo("reading template from {}".format(self.reference_image_path))
+        reference_0_h, reference_0_w, = reference_image_0.shape[0], reference_image_0.shape[1]
+        reference_1_h, reference_1_w, = reference_image_1.shape[0], reference_image_1.shape[0]
+        
         threshold = 0.93
         
         while not rospy.is_shutdown():
@@ -89,16 +95,27 @@ class ServoGear():
             
             if (self.sub_color_image is not None) and (self.sub_depth_image is not None) and (self.sub_mask_image is not None):
 
+                result = None
+                result_image = self.sub_color_image.copy()
+
                 try:
                     roi = self.roi[0]
-                    roi_x, roi_y, roi_w, roi_h = roi.x, roi.y - self.roi_top_offset, roi.width, roi.height
+                    roi_x, roi_y, roi_w, roi_h = roi.x, max(roi.y - self.roi_top_offset, 0), roi.width, roi.height
                     cliped_image = cv2.cvtColor(self.sub_color_image.copy()[roi_y:roi_y+roi_h, roi_x:roi_x+roi_w], cv2.COLOR_BGR2GRAY)
-                    result = None
 
-                    if (cliped_image.shape[0] >= reference_image.shape[0]) and (cliped_image.shape[1] >= reference_image.shape[1]):
-                        result = cv2.matchTemplate(cliped_image, reference_image, cv2.TM_CCOEFF_NORMED)
-
-                    result_image = self.sub_color_image.copy()
+                    if (cliped_image.shape[0] >= reference_image_0.shape[0]) and (cliped_image.shape[1] >= reference_image_0.shape[1]):
+                        result = cv2.matchTemplate(cliped_image, reference_image_0, cv2.TM_CCOEFF_NORMED)
+                        if result is not None:
+                            print("use reference 0")
+                            reference_w, reference_h = reference_0_w, reference_0_h
+                            
+                        elif (cliped_image.shape[0] >= reference_image_1.shape[0]) and (cliped_image.shape[1] >= reference_image_1.shape[1]):
+                            print("check image 1")
+                            result = cv2.matchTemplate(cliped_image, reference_image_1, cv2.TM_CCOEFF_NORMED)
+                            if result is not None:
+                                print("use reference 1")
+                                reference_w, reference_h = reference_1_w, reference_1_h
+                    
                     #result = cv2.matchTemplate(self.ub_color_image, reference_image, cv2.TM_CCORR_NORMED)
 
                 except Exception as e:

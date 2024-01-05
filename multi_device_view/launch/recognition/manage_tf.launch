@@ -1,11 +1,21 @@
 <launch>
+
+  <arg name="tf_publish" default="false" />
+  
+  <include file="$(find multi_device_view)/launch/recognition/camera_100_45.launch">
+    <arg name="tf_publish" value="$(arg tf_publish)" />
+  </include>
+  
   <node pkg="tf" type="static_transform_publisher" name="rarm_kxr_arm_broadcaster" args="0.0 0.0 0.0 0 0 0 rarm_kxr_arm kxr_arm 100" />
   
   <node pkg="tf" type="static_transform_publisher" name="module_0_kxr_arm_broadcaster" args="0.0 0.0 0.0 0 0 0 module_0_kxr_arm kxr_arm 100" />
 
   <node pkg="tf" type="static_transform_publisher" name="screw_gear_broadcaster" args="-0.075 0.004 0.005 0 0 0 kxr_arm servo_gear 100" />
 
+  <node pkg="tf" type="static_transform_publisher" name="l_hand_front_broadcaster" args="0.0195 0.0065 0.0136 1.57 0 0 l_gripper_r_finger_tip_link l_gripper_front 100" />
 
+  <node pkg="tf" type="static_transform_publisher" name="r_hand_front_broadcaster" args="0.0195 0.0065 0.0136 1.57 0 0 r_gripper_r_finger_tip_link r_gripper_front 100" />
+  
   <node name="tf_publisher" pkg="dynamic_tf_publisher"
         type="tf_publish.py"  output="screen">
     <rosparam>

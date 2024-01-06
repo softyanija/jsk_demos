@@ -1,0 +1,22 @@
+<launch>
+  <include file="$(find multi_device_view)/launch/recognition/attach_upper_arm/servo_gear.launch">
+    <arg name="DEVICE" value="module_0"/>
+  </include>
+  
+  <include file="$(find multi_device_view)/launch/recognition/attach_upper_arm/servo_gear.launch">
+    <arg name="DEVICE" value="module_1"/>
+  </include>
+
+  <include file="$(find multi_device_view)/launch/recognition/attach_upper_arm/upper_arm_hole.launch">
+    <arg name="DEVICE" value="module_0"/>
+  </include>
+  
+  <include file="$(find multi_device_view)/launch/recognition/attach_upper_arm/upper_arm_hole.launch">
+    <arg name="DEVICE" value="module_1"/>
+  </include>
+
+  <include file="$(find multi_device_view)/launch/recognition/attach_upper_arm/manage_tf.launch"/>
+
+  <include file="$(find multi_device_view)/launch/recognition/apriltag/apriltag.launch"/>
+  
+</launch>

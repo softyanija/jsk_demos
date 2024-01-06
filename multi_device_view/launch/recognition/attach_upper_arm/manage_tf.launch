@@ -2,7 +2,7 @@
 
   <arg name="tf_publish" default="false" />
   
-  <include file="$(find multi_device_view)/launch/recognition/camera_100_45.launch">
+  <include file="$(find multi_device_view)/launch/recognition/camera_tf/camera_100_45.launch">
     <arg name="tf_publish" value="$(arg tf_publish)" />
   </include>
   

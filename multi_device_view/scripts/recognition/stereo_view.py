@@ -12,6 +12,7 @@ from sensor_msgs.msg import CameraInfo
 from geometry_msgs.msg import PointStamped
 from scipy import linalg
 
+
 class StereoView():
     # def __init__(self, camera1, camera2, t_1w, t_2w, guide_object, target_object, **kwargs):
     def __init__(self, target_1, target_2, **kwargs):
@@ -24,42 +25,40 @@ class StereoView():
         self.K_1 = None
         self.K_2 = None
 
-        self.subscribe()
+        self.subscribe_kp()
+        self.subscribe_camera_info()
 
 
-    def keypoint_cb(self, target_1, target_2, camera_info_1, camera_info_2):
-        self.kp1 = np.array([[target_1.rect.x + target_1.rect.width / 2], [target_1.rect.y + 10]])
-        self.kp2 = np.array([[target_2.rect.x + target_2.rect.width / 2], [target_2.rect.y + 10]])
-        self.K_1 = np.asarray(camera_info_1.K).reshape(3,3)
-        self.K_2 = np.asarray(camera_info_2.K).reshape(3,3)
 
-
-    def subscribe(self):
+    def subscribe_kp(self):
         sub_target_1 = message_filters.Subscriber(self.target_1, RotatedRectStamped)
         sub_target_2 = message_filters.Subscriber(self.target_2, RotatedRectStamped)
+        
+        subs = [sub_target_1, sub_target_2]
+        sync = message_filters.ApproximateTimeSynchronizer(fs = subs, queue_size=5, slop=1)
+        sync.registerCallback(self.keypoint_cb)
+        
+
+    def keypoint_cb(self, target_1, target_2):
+        self.kp1 = np.array([[target_1.rect.x + target_1.rect.width / 2], [target_1.rect.y + 10]])
+        self.kp2 = np.array([[target_2.rect.x + target_2.rect.width / 2], [target_2.rect.y + 10]])
+
+
+    def subscribe_camera_info(self):
         sub_camera_info_1 = message_filters.Subscriber(self.camera_1 + "/color/camera_info", CameraInfo)
         sub_camera_info_2 = message_filters.Subscriber(self.camera_2 + "/color/camera_info", CameraInfo)
         
-        subs = [sub_target_1, sub_target_2, sub_camera_info_1, sub_camera_info_2]
+        subs = [sub_camera_info_1, sub_camera_info_2]
         sync = message_filters.ApproximateTimeSynchronizer(fs = subs, queue_size=5, slop=1)
-        sync.registerCallback(self.keypoint_cb)
+        sync.registerCallback(self.camera_info_cb)
+        
+
+    def camera_info_cb(self, camera_info_1, camera_info_2):
+        self.K_1 = np.asarray(camera_info_1.K).reshape(3,3)
+        self.K_2 = np.asarray(camera_info_2.K).reshape(3,3)
 
         
     def triangulation(self, P_1w, P_2w, kp1, kp2):
-        """Triangulation to get 3D points
-        Args:
-        T_1w (4x4): pose of view 1 w.r.t  i.e. T_1w (from w to 1)
-        T_2w (4x4): pose of view 2 w.r.t world, i.e. T_2w (from w to 2)
-        　　[R(3), t(1)]
-        kp1 (2,1): keypoint in view 1 (not normalized?)
-        kp2 (2,1): keypoints in view 2 (not normalized?
-        shape of T will be change by treatment of tf 
-        
-        Returns:
-        X (3,1): 3D coordinates of the keypoints w.r.t world coordinate
-        X1 (3,1): 3D coordinates of the keypoints w.r.t view1 coordinate
-        X2 (3,1): 3D coordinates of the keypoints w.r.t view2 coordinate
-        """
         
         X = cv2.triangulatePoints(P_1w[:3], P_2w[:3], kp1, kp2)
         X = X / X[3]
@@ -89,8 +88,6 @@ def tf2mat(msg):
     return mat
 
 
-
-
 if __name__ == "__main__":
     rospy.init_node("stereo_view")
     rate = rospy.Rate(5)
@@ -118,7 +115,7 @@ if __name__ == "__main__":
             rospy.logwarn("cought {}".format(e))
             pass
         
-        X, X1, X2 = stereo_view.triangulation(P_1w, P_2w, stereo_view.kp1, stereo_view.kp2)
+        X, X1, X2 = stereo_view.triangulation(P_1w, P_2w, stereo_view.kp_1, stereo_view.kp_2)
 
         # X = stereo_view.DLT(P_1w, P_2w, stereo_view.kp1, stereo_view.kp2)
         point_msg = PointStamped()
@@ -135,6 +132,4 @@ if __name__ == "__main__":
         # point_msg.point.z = X1[2]
         
         point_pub.publish(point_msg)
-        
-    
-    
+

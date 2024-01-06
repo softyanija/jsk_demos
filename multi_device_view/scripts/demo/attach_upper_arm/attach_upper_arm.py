@@ -16,6 +16,7 @@ from skrobot.interfaces.ros.tf_utils import tf_pose_to_coords
 from skrobot.interfaces.ros.tf_utils import geometry_pose_to_coords
 from geometry_msgs.msg import PoseStamped, PoseArray, WrenchStamped
 from jsk_recognition_msgs.msg import BoundingBoxArray
+from dynamic_tf_publisher.srv import SetDynamicTF
 from param import *
 
 
@@ -64,6 +65,27 @@ def get_tf_coordinates(tf_name):
 
     return base_to_tf
 
+def set_tf(coordinates, frame_name):
+    tf = TransformStamped()
+    tf.header.frame_id = "base_link"
+    tf.child_frame_id = frame_name
+    tf.transform.translation.x = coordinates.translation[0]
+    tf.transform.translation.y = coordinates.translation[1]
+    tf.transform.translation.z = coordinates.translation[2]
+    tf.transform.rotation.x = coordinates.quaternion[1]
+    tf.transform.rotation.y = coordinates.quaternion[2]
+    tf.transform.rotation.z = coordinates.quaternion[3]
+    tf.transform.rotation.w = coordinates.quaternion[0]
+    
+    rospy.wait_for_service("/set_dynamic_tf")
+    try:
+        client = rospy.ServiceProxy("/set_dynamic_tf", SetDynamicTF)
+        res = client(100, tf)
+        return
+    except rospy.ServiceException as e:
+        print("Service call failed: %s"%e)
+
+
 
 rospy.init_node("attatch_upper_arm")
 robot = skrobot.models.PR2()
@@ -98,36 +120,12 @@ rarm_link_list = [
     robot.r_wrist_flex_link,
     robot.r_wrist_roll_link]
 
-init_angle_vector = np.array([ 0,  0,  0,  0,  0,
-                               0,  0,  0,  0,  0,
-                               0,  0,  0.3,  0,  0,
-                               0.87266463,  0,  -0.9,  0.2,  -1.65,
-                               0.34906584,  -1.5,  -0.17453292, -0.17453292,  0,
-                               0,  0,  0,  0,  0,
-                               0,  0.9,  0.2,  1.65,  -0.35,
-                               -1.5, -0.17453292, -0.17453292,  0,  0,
-                               0,  0,  0,  0,  0],
-                             dtype="float32")
-
-search_arm_vector = np.array([ 0,  0,  0,  0,  0,
-                               0,  0,  0,  0,  0,
-                               0,  0,  0.3,  0,  0,
-                               0.87266463,  0,  -0.9,  0.2,  -1.65,
-                               0.34906584,  -1.5,  -0.17453292, -0.17453292,  0,
-                               0,  0,  0,  0,  0,
-                               0,  0.9,  0.2,  1.65,  -0.35,
-                               -1.5, -0.17453292, -0.17453292,  0,  0,
-                               0,  0,  0,  0,  0],
-                             dtype="float32")
-tag_to_grasp_pos = skrobot.coordinates.Coordinates([-0.018, -0.000, 0.061], [-3.1, 1.0, -3.1])
-
-search_arm_rarm_vector = np.array([-0.3813113 ,  0.06809891, -2.1100695 , -1.7763098 , -1.6647813 ,
-       -0.27111033, -0.15205745], dtype="float32")
 
 robot.angle_vector(ri.angle_vector())
 robot.angle_vector(init_angle_vector)
 ri.angle_vector(robot.angle_vector(), 4)
 ri.wait_interpolation()
+
 
 robot.rarm.angle_vector(search_arm_rarm_vector)
 ri.angle_vector(robot.angle_vector(), 4)
@@ -138,101 +136,110 @@ tag_recognition_counter = 0
 move_radius = 28
 tag_is_found = False
 
-for i in range(4):
-    for j in range(3):
-        j += 1
-        tag_coordinates = get_tag_coordinates("rarm", "kxr_arm")
-        if tag_coordinates is not None:
-            rospy.loginfo("Found arm tag")
-            tag_is_found = True
+try:
+    for i in range(4):
+        for j in range(3):
+            j += 1
+            tag_coordinates = get_tag_coordinates("rarm", "kxr_arm")
+            if tag_coordinates is not None:
+                rospy.loginfo("Found arm tag")
+                tag_is_found = True
+                break
+            rospy.loginfo("Coudn't find arm tag : {} times".format(j))
+
+        if tag_is_found:
             break
-        rospy.loginfo("Coudn't find arm tag : {} times".format(j))
-    
-    if tag_is_found:
-        break
-    else:
-        #move arm to find tag
-        rospy.loginfo("move to pos{}".format(i+1))
-        theta = math.pi/4 + i*math.pi/2
-        robot.rarm.move_end_pos([move_radius*math.cos(theta), move_radius*math.sin(theta), 0], "world")
-        ri.angle_vector(robot.angle_vector(), 4)
-        ri.wait_interpolation()
-        i += 1
+        else:
+            #move arm to find tag
+            rospy.loginfo("move to pos{}".format(i+1))
+            theta = math.pi/4 + i*math.pi/2
+            robot.rarm.move_end_pos([move_radius*math.cos(theta), move_radius*math.sin(theta), 0], "world")
+            ri.angle_vector(robot.angle_vector(), 4)
+            ri.wait_interpolation()
+            i += 1
 
-        if i == 4:
-            rospy.logwarn("Coudn't find arm tag in 4 pos, loop again")
-            i = 0
+            if i == 4:
+                rospy.logwarn("Coudn't find arm tag in 4 pos, loop again")
+                i = 0
+except KeyboardInterrupt as e:
+    print(e)
 
-#grasp arm
-grasp_pos = tag_coordinates.copy_worldcoords().transform(tag_to_grasp_pos)
+#publish tf from rarm_kxr(tag_coordinates) to kxr_arm
+set_tf(tag_coordinates, "kxr_arm")
+servo_gear_coordinates = tag_coordinates.transform(kxr_arm_to_servo_gear)
+set_tf(servo_gear_coordinates, "servo_gear")
 
-ri.move_gripper("rarm", 0.06)
-robot.inverse_kinematics(
-    grasp_pos,
-    link_list=rarm_link_list,
-    move_target=rarm_end_coords)
-robot.rarm.move_end_pos([-0.04, 0, 0], "local")
-ri.angle_vector(robot.angle_vector(), 4)
-ri.wait_interpolation()
-rospy.sleep(1)
-
-# grasp kxr arm
-ri.angle_vector(robot.angle_vector(), 4)
-ri.wait_interpolation()
-rospy.sleep(1)
-ri.move_gripper("rarm", 0.0118)
+# #grasp arm
+# grasp_pos = tag_coordinates.copy_worldcoords().transform(tag_to_grasp_pos)
 
 
-# search stored_modules 
-robot.larm.angle_vector(search_stored_module_larm_vector)
-ri.angle_vector(robot.angle_vector(), 4)
-ri.wait_interpolation()
+# ri.move_gripper("rarm", 0.06)
+# robot.inverse_kinematics(
+#     grasp_pos,
+#     link_list=rarm_link_list,
+#     move_target=rarm_end_coords)
+# robot.rarm.move_end_pos([-0.04, 0, 0], "local")
+# ri.angle_vector(robot.angle_vector(), 4)
+# ri.wait_interpolation()
+# rospy.sleep(1)
 
 
-module_0_coordinates = None
-while module_0_coordinates is None:
-    rospy.loginfo("getting module_0 pos")
-    module_0_coordinates = get_tag_coordinates("larm", "module_0")
-
-module_0_grasp_pos = module_0_coordinates.copy_worldcoords().transform(module_tag_to_grasp_pos)
-
-robot.larm.angle_vector(grasp_module_neutral_larm_vector)
-ri.angle_vector(robot.angle_vector(), 4)
-ri.wait_interpolation()
+# # grasp kxr arm
+# ri.angle_vector(robot.angle_vector(), 4)
+# ri.wait_interpolation()
+# rospy.sleep(1)
+# ri.move_gripper("rarm", 0.0118)
 
 
-robot.inverse_kinematics(
-    module_0_grasp_pos,
-    link_list=larm_link_list,
-    move_target=larm_end_coords)
-ri.angle_vector(robot.angle_vector(), 4)
-ri.wait_interpolation()
-rospy.sleep(1)
+# # search stored_modules 
+# robot.larm.angle_vector(search_stored_module_larm_vector)
+# ri.angle_vector(robot.angle_vector(), 4)
+# ri.wait_interpolation()
 
-robot.larm.move_end_pos([0.054, 0, 0], "local")
-ri.angle_vector(robot.angle_vector(), 3)
-ri.wait_interpolation()
 
-# grasp module
-ri.move_gripper("larm", 0.019)
+# module_0_coordinates = None
+# while module_0_coordinates is None:
+#     rospy.loginfo("getting module_0 pos")
+#     module_0_coordinates = get_tag_coordinates("larm", "module_0")
 
-robot.larm.move_end_pos([-0.100, 0, 0], "local")
-ri.angle_vector(robot.angle_vector(), 4)
-ri.wait_interpolation()
+# module_0_grasp_pos = module_0_coordinates.copy_worldcoords().transform(module_tag_to_grasp_pos)
 
-# calc camera position
-servo_gear_coordinates = None
-while servo_gear_coordinates is None:
-    rospy.loginfo("getting servo_gear pos")
-    module_0_coordinates = get_tf_coordinates("servo_gear")
+# robot.larm.angle_vector(grasp_module_neutral_larm_vector)
+# ri.angle_vector(robot.angle_vector(), 4)
+# ri.wait_interpolation()
 
-table_top_z = 0.73 
-module_0_pos = module_0_coordinates.transform(servo_gear_to_module_0)
-module_1_pos = module_1_coordinates.transform(servo_gear_to_module_1)    
 
-module_0_pos.translation([module_0_pos.translation[0], module_0_pos.translation[1], table_top_z])
-module_1_pos.translation([module_1_pos.translation[0], module_1_pos.translation[1], table_top_z])
+# robot.inverse_kinematics(
+#     module_0_grasp_pos,
+#     link_list=larm_link_list,
+#     move_target=larm_end_coords)
+# ri.angle_vector(robot.angle_vector(), 4)
+# ri.wait_interpolation()
+# rospy.sleep(1)
 
+# robot.larm.move_end_pos([0.054, 0, 0], "local")
+# ri.angle_vector(robot.angle_vector(), 3)
+# ri.wait_interpolation()
+
+# # grasp module
+# ri.move_gripper("larm", 0.019)
+
+# robot.larm.move_end_pos([-0.100, 0, 0], "local")
+# ri.angle_vector(robot.angle_vector(), 4)
+# ri.wait_interpolation()
+
+# # calc camera position
+# servo_gear_coordinates = None
+# while servo_gear_coordinates is None:
+#     rospy.loginfo("getting servo_gear pos")
+#     module_0_coordinates = get_tf_coordinates("servo_gear")
+
+# table_top_z = 0.73 
+# module_0_pos = module_0_coordinates.transform(servo_gear_to_module_0)
+# module_1_pos = module_1_coordinates.transform(servo_gear_to_module_1)    
+
+# module_0_pos.translation([module_0_pos.translation[0], module_0_pos.translation[1], table_top_z])
+# module_1_pos.translation([module_1_pos.translation[0], module_1_pos.translation[1], table_top_z])
 
 
 # ri.move_gripper("larm", 0.06)

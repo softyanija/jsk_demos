@@ -41,13 +41,14 @@ grasp_module_neutral_larm_vector = np.array([ 0.9475635, 0.01040518, 1.4659243, 
 
 
 #tags
-tag_to_grasp_pos = skrobot.coordinates.Coordinates([-0.018, -0.000, 0.061], [-3.1, 1.0, -3.1])
+# kxr_tag_to_grasp_pos = skrobot.coordinates.Coordinates([-0.000, 0.001, 0.059], [-3.1, 0.9, -3.1])
+kxr_tag_to_grasp_pos = skrobot.coordinates.Coordinates([0.010, 0.001, 0.059], [-3.1, 0.9, -3.1])
 
 module_tag_to_pre_grasp_pos = skrobot.coordinates.Coordinates([-0.007, 0.000, 0.110], [-2.9, 1.5, 1.8])
 
 # arange potision
-servo_gear_to_module_0 = skrobot.coordinates.Coordinates([0.1004, -0.1004, 0], [math.pi * 0.75, 0, 0])
-servo_gear_to_module_1 = skrobot.coordinates.Coordinates([0.1004, 0.1004, 0], [-math.pi * 0.75, 0, 0]) 
+servo_gear_to_module_0 = skrobot.coordinates.Coordinates([0.1004, 0.1004, 0], [-math.pi * 0.75, 0, 0])
+servo_gear_to_module_1 = skrobot.coordinates.Coordinates([-0.1004, 0.1004, 0], [math.pi * 0.25, 0, 0]) 
 
 
 # for tf

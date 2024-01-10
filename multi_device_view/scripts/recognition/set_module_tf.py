@@ -56,11 +56,12 @@ class SetModuleTf():
 
         except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
             rospy.logwarn("Failed to get transform")
+            self.estimated_tf = None
         
 
     def set_estimated_tf(self, arm_side, module):
 
-        self.estimate_tf(arm_side, module)
+         # self.estimate_tf(arm_side, module)
         
         rospy.wait_for_service("/set_dynamic_tf")
         try:
@@ -74,5 +75,7 @@ class SetModuleTf():
 if __name__ == "__main__":
     rospy.init_node("set_module_tf")
     setter = SetModuleTf()
+    setter.estimate_tf("l", "module_0")
     setter.set_estimated_tf("l", "module_0")
+    setter.estimate_tf("l", "module_1")
     setter.set_estimated_tf("l", "module_1")

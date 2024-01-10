@@ -2,12 +2,15 @@
 
 import numpy as np
 import rospy
+import os
 import skrobot
+import sys
 import tf
 import tf2_ros
 import time
 import math
 import pdb
+import rospkg
 
 from skrobot.coordinates import CascadedCoords
 from skrobot.coordinates import Coordinates
@@ -18,6 +21,46 @@ from geometry_msgs.msg import PoseStamped, PoseArray, WrenchStamped
 from jsk_recognition_msgs.msg import BoundingBoxArray
 from dynamic_tf_publisher.srv import SetDynamicTF
 from param import *
+
+rospack = rospkg.RosPack()
+sys.path.append(os.path.join(rospack.get_path('multi_device_view') , "scripts/recognition"))
+from set_module_tf import SetModuleTf
+from stereo_view import StereoView
+
+rospy.init_node("attatch_upper_arm")
+robot = skrobot.models.PR2()
+ri = PR2ROSRobotInterface(robot)
+
+viewer = skrobot.viewers.TrimeshSceneViewer(resolution=(640, 480))
+viewer.add(robot)
+viewer.show()
+
+tf_buffer = tf2_ros.Buffer()
+tf_listener = tf2_ros.TransformListener(tf_buffer)
+
+larm_end_coords = skrobot.coordinates.CascadedCoords(parent=robot.l_gripper_tool_frame, name="larm_end_coords")
+larm_move_target = larm_end_coords
+larm_link_list = [
+    robot.l_shoulder_pan_link,
+    robot.l_shoulder_lift_link,
+    robot.l_upper_arm_roll_link,
+    robot.l_elbow_flex_link,
+    robot.l_forearm_roll_link,
+    robot.l_wrist_flex_link,
+    robot.l_wrist_roll_link]
+
+rarm_end_coords = skrobot.coordinates.CascadedCoords(parent=robot.r_gripper_tool_frame, name="rarm_end_coords")
+rarm_move_target = rarm_end_coords
+rarm_link_list = [
+    robot.r_shoulder_pan_link,
+    robot.r_shoulder_lift_link,
+    robot.r_upper_arm_roll_link,
+    robot.r_elbow_flex_link,
+    robot.r_forearm_roll_link,
+    robot.r_wrist_flex_link,
+    robot.r_wrist_roll_link]
+
+setter = SetModuleTf()
 
 
 def get_tag_coordinates(camera_position, tag_name):
@@ -89,38 +132,6 @@ def set_tf(coordinates, frame_name):
 
 
 
-rospy.init_node("attatch_upper_arm")
-robot = skrobot.models.PR2()
-ri = PR2ROSRobotInterface(robot)
-
-viewer = skrobot.viewers.TrimeshSceneViewer(resolution=(640, 480))
-viewer.add(robot)
-viewer.show()
-
-tf_buffer = tf2_ros.Buffer()
-tf_listener = tf2_ros.TransformListener(tf_buffer)
-
-larm_end_coords = skrobot.coordinates.CascadedCoords(parent=robot.l_gripper_tool_frame, name="larm_end_coords")
-larm_move_target = larm_end_coords
-larm_link_list = [
-    robot.l_shoulder_pan_link,
-    robot.l_shoulder_lift_link,
-    robot.l_upper_arm_roll_link,
-    robot.l_elbow_flex_link,
-    robot.l_forearm_roll_link,
-    robot.l_wrist_flex_link,
-    robot.l_wrist_roll_link]
-
-rarm_end_coords = skrobot.coordinates.CascadedCoords(parent=robot.r_gripper_tool_frame, name="rarm_end_coords")
-rarm_move_target = rarm_end_coords
-rarm_link_list = [
-    robot.r_shoulder_pan_link,
-    robot.r_shoulder_lift_link,
-    robot.r_upper_arm_roll_link,
-    robot.r_elbow_flex_link,
-    robot.r_forearm_roll_link,
-    robot.r_wrist_flex_link,
-    robot.r_wrist_roll_link]
 
 
 def init_pose():
@@ -263,7 +274,7 @@ def place_module_0():
         rospy.loginfo("getting servo_gear pos")
         servo_gear_coordinates = get_tf_coordinates("servo_gear")
 
-    table_top_z = 0.78
+    table_top_z = 0.79
     module_0_pos = servo_gear_coordinates.copy_worldcoords().transform(servo_gear_to_module_0)
     module_1_pos = servo_gear_coordinates.copy_worldcoords().transform(servo_gear_to_module_1)
 
@@ -295,6 +306,134 @@ def place_module_0():
     ri.angle_vector(robot.angle_vector(), 4)
     ri.wait_interpolation()
 
+
+def grasp_module_1():
+    global module_1_coordinates
+    global servo_gear_coordinates
+
+    # search stored_modules 
+    robot.larm.angle_vector(search_stored_module_larm_vector)
+    #robot.larm.move_end_pos([0.1, 0.05, 0.0], "world")
+    ri.angle_vector(robot.angle_vector(), 3)
+    ri.wait_interpolation()
+
+    module_1_coordinates = None
+    while module_1_coordinates is None:
+        try:
+            rospy.loginfo("getting module_0 pos")
+            module_1_coordinates = get_tag_coordinates("larm", "module_1")
+        except KeyboardInterrupt as e:
+            print(e)
+
+    robot.larm.angle_vector(grasp_module_neutral_larm_vector)
+    ri.angle_vector(robot.angle_vector(), 4)
+    ri.wait_interpolation()
+    ri.move_gripper("larm", 0.0550)
+    
+    module_1_grasp_pos = module_1_coordinates.copy_worldcoords().transform(module_tag_to_pre_grasp_pos)
+
+    robot.inverse_kinematics(
+        module_1_grasp_pos,
+        link_list=larm_link_list,
+        move_target=larm_end_coords)
+    ri.angle_vector(robot.angle_vector(), 4)
+    ri.wait_interpolation()
+
+
+    robot.larm.move_end_pos([0.059, 0, 0], "local")
+    ri.angle_vector(robot.angle_vector(), 3)
+    ri.wait_interpolation()
+
+    # grasp module_1
+    ri.move_gripper("larm", 0.019)
+
+    # lift up module_1
+    robot.larm.move_end_pos([-0.100, 0, 0], "local")
+    ri.angle_vector(robot.angle_vector(), 4)
+    ri.wait_interpolation()
+
+
+def place_module_1():
+    global module_1_coordinates
+    global servo_gear_coordinates
+    
+    # calc camera position
+    # servo_gear_coordinates = None
+    # while servo_gear_coordinates is None:
+    #     rospy.loginfo("getting servo_gear pos")
+    #     servo_gear_coordinates = get_tf_coordinates("servo_gear")
+
+    table_top_z = 0.79
+    module_1_pos = servo_gear_coordinates.copy_worldcoords().transform(servo_gear_to_module_1)
+
+    module_1_pos.translate([0, 0, table_top_z - module_1_pos.translation[2]])
+    module_1_pos.rotate(np.pi * 0.5, 'y')
+
+    # place module_1
+    robot.inverse_kinematics(
+        module_1_pos,
+        link_list=larm_link_list,
+        move_target=larm_end_coords)
+    robot.larm.move_end_pos([0, 0, 0.050], "world")
+    ri.angle_vector(robot.angle_vector(), 5)
+    ri.wait_interpolation()
+
+    robot.larm.move_end_pos([0, 0, -0.050], "world")
+    ri.angle_vector(robot.angle_vector(), 2)
+    ri.wait_interpolation()
+    
+    # return to neautral pos
+    ri.move_gripper("larm", 0.045)
+    robot.larm.move_end_pos([0, 0, 0.150], "world")
+    ri.angle_vector(robot.angle_vector(), 4)
+    ri.wait_interpolation()
+
+    robot.larm.angle_vector(search_stored_module_larm_vector)
+    ri.angle_vector(robot.angle_vector(), 4)
+    ri.wait_interpolation()
+
+
+def camera_calibration_pose():
+    global servo_gear_coordinates
+
+    calib_inter_pos = servo_gear_coordinates.copy_worldcoords().transform(servo_gear_to_calib_inter_pose)
+    calib_pos = servo_gear_coordinates.copy_worldcoords().transform(servo_gear_to_calib_inter_pose)
+
+    robot.inverse_kinematics(
+        calib_inter_pos,
+        link_list=larm_link_list,
+        move_target=larm_end_coords)
+    ri.angle_vector(robot.angle_vector(), 4)
+    ri.wait_interpolation()
+
+    robot.inverse_kinematics(
+        calib_pos,
+        link_list=larm_link_list,
+        move_target=larm_end_coords)
+    ri.angle_vector(robot.angle_vector(), 3)
+    ri.wait_interpolation()
+    
+
+def set_module_tf():
+    setter.estimated_tf = None
+    while setter.estimated_tf == None:
+        setter.estimate_tf("l", "module_0")
+    setter.set_estimated_tf("l", "module_0")
+    
+    while setter.estimated_tf == None:
+        setter.estimate_tf("l", "module_1")
+    setter.set_estimated_tf("l", "module_1")
+
+def hand_pass_upper_arm():
+    
+    # change to hand pass pose
+
+    ri.move_gripper("larm", 0.045)
+    # wait for 3 seconds
+    ri.move_gripper("larm", 0.016)
+
+    # move to insertposition 
+    
     
 # robot.angle_vector(ri.angle_vector())
 # robot.angle_vector(induction_init_angle_vector)
@@ -312,6 +451,7 @@ def place_module_0():
 # ri.wait_interpolation()
 
 
+
 if __name__ == "__main__":
     init_pose()
     find_kxr_arm_tag_pose()
@@ -320,4 +460,11 @@ if __name__ == "__main__":
     grasp_kxr_arm()
     grasp_module_0()
     place_module_0()
+    grasp_module_1()
+    place_module_1()
+    camera_calibration_pose()
+    camera_calibration()
+    set_module_tf()
+    # hand_pass_upper_arm()
+
     

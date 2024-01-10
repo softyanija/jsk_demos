@@ -28,9 +28,6 @@ search_arm_vector = np.array([ 0,  0,  0,  0,  0,
                                0,  0,  0,  0,  0],
                              dtype="float32")
 
-
-
-
 # rarm
 search_arm_rarm_vector = np.array([-0.3813113, 0.06809891, -2.1100695, -1.7763098, -1.6647813 , -0.27111033, -0.15205745], dtype="float32")
 
@@ -43,12 +40,16 @@ grasp_module_neutral_larm_vector = np.array([ 0.9475635, 0.01040518, 1.4659243, 
 #tags
 # kxr_tag_to_grasp_pos = skrobot.coordinates.Coordinates([-0.000, 0.001, 0.059], [-3.1, 0.9, -3.1])
 kxr_tag_to_grasp_pos = skrobot.coordinates.Coordinates([0.010, 0.001, 0.059], [-3.1, 0.9, -3.1])
-
 module_tag_to_pre_grasp_pos = skrobot.coordinates.Coordinates([-0.007, 0.000, 0.110], [-2.9, 1.5, 1.8])
+
+servo_gear_to_calib_inter_pose = skrobot.coordinates.Coordinates([-0.204, 0.018, 0.156], [0.8, 1.0, -0.1])
+servo_gear_to_calib_pose = skrobot.coordinates.Coordinates([-0.036, -0.039, 0.102], [1.8, 1.3, 0.2])
+
+
 
 # arange potision
 servo_gear_to_module_0 = skrobot.coordinates.Coordinates([0.1004, 0.1004, 0], [-math.pi * 0.75, 0, 0])
-servo_gear_to_module_1 = skrobot.coordinates.Coordinates([-0.1004, 0.1004, 0], [math.pi * 0.25, 0, 0]) 
+servo_gear_to_module_1 = skrobot.coordinates.Coordinates([-0.1004, 0.1004, 0], [-math.pi * 0.25, 0, 0]) 
 
 
 # for tf

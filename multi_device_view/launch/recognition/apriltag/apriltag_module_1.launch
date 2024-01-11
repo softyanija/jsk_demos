@@ -5,8 +5,8 @@
   <!-- configure camera input -->
   <arg name="camera_name" default="/module_1" />
   <arg name="camera_frame" default="module_1_color_optical_frame" />
-  <arg name="image_topic" default="color/image_rect_color" />
-  <arg name="queue_size" default="1" />
+  <arg name="image_topic" default="color/image_rect_color/republish" />
+  <arg name="queue_size" default="100" />
 
   <!-- apriltag_ros continuous detection node -->
   <node pkg="apriltag_ros" type="apriltag_ros_continuous_node" name="apriltag_ros_continuous_node" clear_params="true" output="screen" launch-prefix="$(arg launch_prefix)">

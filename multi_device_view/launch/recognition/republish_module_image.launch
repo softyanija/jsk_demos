@@ -1,0 +1,18 @@
+<launch>
+  <node name="image_republish_module_0_color" pkg="image_transport" type="republish" args="compressed raw">
+    <remap from="in" to="/module_0/color/image_rect_color" />
+    <remap from="out" to="/module_0/color/image_rect_color/republish" />
+  </node>
+  <node name="image_republish_module_1_color" pkg="image_transport" type="republish" args="compressed raw">
+    <remap from="in" to="/module_1/color/image_rect_color" />
+    <remap from="out" to="/module_1/color/image_rect_color/republish" />
+  </node>
+  <node name="image_republish_module_0_depth" pkg="image_transport" type="republish" args="compressedDepth raw">
+    <remap from="in" to="/module_0/aligned_depth_to_color/image_raw" />
+    <remap from="out" to="/module_0/aligned_depth_to_color/image_raw/republish" />
+  </node>
+  <node name="image_republish_module_1_depth" pkg="image_transport" type="republish" args="compressedDepth raw">
+    <remap from="in" to="/module_1/aligned_depth_to_color/image_raw" />
+    <remap from="out" to="/module_1/aligned_depth_to_color/image_raw/republish" />
+  </node>
+</launch>

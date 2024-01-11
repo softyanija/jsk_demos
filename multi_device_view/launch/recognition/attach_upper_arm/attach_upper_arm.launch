@@ -18,5 +18,6 @@
   <include file="$(find multi_device_view)/launch/recognition/attach_upper_arm/manage_tf.launch"/>
 
   <include file="$(find multi_device_view)/launch/recognition/apriltag/apriltag.launch"/>
-  
+
+  <include file="$(find multi_device_view)/launch/recognition/republish_module_image.launch"/>
 </launch>

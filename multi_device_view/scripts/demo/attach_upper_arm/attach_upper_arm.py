@@ -144,6 +144,8 @@ def init_pose():
 def find_kxr_arm_tag_pose():
     robot.angle_vector(ri.angle_vector())
     robot.rarm.angle_vector(search_arm_rarm_vector)
+    robot.larm.angle_vector(search_stored_module_0_larm_vector)
+    robot.rarm.move_end_pos([0.03, 0, 0], "world")
     ri.angle_vector(robot.angle_vector(), 4)
     ri.wait_interpolation()
 
@@ -224,7 +226,7 @@ def grasp_module_0():
     global servo_gear_coordinates
 
     # search stored_modules 
-    robot.larm.angle_vector(search_stored_module_larm_vector)
+    robot.larm.angle_vector(search_stored_module_0_larm_vector)
     ri.angle_vector(robot.angle_vector(), 4)
     ri.wait_interpolation()
 
@@ -251,7 +253,7 @@ def grasp_module_0():
     ri.wait_interpolation()
     rospy.sleep(1)
 
-    robot.larm.move_end_pos([0.059, 0, 0], "local")
+    robot.larm.move_end_pos([0.054, 0, 0], "local")
     ri.angle_vector(robot.angle_vector(), 3)
     ri.wait_interpolation()
 
@@ -302,7 +304,7 @@ def place_module_0():
     ri.angle_vector(robot.angle_vector(), 4)
     ri.wait_interpolation()
 
-    robot.larm.angle_vector(search_stored_module_larm_vector)
+    robot.larm.angle_vector(search_stored_module_1_larm_vector)
     ri.angle_vector(robot.angle_vector(), 4)
     ri.wait_interpolation()
 
@@ -312,7 +314,7 @@ def grasp_module_1():
     global servo_gear_coordinates
 
     # search stored_modules 
-    robot.larm.angle_vector(search_stored_module_larm_vector)
+    robot.larm.angle_vector(search_stored_module_1_larm_vector)
     #robot.larm.move_end_pos([0.1, 0.05, 0.0], "world")
     ri.angle_vector(robot.angle_vector(), 3)
     ri.wait_interpolation()
@@ -320,7 +322,7 @@ def grasp_module_1():
     module_1_coordinates = None
     while module_1_coordinates is None:
         try:
-            rospy.loginfo("getting module_0 pos")
+            rospy.loginfo("getting module_1 pos")
             module_1_coordinates = get_tag_coordinates("larm", "module_1")
         except KeyboardInterrupt as e:
             print(e)
@@ -340,7 +342,7 @@ def grasp_module_1():
     ri.wait_interpolation()
 
 
-    robot.larm.move_end_pos([0.059, 0, 0], "local")
+    robot.larm.move_end_pos([0.054, 0, 0], "local")
     ri.angle_vector(robot.angle_vector(), 3)
     ri.wait_interpolation()
 
@@ -388,7 +390,7 @@ def place_module_1():
     ri.angle_vector(robot.angle_vector(), 4)
     ri.wait_interpolation()
 
-    robot.larm.angle_vector(search_stored_module_larm_vector)
+    robot.larm.angle_vector(search_stored_module_0_larm_vector)
     ri.angle_vector(robot.angle_vector(), 4)
     ri.wait_interpolation()
 
@@ -397,7 +399,7 @@ def camera_calibration_pose():
     global servo_gear_coordinates
 
     calib_inter_pos = servo_gear_coordinates.copy_worldcoords().transform(servo_gear_to_calib_inter_pose)
-    calib_pos = servo_gear_coordinates.copy_worldcoords().transform(servo_gear_to_calib_inter_pose)
+    calib_pos = servo_gear_coordinates.copy_worldcoords().transform(servo_gear_to_calib_pose)
 
     robot.inverse_kinematics(
         calib_inter_pos,
@@ -424,16 +426,27 @@ def set_module_tf():
         setter.estimate_tf("l", "module_1")
     setter.set_estimated_tf("l", "module_1")
 
-def hand_pass_upper_arm():
-    
-    # change to hand pass pose
 
-    ri.move_gripper("larm", 0.045)
+def hand_pass_upper_arm():
+    # change to hand pass pose
+    calib_inter_pos = servo_gear_coordinates.copy_worldcoords().transform(servo_gear_to_calib_inter_pose)
+
+    robot.inverse_kinematics(
+        calib_inter_pos,
+        link_list=larm_link_list,
+        move_target=larm_end_coords)
+    ri.angle_vector(robot.angle_vector(), 4)
+    ri.wait_interpolation()
+    
+    ri.move_gripper("larm", 0.022)
     # wait for 3 seconds
+    rospy.sleep(3)
     ri.move_gripper("larm", 0.016)
 
-    # move to insertposition 
-    
+    # move to insertposition
+
+
+
     
 # robot.angle_vector(ri.angle_vector())
 # robot.angle_vector(induction_init_angle_vector)
@@ -465,6 +478,7 @@ if __name__ == "__main__":
     camera_calibration_pose()
     camera_calibration()
     set_module_tf()
-    # hand_pass_upper_arm()
+    hand_pass_upper_arm()
 
+    # make StereoView instance here
     

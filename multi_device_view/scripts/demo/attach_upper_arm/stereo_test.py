@@ -21,7 +21,9 @@ from stereo_view import StereoView
 
 rospy.init_node("stereo_test")
 setter = SetModuleTf()
+setter.estimate_tf("l", "module_0")
 setter.set_estimated_tf("l", "module_0")
+setter.estimate_tf("l", "module_1")
 setter.set_estimated_tf("l", "module_1")
 
 

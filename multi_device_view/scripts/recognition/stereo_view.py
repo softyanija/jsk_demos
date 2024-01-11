@@ -6,6 +6,7 @@ import tf2_ros
 import skrobot
 import message_filters
 import os
+import pdb
 
 from skrobot.coordinates import Coordinates
 from jsk_recognition_msgs.msg import RotatedRectStamped
@@ -19,10 +20,10 @@ class StereoView():
     def __init__(self, target_object, guide_object, **kwargs):
         self.target_object = target_object
         self.guide_object = guide_object
-        self.target_kp_1 = None
-        self.target_kp_2 = None
-        self.guide_kp_1 = None
-        self.guide_kp_2 = None
+        self.target_kp1 = None
+        self.target_kp2 = None
+        self.guide_kp1 = None
+        self.guide_kp2 = None
         self.camera_1 = "module_0"
         self.camera_2 = "module_1"
         self.K_1 = None
@@ -34,7 +35,8 @@ class StereoView():
         self.P_1w = None
         self.P_2w = None
 
-        self.subscribe_kp()
+        self.subscribe_target_kp()
+        self.subscribe_guide_kp()
         self.subscribe_camera_info()
 
         self.pub_target_point = rospy.Publisher(os.path.join("target_point", "3d_point"), PointStamped, queue_size=10)
@@ -42,8 +44,8 @@ class StereoView():
         
 
     def subscribe_target_kp(self):
-        sub_target_1 = message_filters.Subscriber(os.path.join(self.camera_1, self.target_object, target_point), RotatedRectStamped)
-        sub_target_2 = message_filters.Subscriber(os.path.join(self.camera_2, self.target_object, target_point), RotatedRectStamped)
+        sub_target_1 = message_filters.Subscriber(os.path.join(self.camera_1, self.target_object, "target_point"), RotatedRectStamped)
+        sub_target_2 = message_filters.Subscriber(os.path.join(self.camera_2, self.target_object, "target_point"), RotatedRectStamped)
         
         subs = [sub_target_1, sub_target_2]
         sync = message_filters.ApproximateTimeSynchronizer(fs = subs, queue_size=5, slop=1)
@@ -56,8 +58,8 @@ class StereoView():
 
 
     def subscribe_guide_kp(self):
-        sub_guide_1 = message_filters.Subscriber(os.path.join(self.camera_1, self.guide_object, guide_point), RotatedRectStamped)
-        sub_guide_2 = message_filters.Subscriber(os.path.join(self.camera_2, self.guide_object, guide_point), RotatedRectStamped)
+        sub_guide_1 = message_filters.Subscriber(os.path.join(self.camera_1, self.guide_object, "guide_point"), RotatedRectStamped)
+        sub_guide_2 = message_filters.Subscriber(os.path.join(self.camera_2, self.guide_object, "guide_point"), RotatedRectStamped)
         
         subs = [sub_guide_1, sub_guide_2]
         sync = message_filters.ApproximateTimeSynchronizer(fs = subs, queue_size=5, slop=1)
@@ -93,16 +95,15 @@ class StereoView():
         return X[:3]
 
 
-    def tf2mat(msg):
+    def tf2mat(self, msg):
         if msg is None:
             rospy.logwarn("can't recieve tf")
-
+            mat = None
+            
+        else:
             tf = msg.transform
             tf_coordinate = skrobot.coordinates.Coordinates([tf.translation.x, tf.translation.y, tf.translation.z], [tf.rotation.w, tf.rotation.x, tf.rotation.y, tf.rotation.z])
             mat = tf_coordinate.T()[:3]
-
-        else:
-            mat = None
     
         return mat
 
@@ -115,10 +116,10 @@ class StereoView():
         self.module_0_tf = tf_buffer.lookup_transform("module_0_color_optical_frame", "module_0_color_optical_frame", rospy.Time(0), rospy.Duration(3))
         self.module_1_tf = tf_buffer.lookup_transform("module_0_color_optical_frame", "module_1_color_optical_frame", rospy.Time(0), rospy.Duration(3))
         time.sleep(2)
-        self.T_1w = tf2mat(module_0_tf)
-        self.T_2w = tf2mat(module_1_tf)
-        self.P_1w = np.dot(stereo_view.K_1, T_1w)
-        self.P_2w = np.dot(stereo_view.K_2, T_2w)
+        self.T_1w = self.tf2mat(self.module_0_tf)
+        self.T_2w = self.tf2mat(self.module_1_tf)
+        self.P_1w = np.dot(self.K_1, self.T_1w)
+        self.P_2w = np.dot(self.K_2, self.T_2w)
 
         while not rospy.is_shutdown():
             try:
@@ -128,27 +129,31 @@ class StereoView():
                 rospy.logwarn("cought {}".format(e))
                 pass
 
-        target_point_msg = PointStamped()
-        target_point_msg.header.stamp =rospy.Time.now() 
-        target_point_msg.header.frame_id = "module_0_color_optical_frame"
-        guide_point_msg = PointStamped()
-        guide_point_msg.header.stamp =rospy.Time.now() 
-        guide_point_msg.header.frame_id = "module_0_color_optical_frame"
+            target_point_msg = PointStamped()
+            target_point_msg.header.stamp =rospy.Time.now() 
+            target_point_msg.header.frame_id = "module_0_color_optical_frame"
+            guide_point_msg = PointStamped()
+            guide_point_msg.header.stamp =rospy.Time.now() 
+            guide_point_msg.header.frame_id = "module_0_color_optical_frame"
+            print(self.target_kp1)
             
-        if self.target_kp1 is not None:
-            X_target = stereo_view.triangulation(self.P_1w, self.P_2w, self.target_kp_1, self.target_kp_2)
-            target_point_msg.point.x = X[0]
-            target_point_msg.point.y = X[1]
-            target_point_msg.point.z = X[2]
+            if self.target_kp1 is not None:
+                rospy.loginfo("found target point!")
+                X_target = self.triangulation(self.P_1w, self.P_2w, self.target_kp1, self.target_kp2)
+                target_point_msg.point.x = X_target[0]
+                target_point_msg.point.y = X_target[1]
+                target_point_msg.point.z = X_target[2]
 
-        if self.guide_kp1 is not None:
-            guide_point_msg.point.x = X[0]
-            guide_point_msg.point.y = X[1]
-            guide_point_msg.point.z = X[2]
+            if self.guide_kp1 is not None:
+                rospy.loginfo("found guide point!")
+                X_guide = self.triangulation(self.P_1w, self.P_2w, self.guide_kp1, self.guide_kp2)
+                guide_point_msg.point.x = X_guide[0]
+                guide_point_msg.point.y = X_guide[1]
+                guide_point_msg.point.z = X_guide[2]
 
-        pub_target_point(target_point_msg)
-        pub_guide_point(guide_point_msg)        
-
+            self.pub_target_point.publish(target_point_msg)
+            self.pub_guide_point.publish(guide_point_msg)        
+        
 
 if __name__ == "__main__":
     rospy.init_node("stereo_view")

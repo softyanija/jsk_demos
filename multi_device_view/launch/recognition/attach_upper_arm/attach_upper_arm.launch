@@ -20,4 +20,8 @@
   <include file="$(find multi_device_view)/launch/recognition/apriltag/apriltag.launch"/>
 
   <include file="$(find multi_device_view)/launch/recognition/republish_module_image.launch"/>
+
+  <node pkg="topic_tools" type="relay" name="module_0_camera_info_relay" args="/module_0/color/camera_info /module_0/color/image_rect_color/camera_info" />
+  <node pkg="topic_tools" type="relay" name="module_1_camera_info_relay" args="/module_1/color/camera_info /module_1/color/image_rect_color/camera_info" />
+
 </launch>

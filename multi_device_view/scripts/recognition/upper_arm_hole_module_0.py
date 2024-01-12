@@ -138,9 +138,8 @@ class UpperArmHole():
         ellipse_limit_min = 100
         box = self.sort_box(box)
         box_vec_x = box[1] - box[0]
-        box_vec_y = box[3] - box[0]
-        # limit = ((0, 0.5), (0.4, 1))
-        limit = ((0, 0.5), (0, 1))
+        box_vec_y = box[3] - box[0]        
+        limit = ((0.37, 0.80), (0.45, 1))
         limit_box = np.array((box[0] + box_vec_x * limit[0][0] + box_vec_y * limit[1][0],
                               box[0] + box_vec_x * limit[0][1] + box_vec_y * limit[1][0],
                               box[0] + box_vec_x * limit[0][1] + box_vec_y * limit[1][1],
@@ -163,7 +162,7 @@ class UpperArmHole():
 
         if ellipse_max_size > ellipse_limit_min:
             guide_ellipse = cv2.fitEllipse(ellipse_contours[ellipse_max_index])
-            drawed_image = cv2.ellipse(drawed_image, guide_ellipse, (0, 0, 255), 3)
+            drawed_image = cv2.ellipse(drawed_image, guide_ellipse, (0, 0, 255), 2)
 
         return guide_ellipse, drawed_image
 

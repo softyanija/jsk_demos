@@ -1,0 +1,8 @@
+<launch>
+
+  <node pkg="multi_device_view" type="servo_gear_module_0.py" name="servo_gear_module_0"/>
+  <node pkg="multi_device_view" type="servo_gear_module_1.py" name="servo_gear_module_1"/>
+  <node pkg="multi_device_view" type="upper_arm_hole_module_0.py" name="upper_arm_hole_module_0"/>
+  <node pkg="multi_device_view" type="upper_arm_hole_module_1.py" name="upper_arm_hole_module_1"/>
+
+</launch>

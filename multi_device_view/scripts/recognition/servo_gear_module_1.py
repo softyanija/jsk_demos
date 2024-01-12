@@ -149,7 +149,7 @@ class ServoGear():
                 self.pub_debug_image_matching.publish(self.bridge.cv2_to_imgmsg(result_image, "bgr8"))
                 
             else:
-                rospy.logwarn("not recieve image")
+                rospy.logwarn("servo_gear_module_1 : not recieve image")
 
 
 if __name__ == "__main__":

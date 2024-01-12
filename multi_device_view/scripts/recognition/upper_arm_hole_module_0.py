@@ -247,7 +247,7 @@ class UpperArmHole():
                         self.pub_rect_image.publish(self.bridge.cv2_to_imgmsg(rect_image_buf, "bgr8"))                    
 
             else:
-                rospy.logwarn("not recieve image")
+                rospy.logwarn("upper_arm_hole_module_0 : not recieve image")
 
 
 if __name__ == "__main__":

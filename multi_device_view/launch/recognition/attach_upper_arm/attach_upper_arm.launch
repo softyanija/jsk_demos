@@ -23,5 +23,9 @@
 
   <node pkg="topic_tools" type="relay" name="module_0_camera_info_relay" args="/module_0/color/camera_info /module_0/color/image_rect_color/camera_info" />
   <node pkg="topic_tools" type="relay" name="module_1_camera_info_relay" args="/module_1/color/camera_info /module_1/color/image_rect_color/camera_info" />
+  <node pkg="multi_device_view" type="servo_gear_module_0.py" name="servo_gear_module_0"/>
+  <node pkg="multi_device_view" type="servo_gear_module_1.py" name="servo_gear_module_1"/>
+  <node pkg="multi_device_view" type="upper_arm_hole_module_0.py" name="upper_arm_hole_module_0"/>
+  <node pkg="multi_device_view" type="upper_arm_hole_module_1.py" name="upper_arm_hole_module_1"/>
 
 </launch>

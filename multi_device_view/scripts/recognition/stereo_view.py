@@ -13,6 +13,9 @@ from jsk_recognition_msgs.msg import RotatedRectStamped
 from sensor_msgs.msg import CameraInfo
 from geometry_msgs.msg import PointStamped
 from scipy import linalg
+from std_msgs.msg import Header
+from std_srvs.srv import Empty
+from std_srvs.srv import EmptyResponse
 
 
 class StereoView():
@@ -34,6 +37,9 @@ class StereoView():
         self.T_2w = None
         self.P_1w = None
         self.P_2w = None
+        self.service_name = os.path.join("stereo_view", "start")
+        self.service_modules_tf_is_set = False
+        self.service = rospy.Service(self.service_name, Empty, self.start_stereo_view)
 
         self.subscribe_target_kp()
         self.subscribe_guide_kp()
@@ -84,6 +90,22 @@ class StereoView():
         self.K_1 = np.asarray(camera_info_1.K).reshape(3,3)
         self.K_2 = np.asarray(camera_info_2.K).reshape(3,3)
 
+
+    def start_stereo_view(self, req):
+        rospy.loginfo("Start stereo_view")
+        tf_buffer = tf2_ros.Buffer()
+        tf_listener = tf2_ros.TransformListener(tf_buffer)
+        self.module_0_tf = tf_buffer.lookup_transform("module_0_color_optical_frame", "module_0_color_optical_frame", rospy.Time(0), rospy.Duration(3))
+        self.module_1_tf = tf_buffer.lookup_transform("module_0_color_optical_frame", "module_1_color_optical_frame", rospy.Time(0), rospy.Duration(3))
+        rospy.sleep(2)
+        self.T_1w = self.tf2mat(self.module_0_tf)
+        self.T_2w = self.tf2mat(self.module_1_tf)
+        self.P_1w = np.dot(self.K_1, self.T_1w)
+        self.P_2w = np.dot(self.K_2, self.T_2w)
+        self.service_modules_tf_is_set = True
+        
+        return EmptyResponse()
+        
         
     def triangulation(self, P_1w, P_2w, kp1, kp2):    
         X = cv2.triangulatePoints(P_1w[:3], P_2w[:3], kp1, kp2)
@@ -110,89 +132,93 @@ class StereoView():
 
     def run(self):
         rate = rospy.Rate(5)
-        tf_buffer = tf2_ros.Buffer()
-        tf_listener = tf2_ros.TransformListener(tf_buffer)
-        
-        self.module_0_tf = tf_buffer.lookup_transform("module_0_color_optical_frame", "module_0_color_optical_frame", rospy.Time(0), rospy.Duration(3))
-        self.module_1_tf = tf_buffer.lookup_transform("module_0_color_optical_frame", "module_1_color_optical_frame", rospy.Time(0), rospy.Duration(3))
-        time.sleep(2)
-        self.T_1w = self.tf2mat(self.module_0_tf)
-        self.T_2w = self.tf2mat(self.module_1_tf)
-        self.P_1w = np.dot(self.K_1, self.T_1w)
-        self.P_2w = np.dot(self.K_2, self.T_2w)
+
+        rospy.loginfo("Waiting for service call...")
+        rospy.wait_for_service(self.service_name)
+        rospy.loginfo("Service is now available")
 
         while not rospy.is_shutdown():
-            try:
-                rate.sleep()
+            if self.service_modules_tf_is_set:
+                try:
+                    rate.sleep()
 
-            except rospy.ROSTimeMovedBackwardsException as e:
-                rospy.logwarn("cought {}".format(e))
-                pass
+                except rospy.ROSTimeMovedBackwardsException as e:
+                    rospy.logwarn("cought {}".format(e))
+                    pass
 
-            target_point_msg = PointStamped()
-            target_point_msg.header.stamp =rospy.Time.now() 
-            target_point_msg.header.frame_id = "module_0_color_optical_frame"
-            guide_point_msg = PointStamped()
-            guide_point_msg.header.stamp =rospy.Time.now() 
-            guide_point_msg.header.frame_id = "module_0_color_optical_frame"
-            print(self.target_kp1)
+                target_point_msg = PointStamped()
+                target_point_msg.header.stamp =rospy.Time.now() 
+                target_point_msg.header.frame_id = "module_0_color_optical_frame"
+                guide_point_msg = PointStamped()
+                guide_point_msg.header.stamp =rospy.Time.now() 
+                guide_point_msg.header.frame_id = "module_0_color_optical_frame"
+                print("target_kp1:")
+                print(self.target_kp1)
+                
             
-            if self.target_kp1 is not None:
-                rospy.loginfo("found target point!")
-                X_target = self.triangulation(self.P_1w, self.P_2w, self.target_kp1, self.target_kp2)
-                target_point_msg.point.x = X_target[0]
-                target_point_msg.point.y = X_target[1]
-                target_point_msg.point.z = X_target[2]
+                if self.target_kp1 is not None:
+                    rospy.loginfo("found target point!")
+                    X_target = self.triangulation(self.P_1w, self.P_2w, self.target_kp1, self.target_kp2)
+                    target_point_msg.point.x = X_target[0]
+                    target_point_msg.point.y = X_target[1]
+                    target_point_msg.point.z = X_target[2]
 
-            if self.guide_kp1 is not None:
-                rospy.loginfo("found guide point!")
-                X_guide = self.triangulation(self.P_1w, self.P_2w, self.guide_kp1, self.guide_kp2)
-                guide_point_msg.point.x = X_guide[0]
-                guide_point_msg.point.y = X_guide[1]
-                guide_point_msg.point.z = X_guide[2]
+                if self.guide_kp1 is not None:
+                    rospy.loginfo("found guide point!")
+                    X_guide = self.triangulation(self.P_1w, self.P_2w, self.guide_kp1, self.guide_kp2)
+                    guide_point_msg.point.x = X_guide[0]
+                    guide_point_msg.point.y = X_guide[1]
+                    guide_point_msg.point.z = X_guide[2]
 
-            self.pub_target_point.publish(target_point_msg)
-            self.pub_guide_point.publish(guide_point_msg)        
-        
+                self.pub_target_point.publish(target_point_msg)
+                self.pub_guide_point.publish(guide_point_msg)
+                
+            else:
+                rospy.loginfo("waiting for tf set")
+                
+                
 
 if __name__ == "__main__":
     rospy.init_node("stereo_view")
-    rate = rospy.Rate(5)
-    tf_buffer = tf2_ros.Buffer()
-    tf_listener = tf2_ros.TransformListener(tf_buffer)
 
-    stereo_view = StereoView("module_0/servo_gear/target_point", "module_1/servo_gear/target_point")
+    stereo_view = StereoView("servo_gear", "upper_arm_hole")
+    stereo_view.run()
+    
+    # rate = rospy.Rate(5)
+    # tf_buffer = tf2_ros.Buffer()
+    # tf_listener = tf2_ros.TransformListener(tf_buffer)
 
-    module_0_tf = tf_buffer.lookup_transform("module_0_color_optical_frame", "module_0_color_optical_frame", rospy.Time(0), rospy.Duration(3))
-    module_1_tf = tf_buffer.lookup_transform("module_0_color_optical_frame", "module_1_color_optical_frame", rospy.Time(0), rospy.Duration(3))
-    time.sleep(2)
-    T_1w = tf2mat(module_0_tf)
-    T_2w = tf2mat(module_1_tf)
-    P_1w = np.dot(stereo_view.K_1, T_1w)
-    P_2w = np.dot(stereo_view.K_2, T_2w)
+    # stereo_view = StereoView("module_0/servo_gear/target_point", "module_1/servo_gear/target_point")
 
-    while not rospy.is_shutdown():
-        try:
-            rate.sleep()
-        except rospy.ROSTimeMovedBackwardsException as e:
-            rospy.logwarn("cought {}".format(e))
-            pass
+    # module_0_tf = tf_buffer.lookup_transform("module_0_color_optical_frame", "module_0_color_optical_frame", rospy.Time(0), rospy.Duration(3))
+    # module_1_tf = tf_buffer.lookup_transform("module_0_color_optical_frame", "module_1_color_optical_frame", rospy.Time(0), rospy.Duration(3))
+    # time.sleep(2)
+    # T_1w = tf2mat(module_0_tf)
+    # T_2w = tf2mat(module_1_tf)
+    # P_1w = np.dot(stereo_view.K_1, T_1w)
+    # P_2w = np.dot(stereo_view.K_2, T_2w)
+
+    # while not rospy.is_shutdown():
+    #     try:
+    #         rate.sleep()
+    #     except rospy.ROSTimeMovedBackwardsException as e:
+    #         rospy.logwarn("cought {}".format(e))
+    #         pass
         
-        X, X1, X2 = stereo_view.triangulation(P_1w, P_2w, stereo_view.kp_1, stereo_view.kp_2)
+    #     X, X1, X2 = stereo_view.triangulation(P_1w, P_2w, stereo_view.kp_1, stereo_view.kp_2)
 
-        # X = stereo_view.DLT(P_1w, P_2w, stereo_view.kp1, stereo_view.kp2)
-        point_msg = PointStamped()
-        point_msg.header.stamp =rospy.Time.now() 
-        point_msg.header.frame_id = "module_0_color_optical_frame"
-        # point_msg.header.frame_id = "base_link"
+    #     # X = stereo_view.DLT(P_1w, P_2w, stereo_view.kp1, stereo_view.kp2)
+    #     point_msg = PointStamped()
+    #     point_msg.header.stamp =rospy.Time.now() 
+    #     point_msg.header.frame_id = "module_0_color_optical_frame"
+    #     # point_msg.header.frame_id = "base_link"
 
-        point_msg.point.x = X[0]
-        point_msg.point.y = X[1]
-        point_msg.point.z = X[2]
+    #     point_msg.point.x = X[0]
+    #     point_msg.point.y = X[1]
+    #     point_msg.point.z = X[2]
 
-        # point_msg.point.x = X1[0]
-        # point_msg.point.y = X1[1]
-        # point_msg.point.z = X1[2]
+    #     # point_msg.point.x = X1[0]
+    #     # point_msg.point.y = X1[1]
+    #     # point_msg.point.z = X1[2]
         
-        point_pub.publish(point_msg)
-
+    #     point_pub.publish(point_msg)

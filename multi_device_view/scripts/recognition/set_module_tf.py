@@ -17,6 +17,10 @@ class SetModuleTf():
         self.module = None
 
 
+    def reset_estimated_tf(self):
+        self.estimated_tf = None
+        
+
     def estimate_tf(self, arm_side, module):
         tf_buffer = tf2_ros.Buffer()
         tf_listener = tf2_ros.TransformListener(tf_buffer)

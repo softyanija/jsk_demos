@@ -7,6 +7,7 @@ import numpy as np
 import rospy
 import math
 import time
+import pdb
 from opencv_apps.msg import Line,LineArrayStamped
 from geometry_msgs.msg import PoseArray
 from sensor_msgs.msg import Image
@@ -15,13 +16,11 @@ from cv_bridge import CvBridge
 rospy.init_node('detect_lines')
 
 def callback(lines_msg, area_msg, image_msg):
-
     bridge = CvBridge()
     memory_line = LineArrayStamped()
     memory_line.header = lines_msg.header
 
     if ((not lines_msg.lines == []) and (not area_msg.poses == [])):
-        
         l1 = (area_msg.poses[1].position.x - area_msg.poses[0].position.x)**2 + (area_msg.poses[1].position.y - area_msg.poses[0].position.y)**2
         l2 = (area_msg.poses[1].position.x - area_msg.poses[2].position.x)**2 + (area_msg.poses[1].position.y - area_msg.poses[2].position.y)**2
 
@@ -63,7 +62,6 @@ def callback(lines_msg, area_msg, image_msg):
 
 pub_line = rospy.Publisher('/timer_cam2_rec/memory/memory_line/line',LineArrayStamped , queue_size=1)
 pub_image = rospy.Publisher('/timer_cam2_rec/memory/memory_line/debug_image', Image , queue_size=1)
-
 
 sub_lines = message_filters.Subscriber('/timer_cam2_rec/memory/hough_lines/lines', LineArrayStamped)
 sub_area = message_filters.Subscriber('/timer_cam2_rec/memory_edge', PoseArray)

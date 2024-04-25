@@ -4,6 +4,7 @@ import rospy
 import cv2
 import numpy as np
 import time
+import pdb
 from geometry_msgs.msg import Pose
 from geometry_msgs.msg import PoseArray
 from sensor_msgs.msg import Image
@@ -17,14 +18,18 @@ class memory_edge():
         self.img_pub = rospy.Publisher("/timer_cam2_rec/memory_edge/debug_image", Image, queue_size=3)
         
     def callback(self, data):
+        bridge = CvBridge()
         ps = PoseArray()
         ps.header = data.header
-        bridge = CvBridge()
         img = bridge.imgmsg_to_cv2(data, "bgr8")
         img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        ret,thresh = cv2.threshold(img_gray,127,255,0)
-        imgEdge,contours,hierarchy = cv2.findContours(thresh, 1, 2)
-        
+        try:
+            ret,thresh = cv2.threshold(img_gray,127,255,0)
+            contours,hierarchy = cv2.findContours(thresh, 1, 2)
+        except Exception as e:
+            rospy.loginfo(e)
+            pdb.set_trace()
+
         if (not contours == []):
             cnt = max(contours, key=lambda x: cv2.contourArea(x))
             rect = cv2.minAreaRect(cnt)
@@ -32,8 +37,7 @@ class memory_edge():
             box = np.int0(box)
             buf = box.tolist()
             img = cv2.drawContours(img, [box], 0, (0,255,0), 3)
-            
-            
+
             for i in range(4):
                 pose = Pose()
                 pose.position.x = box[i][0]

@@ -28,9 +28,9 @@
 	  <include file="$(find opencv_apps)/launch/hough_lines.launch">
 		<arg name="image" value="hsv_color_filter/image"/>
 		<arg name="hough_type" value="1" />
-		<arg name="threshold" value="90"/>
+		<arg name="threshold" value="60"/>
 		<arg name="rho" value="4.0"/>
-        <arg name="minLineLength" value="95" />
+        <arg name="minLineLength" value="50" />
         <arg name="maxLineGrap" value="50" />
         <arg name="debug_view" value="$(arg debug_view_memory)"/>
 	  </include>

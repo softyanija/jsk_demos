@@ -31,7 +31,7 @@
 		<arg name="threshold" value="60"/>
 		<arg name="rho" value="4.0"/>
         <arg name="minLineLength" value="50" />
-        <arg name="maxLineGrap" value="50" />
+        <arg name="maxLineGrap" value="20" />
         <arg name="debug_view" value="$(arg debug_view_memory)"/>
 	  </include>
 
@@ -131,7 +131,8 @@
     </group>
     
   </group>
-  <node name="pub_socket_line" pkg="assemble_table_pr2" type="socket_line.py" />
+  <!-- <node name="pub_socket_line" pkg="assemble_table_pr2" type="socket_line.py" /> -->
+  <!-- <node name="pub_socket_line" pkg="assemble_table_pr2" type="indicate_socketline_cam2.py" /> -->
   <node name="check_lever" pkg="assemble_table_pr2" type="check_lever.py" />
   <node name="aruco_hand" pkg="assemble_table_pr2" type="aruco_hand.py" />
 </launch>

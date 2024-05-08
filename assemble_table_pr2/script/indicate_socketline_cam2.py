@@ -8,7 +8,7 @@ import numpy as np
 import math
 import time
 import pdb
-from opencv_apps.msg import Line,LineArrayStamped,RotatedRectArrayStamped
+from opencv_apps.msg import Line,LineArray,LineArrayStamped,RotatedRectArrayStamped
 from geometry_msgs.msg import Pose
 from geometry_msgs.msg import PoseArray
 from sensor_msgs.msg import Image
@@ -22,6 +22,7 @@ class SocketLine():
         self.sub_image = None
         self.debug_image = None
         self.socket_line = None
+        self.socket_line_candidate = None
         self.header = None
         self.bridge = CvBridge()
         
@@ -65,21 +66,34 @@ class SocketLine():
                 if (not self.sub_lines == []):
                     use_line = 0
                     center_y_max = 0
+                    self.socket_line_candidate = LineArray()
+                    
                     for i,line in enumerate(self.sub_lines.lines):
                         center_y = (line.pt1.y + line.pt2.y)/2
-                        if center_y > center_y_max:
-                            center_y_max = center_y
-                            use_line = i
 
-                    line = Line()
+                        if center_y > 170 and center_y < 210 and (2* abs(line.pt1.y - line.pt2.y))< abs(line.pt1.x - line.pt2.x):
+                            # rospy.loginfo("selected line")
+                            # rospy.loginfo(center_y)
+                            
+                            self.socket_line_candidate.lines.append(line)
+                            line_start = (int(line.pt1.x), int(line.pt1.y))
+                            line_end = (int(line.pt2.x), int(line.pt2.y))
+                            self.pub_image = cv2.line(self.pub_image, line_start, line_end, (0,255,0), 3)
 
-                    if center_y_max > 120 and center_y_max < 210 and (2* abs(self.sub_lines.lines[use_line].pt1.y - self.sub_lines.lines[use_line].pt2.y))< abs(self.sub_lines.lines[use_line].pt1.x - self.sub_lines.lines[use_line].pt2.x) :
-                        line = self.sub_lines.lines[use_line]
-                        self.socket_line.lines.append(line)
-                        line_start = (int(line.pt1.x), int(line.pt1.y))
-                        line_end = (int(line.pt2.x), int(line.pt2.y))
-                        self.pub_image = cv2.line(self.pub_image, line_start, line_end, (0,255,0), 3)
+                    if (not self.socket_line_candidate.lines == []):
+                        for j,line in enumerate(self.socket_line_candidate.lines):
+                            max_length = 0
+                            use_line_id = 0
+                            length = (line.pt1.x - line.pt2.x)**2 + (line.pt1.y - line.pt2.y)**2
+                            if length > max_length:
+                                max_length = length
+                                use_line_id = j
 
+                        self.socket_line.lines.append(self.socket_line_candidate.lines[use_line_id])
+                        socket_line_start = (int(self.socket_line_candidate.lines[use_line_id].pt1.x), int(self.socket_line_candidate.lines[use_line_id].pt1.y))
+                        socket_line_end = (int(self.socket_line_candidate.lines[use_line_id].pt2.x), int(self.socket_line_candidate.lines[use_line_id].pt2.y))
+                        self.pub_image = cv2.line(self.pub_image, line_start, line_end, (0,0,255), 3)
+                
                 self.socket_line.header = self.header
                 self.pub_line.publish(self.socket_line)
                 self.pub_debug_image.publish(self.bridge.cv2_to_imgmsg(self.pub_image, "bgr8"))

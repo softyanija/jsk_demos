@@ -7,6 +7,7 @@ import message_filters
 import numpy as np
 import math
 import time
+import pdb
 from opencv_apps.msg import Line,LineArrayStamped,RotatedRectArrayStamped
 from geometry_msgs.msg import Pose
 from geometry_msgs.msg import PoseArray
@@ -42,51 +43,47 @@ class SocketLine():
         self.sub_lines = lines 
         self.sub_image = self.bridge.imgmsg_to_cv2(image, "bgr8")
         self.header = image.header
-        rospy.loginfo("multi_callback")
 
 
     def run(self):
         rate = rospy.Rate(5)
+        self.socket_line = LineArrayStamped()
         
         rospy.loginfo("start to recognition socket line")
         
         while not rospy.is_shutdown():
-            rospy.loginfo("loop")
             try:
-                rospy.loginfo("1")
                 rate.sleep()
                 
             except rospy.ROSTimeMovedBackwardsException as e:
                 rospy.logwarn("cought {}".format(e))
                 pass
-
-            rospy.loginfo("hoge")
             
             if self.sub_image is not None:
+                self.pub_image = self.sub_image.copy()
+                
                 if (not self.sub_lines == []):
                     use_line = 0
                     center_y_max = 0
-                    for i,line in enumerate(self.sub_lines):
+                    for i,line in enumerate(self.sub_lines.lines):
                         center_y = (line.pt1.y + line.pt2.y)/2
                         if center_y > center_y_max:
                             center_y_max = center_y
                             use_line = i
 
                     line = Line()
-                    self.pub_img = bridge.imsmsg_to_cv2(self.sub_img, "bgr8")
 
-                    if center_y_max > 150 and (2* abs(self.sub_lines.lines[use_line].pt1.y - self.sub_lines.lines[use_line].pt2.y))< abs(self.sub_lines.lines[use_line].pt1.x - self.sub_lines.lines[use_line].pt2.x) :
-                        line = sub_lines.lines[use_line]
+                    if center_y_max > 120 and center_y_max < 210 and (2* abs(self.sub_lines.lines[use_line].pt1.y - self.sub_lines.lines[use_line].pt2.y))< abs(self.sub_lines.lines[use_line].pt1.x - self.sub_lines.lines[use_line].pt2.x) :
+                        line = self.sub_lines.lines[use_line]
                         self.socket_line.lines.append(line)
                         line_start = (int(line.pt1.x), int(line.pt1.y))
                         line_end = (int(line.pt2.x), int(line.pt2.y))
-                        self.pub_image = cv2.line(self.pub_image, line_start, line_end, (0,255,0), 2)
+                        self.pub_image = cv2.line(self.pub_image, line_start, line_end, (0,255,0), 3)
 
-
-                self.pub_image = bridge.cv2_to_imgmsg(image_msg, "bgr8")
+                self.socket_line.header = self.header
                 self.pub_line.publish(self.socket_line)
-                self.pub_debug_image.publish(self.pub_image)
-                print("huga")
+                self.pub_debug_image.publish(self.bridge.cv2_to_imgmsg(self.pub_image, "bgr8"))
+
 
 if __name__ == "__main__":
     rospy.init_node("socket_line")

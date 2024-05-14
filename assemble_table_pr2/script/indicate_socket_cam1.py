@@ -53,9 +53,6 @@ def callback(img_msg, rec_msg):
             target_top_x = int(rec_msg.rects[use_rect].center.x)
             target_top_y = int(rec_msg.rects[use_rect].center.y - rec_msg.rects[use_rect].size.height*2)
             
-
-            
-            
             image_msg = cv2.rectangle(image_msg, (lefttop_x, lefttop_y), (rightbot_x, rightbot_y), (0,255,0), 2)
             image_msg = cv2.line(image_msg, (target_top_x,target_top_y),(target_x,target_y),(255,0,0),2)
             image_msg = cv2.circle(image_msg, (target_x, target_y), 3,(0,0,255), 1, 4, 0)

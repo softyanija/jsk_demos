@@ -1,0 +1,5 @@
+<launch>
+  <include file="$(find m5stack_ros)/launch/timer_cam.launch">
+	<arg name="namespace" value="timer_cam1" />
+  </include>
+</launch>

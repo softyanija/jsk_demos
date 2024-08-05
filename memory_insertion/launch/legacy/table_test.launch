@@ -1,0 +1,62 @@
+<launch>
+  <arg name="input" default="/kinect_head/depth_registered/quater/throttled/points" />
+  <arg name="sensor_frame" default="/head_mount_kinect_rgb_optical_frame" />
+  <arg name="manager" default="tabletop_object_detector_nodelet_manager" />
+  <arg name="machine" default="localhost" />
+
+  <arg name="launch_manager" default="true" />
+  <arg name="launch_tracking" default="true" />
+  <arg name="launch_openni" default="false" />
+  <arg name="launch_rviz" default="false" />
+  <arg name="publish_tf" default="true" />
+
+  <machine name="localhost" address="localhost" />
+
+  <!-- visualization -->
+  <node name="rviz_tabletop" pkg="rviz" type="rviz"
+        args=" -d $(find jsk_pcl_ros)/config/openni_tabletop.rviz"
+        if="$(arg launch_rviz)"/>
+
+  <!-- tabletop object detection -->
+  <node name="$(arg manager)" pkg="nodelet" type="nodelet" args="manager"
+        machine="$(arg machine)" if="$(arg launch_manager)"
+        output="screen" />
+
+  <node name="input_relay" pkg="nodelet" type="nodelet"
+        args="load jsk_topic_tools/Relay $(arg manager)"
+        machine="$(arg machine)">
+    <remap from="~input" to="$(arg input)" />
+  </node>
+  <node name="multi_plane_estimate" pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/OrganizedMultiPlaneSegmentation $(arg manager)"
+        output="screen"
+        if="$(arg launch_manager)"
+        machine="$(arg machine)">
+    <remap from="~input" to="input_relay/output" />
+    <rosparam>
+      max_curvature: 0.01
+      estimate_normal: true
+    </rosparam>
+  </node>
+  <node name="polygon_magnifier" pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/PolygonMagnifier $(arg manager)"
+        output="screen"
+        machine="$(arg machine)">
+    <remap from="~input" to="multi_plane_estimate/output_refined_polygon" />
+  </node>
+  <node name="plane_extraction" pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/MultiPlaneExtraction $(arg manager)"
+        output="screen"
+        machine="$(arg machine)">
+    <remap from="~input" to="input_relay/output" />
+    <remap from="~indices" to="/multi_plane_estimate/output_refined" />
+    <remap from="~input_polygons" to="/multi_plane_estimate/output_refined_polygon" />
+    <remap from="~input_coefficients" to="/multi_plane_estimate/output_refined_coefficients" />
+    <rosparam subst_value="true">
+      use_sensor_frame: true
+      sensor_frame: $(arg sensor_frame)
+      min_height: 0.03
+    </rosparam>
+  </node>
+  
+</launch>

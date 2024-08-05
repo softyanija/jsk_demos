@@ -1,0 +1,4 @@
+<launch>
+  <include file="$(find assemble_table_pr2)/launch/third_eye/recog_cam1.launch" />
+  <include file="$(find assemble_table_pr2)/launch/third_eye/recog_cam2.launch" />
+</launch>

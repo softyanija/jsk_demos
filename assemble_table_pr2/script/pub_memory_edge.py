@@ -4,6 +4,7 @@ import rospy
 import cv2
 import numpy as np
 import time
+import pdb
 from geometry_msgs.msg import Pose
 from geometry_msgs.msg import PoseArray
 from sensor_msgs.msg import Image
@@ -15,16 +16,22 @@ class memory_edge():
         self.sub = rospy.Subscriber("/timer_cam2_rec/memory/hsv_color_filter/image", Image, self.callback)
         self.edge_pub = rospy.Publisher("/timer_cam2_rec/memory_edge", PoseArray, queue_size=3)
         self.img_pub = rospy.Publisher("/timer_cam2_rec/memory_edge/debug_image", Image, queue_size=3)
+        self.edge_img_pub = rospy.Publisher("/timer_cam2_rec/memory_edge/guide_point/debug_image", Image, queue_size=3)
         
     def callback(self, data):
+        bridge = CvBridge()
         ps = PoseArray()
         ps.header = data.header
-        bridge = CvBridge()
         img = bridge.imgmsg_to_cv2(data, "bgr8")
+        edge = img.copy()
         img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        ret,thresh = cv2.threshold(img_gray,127,255,0)
-        imgEdge,contours,hierarchy = cv2.findContours(thresh, 1, 2)
-        
+        try:
+            ret,thresh = cv2.threshold(img_gray,127,255,0)
+            contours,hierarchy = cv2.findContours(thresh, 1, 2)
+        except Exception as e:
+            rospy.loginfo(e)
+            pdb.set_trace()
+
         if (not contours == []):
             cnt = max(contours, key=lambda x: cv2.contourArea(x))
             rect = cv2.minAreaRect(cnt)
@@ -32,8 +39,9 @@ class memory_edge():
             box = np.int0(box)
             buf = box.tolist()
             img = cv2.drawContours(img, [box], 0, (0,255,0), 3)
-            
-            
+
+            edge_value_max = 0
+            edge_id = 0
             for i in range(4):
                 pose = Pose()
                 pose.position.x = box[i][0]
@@ -43,18 +51,28 @@ class memory_edge():
                 pose.orientation.y = 0
                 pose.orientation.z = 0
                 pose.orientation.w = 1
-
                 ps.poses.append(pose)
 
+                if box[i][0] + box[i][1] > edge_value_max:
+                    edge_value_max = box[i][0] + box[i][1]
+                    edge_id = i
+
+            edge = cv2.circle(edge, (int(box[edge_id][0]), int(box[edge_id][1])), 3 ,(0,0,255), 3,4,0)
+
         img = bridge.cv2_to_imgmsg(img, "bgr8")
+        edge = bridge.cv2_to_imgmsg(edge, "bgr8")
         self.edge_publish(ps)
         self.img_publish(img)
+        self.edge_img_publish(edge)
 
     def edge_publish(self, data):
         self.edge_pub.publish(data)
 
     def img_publish(self, data):
         self.img_pub.publish(data)
+
+    def edge_img_publish(self, data):
+        self.edge_img_pub.publish(data)
 
 if __name__ == '__main__':
     rospy.init_node('pub_memory_edge')

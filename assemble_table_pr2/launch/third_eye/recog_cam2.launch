@@ -1,8 +1,11 @@
 <launch>
   <arg name="INPUT" default="/timer_cam2/timer_cam_image/image_rect_color"/>
   <arg name="gui" default="true" />
-  <arg name="debug_view" default="true" />
-  <param name="/use_sim_time" value="false" />
+  <arg name="debug_view_memory" default="true" />
+  <arg name="debug_view_socket" default="false" />
+  <arg name="debug_view_lever" default="false" />
+  <arg name="debug_view_board" default="false" />
+  <param name="/use_sim_time" value="true" />
 
   <group ns="timer_cam2_rec">
 	<group ns="memory">
@@ -14,20 +17,22 @@
 		<arg name="s_limit_min" default="15"/>
 		<arg name="v_limit_max" default="256"/>
 		<arg name="v_limit_min" default="44"/>
+        <arg name="debug_view" value="$(arg debug_view_memory)"/>
 	  </include>
 
 	  <include file="$(find opencv_apps)/launch/general_contours.launch">
 		<arg name="image" value="hsv_color_filter/image"/>
-		<arg name="debug_view" value="$(arg debug_view)"/>
+		<arg name="debug_view" value="$(arg debug_view_memory)"/>
       </include>
 
 	  <include file="$(find opencv_apps)/launch/hough_lines.launch">
 		<arg name="image" value="hsv_color_filter/image"/>
 		<arg name="hough_type" value="1" />
-		<arg name="threshold" value="90"/>
+		<arg name="threshold" value="60"/>
 		<arg name="rho" value="4.0"/>
-        <arg name="minLineLength" value="95" />
-        <arg name="maxLineGrap" value="50" />
+        <arg name="minLineLength" value="50" />
+        <arg name="maxLineGrap" value="20" />
+        <arg name="debug_view" value="$(arg debug_view_memory)"/>
 	  </include>
 
       <node name="pub_memory_edge" pkg="assemble_table_pr2" type="pub_memory_edge.py" />
@@ -50,20 +55,22 @@
 		<arg name="s_limit_min" default="35"/>
 		<arg name="v_limit_max" default="256"/>
 		<arg name="v_limit_min" default="115"/>
+        <arg name="debug_view" value="$(arg debug_view_socket)"/>
 	  </include>
 
 	  <include file="$(find opencv_apps)/launch/general_contours.launch">
 		<arg name="image" value="hsv_color_filter/image"/>
-		<arg name="debug_view" value="$(arg debug_view)"/>
+		<arg name="debug_view" value="$(arg debug_view_socket)"/>
       </include>
 
       <include file="$(find opencv_apps)/launch/hough_lines.launch">
 		<arg name="image" value="$(arg INPUT)"/>
 		<arg name="hough_type" value="1" />
-		<arg name="threshold" value="100"/>
+		<arg name="threshold" value="80"/>
 		<arg name="rho" value="4.0"/>
-        <arg name="minLineLength" value="110"/>
-        <arg name="maxLineGrap" value="20" />
+        <arg name="minLineLength" value="10"/>
+        <arg name="maxLineGrap" value="5" />
+        <arg name="debug_view" value="$(arg debug_view_socket)"/>
 	  </include>
 	</group>
 
@@ -74,33 +81,58 @@
       <remap from="~input/src1" to="memory/hsv_color_filter/image" />
       <remap from="~input/src2" to="socket/hsv_color_filter/image" />
 	</node>
-
-	<node name="apply_mask_image"
-          pkg="nodelet" type="nodelet"
-          args="standalone jsk_perception/ApplyMaskImage"
-          respawn="true" >
-      <remap from="~input" to="$(arg INPUT)" />
-      <remap from="~input/mask" to="add_mask_image/output" />
-      <rosparam>
-        approximate_sync: true
-        clip: false
-      </rosparam>
-	</node>
     
     <group ns="lever">
       <include file="$(find opencv_apps)/launch/hsv_color_filter.launch">
-		<arg name="image" value="around_image"/>
+		<!-- <arg name="image" value="around_image"/> -->
+        <arg name="image" value="$(arg INPUT)"/>
 		<arg name="h_limit_max" default="295"/>
 		<arg name="h_limit_min" default="196"/>
 		<arg name="s_limit_max" default="256"/>
-		<arg name="s_limit_min" default="40"/>
+		<arg name="s_limit_min" default="30"/>
 		<arg name="v_limit_max" default="256"/>
 		<arg name="v_limit_min" default="0"/>
+        <arg name="debug_view" value="$(arg debug_view_lever)"/>
 	  </include>
 
+      <node name="mask_image_generator"
+            pkg="jsk_perception" type="mask_image_generator">
+        <remap from="~input" to="$(arg INPUT)" />
+        <rosparam>
+          offset_x: 179
+          offset_y: 160
+          width: 14
+          height: 21
+        </rosparam>
+      </node>
+
+      <node name="mask_image_to_rect"
+            pkg="jsk_perception" type="mask_image_to_rect">
+        <remap from="~input" to="mask_image_generator/output" />
+      </node>
+
+      <node name="draw_rects"
+            pkg="jsk_perception" type="draw_rects">
+        <remap from="~input" to="$(arg INPUT)" />
+        <remap from="~input/rects" to="mask_image_to_rect/output" />
+      </node>
+
+      <node name="apply_mask_image"
+            pkg="nodelet" type="nodelet"
+            args="standalone jsk_perception/ApplyMaskImage">
+        <remap from="~input" to="hsv_color_filter/image" />
+        <remap from="~input/mask" to="mask_image_generator/output" />
+        <rosparam>
+          approximate_sync: true
+          clip: false
+        </rosparam>
+      </node>
+
+      
+
 	  <include file="$(find opencv_apps)/launch/general_contours.launch">
-		<arg name="image" value="hsv_color_filter/image"/>
-		<arg name="debug_view" value="$(arg debug_view)"/>
+		<arg name="image" value="apply_mask_image/output"/>
+		<arg name="debug_view" value="$(arg debug_view_lever)"/>
       </include>
     </group>
 
@@ -113,18 +145,19 @@
 		<arg name="s_limit_min" default="40"/>
 		<arg name="v_limit_max" default="256"/>
 		<arg name="v_limit_min" default="0"/>
+        <arg name="debug_view" value="$(arg debug_view_board)"/>
 	  </include>
 
 	  <include file="$(find opencv_apps)/launch/general_contours.launch">
 		<arg name="image" value="hsv_color_filter/image"/>
-		<arg name="debug_view" value="$(arg debug_view)"/>
+		<arg name="debug_view" value="$(arg debug_view_board)"/>
       </include>
     </group>
     
   </group>
-  <node name="pub_socket_line" pkg="assemble_table_pr2" type="socket_line.py" />
+  <!-- <node name="pub_socket_line" pkg="assemble_table_pr2" type="indicate_socket_position_cam2.py" /> -->
+  <node name="pub_socket_line" pkg="assemble_table_pr2" type="indicate_socket_line_cam2.py" />
   <node name="check_lever" pkg="assemble_table_pr2" type="check_lever.py" />
+  <node name="indicate_lever" pkg="assemble_table_pr2" type="indicate_lever_cam2.py" />
   <node name="aruco_hand" pkg="assemble_table_pr2" type="aruco_hand.py" />
-
-  
 </launch>

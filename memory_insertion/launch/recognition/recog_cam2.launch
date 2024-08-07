@@ -30,8 +30,8 @@
         <arg name="maxLineGrap" value="50" />
 	  </include>
 
-      <node name="pub_memory_edge" pkg="assemble_table_pr2" type="pub_memory_edge.py" />
-      <node name="pub_memory_line" pkg="assemble_table_pr2" type="memory_line.py" />
+      <node name="pub_memory_edge" pkg="memory_insertion" type="pub_memory_edge.py" />
+      <node name="pub_memory_line" pkg="memory_insertion" type="memory_line.py" />
 
 	  <group if="$(arg gui)">
 		<node name="image_view_fg"
@@ -122,9 +122,8 @@
     </group>
     
   </group>
-  <node name="pub_socket_line" pkg="assemble_table_pr2" type="socket_line.py" />
-  <node name="check_lever" pkg="assemble_table_pr2" type="check_lever.py" />
-  <node name="aruco_hand" pkg="assemble_table_pr2" type="aruco_hand.py" />
-
+  <node name="pub_socket_line" pkg="memory_insertion" type="socket_line.py" />
+  <node name="check_lever" pkg="memory_insertion" type="check_lever.py" />
+  <node name="aruco_hand" pkg="memory_insertion" type="aruco_hand.py" />
   
 </launch>

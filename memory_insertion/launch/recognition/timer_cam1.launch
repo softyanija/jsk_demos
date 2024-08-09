@@ -1,5 +1,6 @@
 <launch>
   <include file="$(find m5stack_ros)/launch/timer_cam.launch">
 	<arg name="namespace" value="timer_cam1" />
+    <arg name="camera_info" value="camera/individual/timer_cam1_info.yaml" />
   </include>
 </launch>

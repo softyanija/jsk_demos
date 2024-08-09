@@ -27,6 +27,9 @@ if [ $? != 0 ]; then
     tmux send-keys -t $SESSION_NAME:0.1 "rossetip" C-m
     tmux send-keys -t $SESSION_NAME:0.1 "source ~/pr2_ws/devel/setup.bash" C-m
     tmux send-keys -t $SESSION_NAME:0.1 "roscd memory_insertion/launch/recognition" C-m
+    tmux send-keys -t $SESSION_NAME:0.1 "source ~/m5stack_ros_ws/devel/setup.bash" C-m
+    tmux send-keys -t $SESSION_NAME:0.1 "sleep 5" C-m
+    tmux send-keys -t $SESSION_NAME:0.1 "roslaunch timer_cams.launch" C-m
 
     tmux send-keys -t $SESSION_NAME:0.2 "echo 2" C-m
     tmux send-keys -t $SESSION_NAME:0.2 "rossetmaster pr1012" C-m
@@ -70,8 +73,8 @@ if [ $? != 0 ]; then
     tmux send-keys -t $SESSION_NAME:1.2 "rossetmaster pr1012" C-m
     tmux send-keys -t $SESSION_NAME:1.2 "rossetip" C-m
     tmux send-keys -t $SESSION_NAME:1.2 "source ~/pr2_ws/devel/setup.bash" C-m
-    tmux send-keys -t $SESSION_NAME:1.2 "roscd memory_insertion" C-m
-#    tmux send-keys -t $SESSION_NAME:1.2 "roslaunch multi_device_view pointcloud_processing.launch" C-m
+    tmux send-keys -t $SESSION_NAME:1.2 "roscd memory_insertion/script/rosbag" C-m
+    tmux send-keys -t $SESSION_NAME:1.2 "python3 rosbag_record_device_images.py"
 
     tmux send-keys -t $SESSION_NAME:1.3 "echo 3" C-m
     tmux send-keys -t $SESSION_NAME:1.3 "rossetmaster pr1012" C-m

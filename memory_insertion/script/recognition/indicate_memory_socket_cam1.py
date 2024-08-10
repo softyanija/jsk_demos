@@ -26,6 +26,8 @@ class MemorySocketCam1():
         self.memory_under = None
         self.result_image = None
         self.memory_under = None
+        self.memory_angle = None
+        self.socket_angle = None
         self.bridge = CvBridge()
         self.pub_under = rospy.Publisher('/timer_cam1_rec/memory/memory_under', PoseArray, queue_size=1)
         self.pub_image = rospy.Publisher('/timer_cam1_rec/memory/memory_under/debug_image', Image, queue_size=1)
@@ -65,6 +67,8 @@ class MemorySocketCam1():
 
             if (self.sub_image is not None):
                 self.result_image = self.sub_image.copy()
+                self.memory_angle = None
+                self.socket_angle = None
 
                 if (not self.sub_memory_rect.rects == []):
                     size_max = 0.0
@@ -87,6 +91,7 @@ class MemorySocketCam1():
                         # else:
                         #     angle = (self.sub_memory_rect.rects[use_rect].angle + 90)
                         angle = self.sub_memory_rect.rects[use_rect].angle
+                        self.memory_angle = angle
                         print(angle)
             
                         under_x = int(self.sub_memory_rect.rects[use_rect].center.x + (memory_len / 2)* math.sin(angle))
@@ -118,6 +123,7 @@ class MemorySocketCam1():
                         socket_center = self.sub_socket_rect.rects[use_rect].center
                         socket_size = self.sub_socket_rect.rects[use_rect].size
                         socket_angle = self.sub_socket_rect.rects[use_rect].angle
+                        self.socket_angle = socket_angle
                         # socket_left_top = (int(socket_center.x - socket_size.width/2), int(socket_center.y - socket_size.height/2))
                         # socket_right_bottom = (int(socket_center.x + socket_size.width/2), int(socket_center.y + socket_size.height/2))
                         socket_right_bottom = (int(socket_center.x - socket_size.width/2 * math.cos(math.radians(socket_angle)) - socket_size.height/2 * math.sin(math.radians(socket_angle))),

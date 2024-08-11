@@ -20,6 +20,7 @@ class MemoryEdgeCam2():
         self.bridge = CvBridge()
 
         self.pub_image = rospy.Publisher("/timer_cam2_rec/memory_edge/debug_image", Image, queue_size=3)
+        self.pub_guid_point_b = rospy.Publisher("/timer_cam2_rec/memory_edge/guide_point_b", PoseArray, queue_size=3)
         self.pub_memory_edge = rospy.Publisher("/timer_cam2_rec/memory_edge/memory_edge", PoseArray, queue_size=3)
         self.subscribe()
 
@@ -34,7 +35,7 @@ class MemoryEdgeCam2():
 
 
     def run(self):
-        rate = rospy.Rate(5)
+        rate = rospy.Rate(3)
         rospy.loginfo("start indicate_memory_edge_cam1")
 
         while not rospy.is_shutdown():
@@ -48,6 +49,8 @@ class MemoryEdgeCam2():
                 self.result_image = self.sub_image.copy()
                 self.memory_edge = PoseArray()
                 self.memory_edge.header = self.header
+                self.memory_guide_point_b = PoseArray()
+                self.memory_guide_point_b.header = self.header
                 img_gray = cv2.cvtColor(self.sub_image, cv2.COLOR_BGR2GRAY)
                 ret,thresh = cv2.threshold(img_gray,127,255,0)
                 contours,hierarchy = cv2.findContours(thresh, 1, 2)
@@ -59,7 +62,8 @@ class MemoryEdgeCam2():
                     box = np.int0(box)
                     buf = box.tolist()
                     # img = cv2.drawContours(img, [box], 0, (0,255,0), 3)
-
+                    max_sum_xy = 0
+                    use_index = 0
                     for i in range(4):
                         pose = Pose()
                         pose.position.x = box[i][0]
@@ -70,14 +74,31 @@ class MemoryEdgeCam2():
                         pose.orientation.z = 0
                         pose.orientation.w = 1
 
-                    self.result_image = cv2.circle(self.result_image, (pose.position.x, pose.position.y), 3, (255,0,0), 3,4,0)
-                    self.memory_edge.poses.append(pose)
+                        #all edge
+                        self.result_image = cv2.circle(self.result_image, (pose.position.x, pose.position.y), 2, (0,255,0), 3,4,0)
+                        self.memory_edge.poses.append(pose)
 
+                        if (box[i][0] + box[i][1]) > max_sum_xy:
+                            max_sum_xy = box[i][0] + box[i][1]
+                            use_index = i
+
+                    pose.position.x = box[use_index][0]
+                    pose.position.y = box[use_index][1]
+                    pose.position.z= 0
+                    pose.orientation.x = 0
+                    pose.orientation.y = 0
+                    pose.orientation.z = 0
+                    pose.orientation.w = 1
+
+                    self.memory_guide_point_b.poses.append(pose)
+                    self.result_image = cv2.circle(self.result_image, (self.memory_edge.poses[use_index].position.x, self.memory_edge.poses[use_index].position.y), 4, (255,0,0), 3,4,0)
                 self.result_image = self.bridge.cv2_to_imgmsg(self.result_image, "rgb8")
 
                 self.pub_image.publish(self.result_image)
+
                 self.pub_memory_edge.publish(self.memory_edge)
-                rospy.loginfo("memory edge x: " + str(pose.position.x) + " y: " + str(pose.position.y))
+                self.pub_guid_point_b.publish(self.memory_guide_point_b)
+                rospy.loginfo("memory edge x: " + str(self.memory_edge.poses[use_index].position.x) + " y: " + str(self.memory_edge.poses[use_index].position.y))
             else:
                 rospy.logwarn("didn't recieve image")
 

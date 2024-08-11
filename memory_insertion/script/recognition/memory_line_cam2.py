@@ -75,6 +75,7 @@ class MemoryLineCam2():
 
                     ref_deg = math.atan(t)
                     use_line = 0
+                    self.memory_angle = None
         
                     for i,line in enumerate(self.sub_memory_lines):
                         buf = (line.pt1.y - line.pt2.y) / max(1, (line.pt1.x - line.pt2.x))
@@ -89,6 +90,7 @@ class MemoryLineCam2():
                         if diff_deg_min > diff_deg:
                             diff_deg_min = diff_deg
                             use_line = i
+                            self.memory_angle = buf_deg
                             line_start = (int(line.pt1.x), int(line.pt1.y))
                             line_end = (int(line.pt2.x), int(line.pt2.y))
 

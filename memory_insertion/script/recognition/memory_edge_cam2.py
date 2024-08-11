@@ -11,7 +11,7 @@ from std_msgs.msg import Header
 from cv_bridge import CvBridge
 
 class MemoryEdgeCam2():
-
+    
     def __init__(self):
         self.subs = []
         self.header = None

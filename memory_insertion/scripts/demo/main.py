@@ -9,6 +9,7 @@ rospack = rospkg.RosPack()
 
 sys.path.append(rospack.get_path("memory_insertion") + "/scripts")
 from recognition import *
+from demo import *
 
 import numpy as np
 import rospy

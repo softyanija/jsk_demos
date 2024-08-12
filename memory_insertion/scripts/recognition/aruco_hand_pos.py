@@ -27,7 +27,7 @@ class ArucoHandPos():
     def callback(self, image):
         self.sub_image = self.bridge.imgmsg_to_cv2(image, "rgb8")
 
-    def run(self)
+    def run(self):
         self.hand_pos = PoseArray()
         self.hand_pos.header = image.header
         self.result_image = self.sub_image.copy()
@@ -36,7 +36,7 @@ class ArucoHandPos():
 
         if ids is not None:
             v = np.mean(corners[0][0],axis=0)
-            print int(v[0]), int(v[1])
+            print (int(v[0]), int(v[1]))
 
             pose = Pose()
             pose.position.x = int(v[0])

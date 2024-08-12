@@ -58,25 +58,25 @@ class SocketLineCam2():
                     center_y_max = 0
                     for i,line in enumerate(self.lines_msg.lines):
                         center_y = (line.pt1.y + line.pt2.y)/2
-                          if center_y > center_y_max:
-                               center_y_max = center_y
-                               use_line = i
+                        if center_y > center_y_max:
+                            center_y_max = center_y
+                            use_line = i
 
                     if use_line is not None:
                         if center_y_max > 320 and (2* abs(lines_msg.lines[use_line].pt1.y - lines_msg.lines[use_line].pt2.y))< abs(lines_msg.lines[use_line].pt1.x - lines_msg.lines[use_line].pt2.x) :
-                        line = lines_msg.lines[use_line]
-                        socket_line.lines.append(line)
-                        line_start = (int(line.pt1.x), int(line.pt1.y))
-                        line_end = (int(line.pt2.x), int(line.pt2.y))
-                        self.result_image = cv2.line(self.result_image, line_start, line_end, (0,255,0), 3)
-                        self.pub_line.publish(socket_line)
+                            line = lines_msg.lines[use_line]
+                            socket_line.lines.append(line)
+                            line_start = (int(line.pt1.x), int(line.pt1.y))
+                            line_end = (int(line.pt2.x), int(line.pt2.y))
+                            self.result_image = cv2.line(self.result_image, line_start, line_end, (0,255,0), 3)
+                            self.pub_line.publish(socket_line)
 
                 self.pub_image.publish(self.bridge.cv2_to_imgmsg(self.result_image, "bgr8"))
 
             else:
                 rospy.logwarn("didn't recieve lines")
 
-if __name__= "__main__":
+if __name__ == "__main__":
 
     rospy.init_node('socket_line')
     socket_line = SocketLine()

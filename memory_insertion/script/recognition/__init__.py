@@ -5,3 +5,4 @@ from . import SocketLineCam2
 from . import MemoryLineCam2
 from . import SocketCam2
 from . import CheckLeverCam2
+from . import ArucoHandPos

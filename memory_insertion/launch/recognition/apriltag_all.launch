@@ -1,0 +1,9 @@
+<launch>
+  <group ns="timer_cam1_rec">
+    <include file="$(find memory_insertion)/launch/recognition/apriltag_timer_cam1.launch"/>
+  </group>
+
+  <group ns="timer_cam2_rec">
+    <include file="$(find memory_insertion)/launch/recognition/apriltag_timer_cam2.launch"/>
+  </group>
+</launch>

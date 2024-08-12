@@ -5,10 +5,10 @@ import sys
 import os
 import rospkg
 
-rospack = rospkg.Rospack()
+rospack = rospkg.RosPack()
 
-sys.path.append(rospack.get_path("memory_insertion") + "scripts")
-# if you are in ipython3, use "sys.path.append(os.getcwd())"
+sys.path.append(rospack.get_path("memory_insertion") + "/scripts")
+from recognition import *
 
 import numpy as np
 import rospy
@@ -22,8 +22,6 @@ from skrobot.coordinates import Coordinates
 from skrobot.interfaces.ros import PR2ROSRobotInterface
 from skrobot.interfaces.ros.tf_utils import tf_pose_to_coords
 from skrobot.interfaces.ros.tf_utils import geometry_pose_to_coords
-
-from recognition import *
 
 
 rospy.init_node("memory_insertion")

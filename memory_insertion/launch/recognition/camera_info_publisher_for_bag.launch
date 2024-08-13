@@ -1,13 +1,8 @@
 <launch>
-  <arg name="port" default="/dev/rfcomm1" />
-  <arg name="baud" default="115200" />
-  <arg name="image" default="timer_cam_image" />
-  <arg name="namespace" default="/"/>
-  <arg name="rosserial_name" default="seiral_node" />
-  <arg name="gui" default="true" />
   <arg name="camera_info" default="timer_cam_info.yaml"/>
+  <arg name="image" default="timer_cam_image/image_rect_color" />
 
-  <group ns="timer_cam1"> 
+  <group ns="timer_cam1">    
     <node pkg="jsk_interactive_marker" name="camera_info_publisher" type="camera_info_publisher" output="screen">
      </node>
 
@@ -21,7 +16,7 @@
     </node>
   </group>
 
-  <group ns="timer_cam2"> 
+  <group ns="timer_cam2">
     <node pkg="jsk_interactive_marker" name="camera_info_publisher" type="camera_info_publisher" output="screen">
      </node>
 

@@ -50,8 +50,7 @@ class MemorySocketCam1():
         self.sub_image = self.bridge.imgmsg_to_cv2(image, "rgb8")
         self.header = image.header
         self.memory_under = PoseArray()
-        # socket
-        
+        # socket        
 
 
     def run(self):
@@ -81,30 +80,28 @@ class MemorySocketCam1():
 
                     if use_rect is not None:
                         self.memory_under_pose = Pose()
-                        memory_len = max(self.sub_memory_rect.rects[use_rect].size.width, self.sub_memory_rect.rects[use_rect].size.height)
-                        #memory_len = rec_msg.rects[use_rect].size.width
-                        # under_x = int(rec_msg.rects[use_rect].center.x)
-                        # under_y = int(rec_msg.rects[use_rect].center.y + memory_len/2)
-            
-                        # if (abs(self.sub_memory_rect.rects[use_rect].angle) < (self.sub_memory_rect.rects[use_rect].angle + 90)):
-                        #     angle = self.sub_memory_rect.rects[use_rect].angle
-                        # else:
-                        #     angle = (self.sub_memory_rect.rects[use_rect].angle + 90)
-                        angle = self.sub_memory_rect.rects[use_rect].angle
-                        self.memory_angle = angle
-                        print(angle)
-            
-                        under_x = int(self.sub_memory_rect.rects[use_rect].center.x + (memory_len / 2)* math.sin(angle))
-                        under_y = int(self.sub_memory_rect.rects[use_rect].center.y + (memory_len / 2)* math.cos(angle))
-                        top_x = int(self.sub_memory_rect.rects[use_rect].center.x - (memory_len / 2)* math.sin(angle))
-                        top_y = int(self.sub_memory_rect.rects[use_rect].center.y - (memory_len / 2)* math.cos(angle))
+                        memory_angle = self.sub_memory_rect.rects[use_rect].angle
+
+                        if self.sub_memory_rect.rects[use_rect].size.width > self.sub_memory_rect.rects[use_rect].size.height:
+                            self.memory_angle = memory_angle + 90
+                            under_x = int(self.sub_memory_rect.rects[use_rect].center.x - self.sub_memory_rect.rects[use_rect].size.width/2 * math.sin(math.radians(self.memory_angle)))
+                            under_y = int(self.sub_memory_rect.rects[use_rect].center.y + self.sub_memory_rect.rects[use_rect].size.width/2 * math.cos(math.radians(self.memory_angle)))
+                            top_x = int(self.sub_memory_rect.rects[use_rect].center.x + self.sub_memory_rect.rects[use_rect].size.width/2 * math.sin(math.radians(self.memory_angle)))
+                            top_y = int(self.sub_memory_rect.rects[use_rect].center.y - self.sub_memory_rect.rects[use_rect].size.width/2 * math.cos(math.radians(self.memory_angle)))
+                        else:
+                            under_x = int(self.sub_memory_rect.rects[use_rect].center.x - self.sub_memory_rect.rects[use_rect].size.height/2 * math.sin(math.radians(memory_angle)))
+                            under_y = int(self.sub_memory_rect.rects[use_rect].center.y + self.sub_memory_rect.rects[use_rect].size.height/2 * math.cos(math.radians(memory_angle)))
+                            top_x = int(self.sub_memory_rect.rects[use_rect].center.x + self.sub_memory_rect.rects[use_rect].size.height/2 * math.sin(math.radians(memory_angle)))
+                            top_y = int(self.sub_memory_rect.rects[use_rect].center.y - self.sub_memory_rect.rects[use_rect].size.height/2 * math.cos(math.radians(memory_angle)))
+                        
+                        rospy.loginfo("memory: x:{:.3g} y:{:.3g} width:{:.2g} height:{:.2g} angle:{:.2g}".format(self.sub_memory_rect.rects[use_rect].center.x, self.sub_memory_rect.rects[use_rect].center.y, self.sub_memory_rect.rects[use_rect].size.width, self.sub_memory_rect.rects[use_rect].size.height, memory_angle))
+                        
                         self.memory_under_pose.position.x = under_x
                         self.memory_under_pose.position.y = under_y
                         self.memory_under.header = self.header
                         self.memory_under.poses.append(self.memory_under_pose)
 
                         self.result_image = cv2.circle(self.result_image, (under_x,under_y), 3,(0,0,255),1,4,0)
-                        # self.result_image = cv2.circle(self.result_image, (top_x,top_y), 5,(255,0,0),2,4,0)
                         self.result_image = cv2.line(self.result_image, (under_x,under_y),(top_x,top_y),(0,255,0),1)
                         self.pub_under.publish(self.memory_under)
 
@@ -123,17 +120,22 @@ class MemorySocketCam1():
                         socket_center = self.sub_socket_rect.rects[use_rect].center
                         socket_size = self.sub_socket_rect.rects[use_rect].size
                         socket_angle = self.sub_socket_rect.rects[use_rect].angle
+                        if socket_angle < -45:
+                            socket_angle = socket_angle + 90
+                             
                         self.socket_angle = socket_angle
                         # socket_left_top = (int(socket_center.x - socket_size.width/2), int(socket_center.y - socket_size.height/2))
                         # socket_right_bottom = (int(socket_center.x + socket_size.width/2), int(socket_center.y + socket_size.height/2))
+                        # if socket_size.height
+
                         socket_right_bottom = (int(socket_center.x - socket_size.width/2 * math.cos(math.radians(socket_angle)) - socket_size.height/2 * math.sin(math.radians(socket_angle))),
                                            int(socket_center.y - socket_size.width/2 * math.sin(math.radians(socket_angle)) - socket_size.height/2 * math.cos(math.radians(socket_angle))))
                         socket_left_top = (int(socket_center.x + socket_size.width/2 * math.cos(math.radians(socket_angle)) + socket_size.height/2 * math.sin(math.radians(socket_angle))),
                                                int(socket_center.y + socket_size.width/2 * math.sin(math.radians(socket_angle)) + socket_size.height/2 * math.cos(math.radians(socket_angle))))
-                        socket_target_point = (int(socket_center.x + socket_size.width/2 * math.cos(math.radians(socket_angle))),
-                                               int(socket_center.y + socket_size.width/2 * math.sin(math.radians(socket_angle))))
-                        socket_target_line_end = (int(socket_center.x + socket_size.width * math.cos(math.radians(socket_angle))),
-                                               int(socket_center.y + socket_size.width * math.sin(math.radians(socket_angle))))
+                        socket_target_point = (int(socket_center.x + socket_size.width/2 * math.sin(math.radians(socket_angle))),
+                                               int(socket_center.y - socket_size.height/2 * math.cos(math.radians(socket_angle))))
+                        socket_target_line_end = (int(socket_center.x + socket_size.width * math.sin(math.radians(socket_angle))),
+                                               int(socket_center.y - socket_size.height * math.cos(math.radians(socket_angle))))
 
                         self.result_image = cv2.rectangle(self.result_image, socket_left_top, socket_right_bottom, (0,255,0),3)
                         self.result_image = cv2.circle(self.result_image, socket_target_point, 3,(255,0,0),3,4,0)
@@ -141,6 +143,7 @@ class MemorySocketCam1():
                         
                 self.result_image = self.bridge.cv2_to_imgmsg(self.result_image, "rgb8")
                 self.pub_image.publish(self.result_image)
+                # rospy.loginfo("memory_angle: {:.3g}, socket_angle: {:.3g}".format(self.memory_angle, self.socket_angle))
 
             else:
                 rospy.logwarn("didn't recieve image")

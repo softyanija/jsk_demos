@@ -24,7 +24,6 @@ from skrobot.interfaces.ros import PR2ROSRobotInterface
 from skrobot.interfaces.ros.tf_utils import tf_pose_to_coords
 from skrobot.interfaces.ros.tf_utils import geometry_pose_to_coords
 
-
 rospy.init_node("memory_insertion")
 robot = skrobot.models.PR2()
 ri = PR2ROSRobotInterface(robot)
@@ -59,11 +58,60 @@ rarm_link_list = [
     r.r_wrist_roll_link]
 
 
-
 #move-to-init()
+ri.move_gripper("larm", 0.06)
+ri.move_gripper("rarm", 0.06)
+robot.angle_vector(ri.angle_vector())
+robot.angle_vector(params.init_pose)
+ri.angle_vector(robot.angle_vector(), 4)
+ri.wait_interpolation()
+rospy.sleep(1)
 
 #place-cam2()
+robot.angle_vector(params.place_cam2_2)
+ri.angle_vector(robot.angle_vector(), 4)
+ri.wait_interpolation()
+rospy.sleep(1)
+
+ri.move_gripper("rarm", 0.035) #TODO: adjust
+rospy.sleep(1)
+
+robot.angle_vector(params.place_cam2_3)
+ri.angle_vector(robot.angle_vector(), 4)
+ri.wait_interpolation()
+rospy.sleep(1)
+
+robot.angle_vector(params.place_cam2_4)
+ri.angle_vector(robot.angle_vector(), 4)
+ri.wait_interpolation()
+rospy.sleep(1)
+
+robot.angle_vector(params.place_cam2_5)
+ri.angle_vector(robot.angle_vector(), 4)
+ri.wait_interpolation()
+rospy.sleep(1)
+
+robot.angle_vector(params.place_cam2_6)
+ri.angle_vector(robot.angle_vector(), 4)
+ri.wait_interpolation()
+rospy.sleep(1)
+
+ri.move_gripper("rarm", 0.050)
+rospy.sleep(1)
+
+robot.angle_vector(params.place_cam2_5)
+ri.angle_vector(robot.angle_vector(), 4)
+ri.wait_interpolation()
+rospy.sleep(1)
+
+robot.angle_vector(params.place_cam2_4)
+ri.angle_vector(robot.angle_vector(), 4)
+ri.wait_interpolation()
+rospy.sleep(1)
+
 #move-to-init()
+
+
 #place-cam1()
 
 #set cam1 tf

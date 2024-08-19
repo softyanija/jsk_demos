@@ -20,7 +20,7 @@ class DetectLinesCam2():
         self.header = None
         self.lines_msg = None
         self.sub_image = None
-        self.clip_top_left = (0, 130)
+        self.clip_top_left = (50, 130)
         self.clip_bottom_right = (200, 200)        
         self.bridge = CvBridge()
         self.line = Line()
@@ -52,7 +52,7 @@ class DetectLinesCam2():
             x1, y1 = 0, calc_y(0)
             x2, y2 = w, calc_y(w)
         x1, y1, x2, y2 = map(int, [x1, y1, x2, y2])
-        cv2.line(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
+        cv2.line(img, (x1, y1), (x2, y2), (0, 255, 0), 1)
         return (x1, y1), (x2, y2)
 
 
@@ -78,28 +78,24 @@ class DetectLinesCam2():
                 equalized_image_wide = np.hstack((gray,equ))
                 equalized_image = equalized_image_wide[:, equalized_image_wide.shape[1]//2:equalized_image_wide.shape[1]]
                
-                image_contour_only = cv2.Canny(equalized_image, 100, 250, L2gradient=True)
+                image_contour_only = cv2.Canny(equalized_image, 100, 300, L2gradient=True)
 
                 mask = np.zeros_like(image_contour_only)
                 cv2.rectangle(mask, self.clip_top_left, self.clip_bottom_right, (255,255,255), thickness=cv2.FILLED)
                 cliped_contour = cv2.bitwise_and(image_contour_only, mask)
-                detected_lines = cv2.HoughLines(cliped_contour, rho=1, theta=np.pi/180, threshold=100)
-
+                detected_lines = cv2.HoughLines(cliped_contour, rho=1, theta=np.pi/180, threshold=70)
                 
                 if not detected_lines is None:
                     for line in detected_lines:
                         rho, theta = line[0]
-                        print(self.result_image.shape[:2])
                         pt1, pt2 = self.draw_line(self.result_image, theta, rho)
+                        self.line = Line()
                         self.line.pt1.x = pt1[0]
                         self.line.pt1.y = pt1[1]
                         self.line.pt2.x = pt2[0]
                         self.line.pt2.y = pt2[1]
                         self.lines_msg.lines.append(self.line)
 
-                
-                # rospy.loginfo(detected_lines)
-                
                 self.equalized_image = self.bridge.cv2_to_imgmsg(equalized_image, "mono8")
                 self.contour_image = self.bridge.cv2_to_imgmsg(cliped_contour, "8UC1")
                 self.result_image = self.bridge.cv2_to_imgmsg(self.result_image, "rgb8")

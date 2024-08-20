@@ -20,21 +20,19 @@ class CheckLeverCam2():
     def __init__(self):
         self.subs = []
         self.header = None
-        self.lines_msg = None
         self.sub_image = None
+        self.sub_hsv_image = None
         self.sub_lever_rect = None
-        self.memory_under = None
         self.result_image = None
-        self.socket_angle = None
         
-        self.width = 640
-        self.height = 480
-        self.mask_width_half = 16
-        self.mask_height_half = 16
+        self.width = 320
+        self.height = 240
+        self.mask_width_half = 12
+        self.mask_height_half = 14
         self.mask_delta_x = -6
-        self.mask_delta_y = -40
-        self.mask_x = 380
-        self.mask_y = 380
+        self.mask_delta_y = -23
+        self.mask_x = 190
+        self.mask_y = 190
         
         self.bridge = CvBridge()
         self.pub_image = rospy.Publisher('/timer_cam2_rec/lever/around_image/debug_image', Image, queue_size=1)
@@ -43,16 +41,17 @@ class CheckLeverCam2():
 
 
     def subscribe(self):
-        rospy.loginfo("hoge")
         sub_socket_rect = message_filters.Subscriber('/timer_cam2_rec/socket/general_contours/rectangles', RotatedRectArrayStamped)
+        sub_hsv = message_filters.Subscriber('/timer_cam2_rec/lever/hsv_color_filter/image', Image)
         sub_image = message_filters.Subscriber('/timer_cam2/timer_cam_image/image_rect_color', Image)
-        self.subs = [sub_socket_rect, sub_image]
+        self.subs = [sub_socket_rect, sub_hsv, sub_image]
         sync = message_filters.ApproximateTimeSynchronizer(fs=self.subs, queue_size=5, slop=1)
         sync.registerCallback(self.callback)
 
 
-    def callback(self, socket_rect, image):
+    def callback(self, socket_rect, hsv, image):
         self.sub_socket_rect = socket_rect.rects
+        self.sub_hsv_image = self.bridge.imgmsg_to_cv2(hsv, "rgb8")
         self.sub_image = self.bridge.imgmsg_to_cv2(image, "rgb8")
         self.header = image.header
 
@@ -72,16 +71,13 @@ class CheckLeverCam2():
 
             if (self.sub_image is not None):
                 self.result_image = self.sub_image.copy()
-                self.sub_image_copy = self.sub_image.copy()
-                self.memory_angle = None
-                self.socket_angle = None
 
                 if (not self.sub_socket_rect == []):
-                    size_max = 80
+                    size_max = 20
                     use_rect = None
                     for i,rect in enumerate(self.sub_socket_rect):
                         size_buf = rect.size.width * rect.size.height
-                        if size_buf > size_max and rect.center.x > 320 and rect.center.x < 480 and rect.center.y > 300:
+                        if size_buf > size_max and rect.center.x > 160 and rect.center.x < 240 and rect.center.y > 150:
                             size_max = size_buf
                             use_rect = i
                 
@@ -91,14 +87,28 @@ class CheckLeverCam2():
                         mask_x = int(self.sub_socket_rect[use_rect].center.x)
                         mask_y = int(self.sub_socket_rect[use_rect].center.y)
 
-                        self.mask = cv2.rectangle(self.sub_image_copy, (0,0),(self.width,self.height),(0,0,0), -1)
-                        self.mask = cv2.rectangle(self.sub_image_copy, (self.mask_x - self.mask_width_half + self.mask_delta_x, self.mask_y - self.mask_height_half + self.mask_delta_y), (self.mask_x + self.mask_width_half + self.mask_delta_x, self.mask_y + self.mask_height_half + self.mask_delta_y), (255,255,255), -1)
+                        self.mask = np.zeros_like(self.sub_image)
+                        self.mask = cv2.rectangle(self.mask, (self.mask_x - self.mask_width_half + self.mask_delta_x, self.mask_y - self.mask_height_half + self.mask_delta_y), (self.mask_x + self.mask_width_half + self.mask_delta_x, self.mask_y + self.mask_height_half + self.mask_delta_y), (255,255,255), -1)
                         self.result_image = cv2.bitwise_and(self.result_image, self.mask)
-    
-                #image_msg = bridge.cv2_to_imgmsg(image_msg, "bgr8")
+                        self.sub_hsv_image = cv2.bitwise_and(self.sub_hsv_image, self.mask)
+                        image_gray = cv2.cvtColor(self.sub_hsv_image, cv2.COLOR_BGR2GRAY)
+
+                        ret,thresh = cv2.threshold(image_gray,127,255,0)
+                        contours,hierarchy = cv2.findContours(thresh, 1, 2)
+                      
+                        if (not contours == ()):
+                            cnt = max(contours, key=lambda x: cv2.contourArea(x))
+                            rect = cv2.minAreaRect(cnt)
+                            box = cv2.boxPoints(rect)
+                            box = np.int0(box)
+
+                            self.result_image = cv2.rectangle(self.result_image, (box[0][0], box[0][1]), (box[2][0], box[2][1]), (0,0,255), 2, )
+
+
                 self.result_image = self.bridge.cv2_to_imgmsg(self.result_image, "rgb8")
-                self.mask = self.bridge.cv2_to_imgmsg(self.mask, "bgr8")
+                self.mask = self.bridge.cv2_to_imgmsg(self.mask, "rgb8")
     
+                # self.pub_image.publish(self.result_image)
                 self.pub_image.publish(self.result_image)
                 self.pub_mask.publish(self.mask)
 

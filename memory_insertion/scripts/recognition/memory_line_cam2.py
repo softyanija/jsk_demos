@@ -61,7 +61,7 @@ class MemoryLineCam2():
 
             if (self.sub_image is not None):
                 self.result_image = self.sub_image.copy()
-                print()
+
                 if ((not self.sub_memory_lines == []) and (not self.sub_memory_area == [])):
                     self.memory_line = LineArrayStamped()
         

@@ -14,7 +14,7 @@ from std_msgs.msg import Header
 from cv_bridge import CvBridge
 
 
-class MemorySocketCam1():
+class SocketCam1():
 
     def __init__(self):
         self.subs = []
@@ -101,9 +101,9 @@ class MemorySocketCam1():
                         self.memory_under.header = self.header
                         self.memory_under.poses.append(self.memory_under_pose)
 
-                        self.result_image = cv2.circle(self.result_image, (under_x,under_y), 3,(0,0,255),1,4,0)
-                        self.result_image = cv2.line(self.result_image, (under_x,under_y),(top_x,top_y),(0,255,0),1)
-                        self.pub_under.publish(self.memory_under)
+                        # self.result_image = cv2.circle(self.result_image, (under_x,under_y), 3,(0,0,255),1,4,0)
+                        # self.result_image = cv2.line(self.result_image, (under_x,under_y),(top_x,top_y),(0,255,0),1)
+                        # self.pub_under.publish(self.memory_under)
 
                 if (not self.sub_socket_rect.rects == []):
                     size_max = 0.0
@@ -139,7 +139,7 @@ class MemorySocketCam1():
 
                         self.result_image = cv2.rectangle(self.result_image, socket_left_top, socket_right_bottom, (0,255,0),2)
                         self.result_image = cv2.circle(self.result_image, socket_target_point, 2,(255,0,0),2,2,0)
-                        self.result_image = cv2.line(self.result_image, socket_target_point, socket_target_line_end, (0,0,255), 2)                                       
+                        # self.result_image = cv2.line(self.result_image, socket_target_point, socket_target_line_end, (0,0,255), 2)                                       
                         
                 self.result_image = self.bridge.cv2_to_imgmsg(self.result_image, "rgb8")
                 self.pub_image.publish(self.result_image)
@@ -150,8 +150,8 @@ class MemorySocketCam1():
 
 
 if __name__ == "__main__":
-    rospy.init_node('indicate_memory_socket_cam1')
+    rospy.init_node('indicate_socket_cam1')
 
-    memory_socket_cam1 = MemorySocketCam1()
+    socket_cam1 = SocketCam1()
 
-    memory_socket_cam1.run()
+    socket_cam1.run()

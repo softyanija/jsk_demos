@@ -3,13 +3,6 @@
 
 import sys
 import os
-import rospkg
-
-rospack = rospkg.RosPack()
-
-sys.path.append(rospack.get_path("memory_insertion") + "/scripts")
-from recognition import *
-from demo import *
 
 import numpy as np
 from numpy import pi
@@ -48,7 +41,7 @@ def rotate_hand_in_cam(camera_tf, angle_deg, end_coords):
 
     return new_coords
 
-
+"""
 def move_hand_in_cam(camera_tf, translation=np.array([0.05, 0, 0]), k_x, k_y):    
     R_cam = np.array([[0,0,-1],[1,0,0],[0,-1,0]]) # todo
     q_cam_buf = skrobot.coordinates.Coordinates([0,0,0], R_cam)
@@ -58,6 +51,4 @@ def move_hand_in_cam(camera_tf, translation=np.array([0.05, 0, 0]), k_x, k_y):
     robot.larm.move_end_pos(translation_robot, "world")
 
     return translation_robot
-
-
-
+"""

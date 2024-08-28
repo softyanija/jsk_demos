@@ -14,10 +14,12 @@ from cv_bridge import CvBridge
 
 
 class SocketLineCam2():
+
     def __init__(self):
         self.subs = []
         self.header = None
         self.lines_msg = None
+        self.socket_line = None
         self.sub_image = None
         self.socket_line = None
         self.bridge = CvBridge()
@@ -27,8 +29,6 @@ class SocketLineCam2():
          
 
     def subscribe(self):
-        #sub_lines = message_filters.Subscriber("/timer_cam2_rec/socket/hough_lines/lines", LineArrayStamped)
-
         sub_lines = message_filters.Subscriber("/timer_cam2_rec/socket/detected_lines", LineArrayStamped)
         sub_image = message_filters.Subscriber("/timer_cam2/timer_cam_image/image_rect_color", Image)
         self.subs = [sub_lines, sub_image]
@@ -82,8 +82,8 @@ class SocketLineCam2():
             else:
                 rospy.logwarn("didn't recieve image")
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
     rospy.init_node('socket_line_cam2')
     socket_line_cam2 = SocketLineCam2()
     socket_line_cam2.run()

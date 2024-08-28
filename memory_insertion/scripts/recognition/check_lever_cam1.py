@@ -57,13 +57,13 @@ class CheckLeverCam1():
         rate = rospy.Rate(2)
         rospy.loginfo("start check_lever_cam2")
     
-    if (not rect_msg.rects == []):
-        while not rospy.is_shutdown():
-            try:
-                rate.sleep()
-            except rospy.ROSTimeMovedBackwardsException as e:
-                rospy.logwarn("cought {}".format(e))
-                pass
+        if (not rect_msg.rects == []):
+            while not rospy.is_shutdown():
+                try:
+                    rate.sleep()
+                except rospy.ROSTimeMovedBackwardsException as e:
+                    rospy.logwarn("cought {}".format(e))
+                    pass
 
             if (self.sub_image is not None):
                 self.result_image = self.sub_image.copy()
@@ -90,17 +90,9 @@ class CheckLeverCam1():
                             image_msg = bridge.cv2_to_imgmsg(image_msg, "bgr8")
                             mask = bridge.cv2_to_imgmsg(mask, "bgr8")
     
-    pub_image.publish(image_msg)
-    pub_mask.publish(mask)
+        pub_image.publish(image_msg)
+        pub_mask.publish(mask)
 
-
-
-
-
-
-sync = message_filters.ApproximateTimeSynchronizer([sub_img,sub_rect], 10, 0.5)
-sync.registerCallback(callback)
-rospy.spin()
 
 if __name__ == "__main__":
     rospy.init_node('check_lever_cam1')

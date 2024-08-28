@@ -8,13 +8,14 @@ import rospkg
 rospack = rospkg.RosPack()
 
 sys.path.append(rospack.get_path("memory_insertion") + "/scripts")
-from recognition import *
+from recognition import MemorySocketCam1,MemorySocketCam2,MemoryEdgeCam2,MemoryLineCam2,SocketLineCam2,DetectLinesCam2,CheckLeverCam1,CheckLeverCam2,ApriltagHandPos,SetCameraTf
 from demo import *
 
 import numpy as np
 import rospy
 import skrobot
 import tf
+import tf2_ros
 import time
 
 from geometry_msgs.msg import PoseStamped, PoseArray, WrenchStamped
@@ -49,13 +50,13 @@ larm_link_list = [
 rarm_end_coords = skrobot.coordinates.CascadedCoords(parent=robot.r_gripper_tool_frame, name="rarm_end_coords")
 rarm_move_target = rarm_end_coords
 rarm_link_list = [
-    r.r_shoulder_pan_link,
-    r.r_shoulder_lift_link,
-    r.r_upper_arm_roll_link,
-    r.r_elbow_flex_link,
-    r.r_forearm_roll_link, 
-    r.r_wrist_flex_link,
-    r.r_wrist_roll_link]
+    robot.r_shoulder_pan_link,
+    robot.r_shoulder_lift_link,
+    robot.r_upper_arm_roll_link,
+    robot.r_elbow_flex_link,
+    robot.r_forearm_roll_link,
+    robot.r_wrist_flex_link,
+    robot.r_wrist_roll_link]
 
 
 #move-to-init()
@@ -138,6 +139,17 @@ rospy.sleep(1)
 #(send *ri* :wait-interpolation)
 
 #measure-socket-line-cam2()
+socket_line_cam2 = SocketLineCam2()
+
+while True:
+    if socket_line_cam2.socket_line.lines != []:
+        socket_line = socket_line_cam2.socket_line.lines[0]
+        angle = math.degrees(math.atan( - (socket_line.pt2.y - socket_line.pt1.y) / (socket_line.pt2.x - socket_line.pt1.x)))
+        
+    
+    
+
+
 #pick-memory()
 #adjust-angle-cam2()
 
@@ -145,7 +157,7 @@ rospy.sleep(1)
 
 memory_socket_cam1 = MemorySocketCam1()
 
-diff_angle = 3
+diff_angle_tr = 3
 
 while abs(diff_angle) < 3:
     if (memory_socket_cam1.memory_angle is not None) and  (memory_socket_cam1.socket_angle is not None):
@@ -166,15 +178,25 @@ while abs(diff_angle) < 3:
 rospy.loginfo("measuring cam1-pos-param")
 
 #adjust-pos-cam1()
+rospy.loginfo("adjusting pos-cam1")
 
 #get-cam2-pos-param()
 rospy.loginfo("measuring cam2-pos-param")
-#adjust-pos-cam2()
 
+
+#adjust-pos-cam2()
+rospy.loginfo("adjusting pos-cam2")
+
+
+
+#get-cam2-pos-param()
+rospy.loginfo("measuring cam2-pos-param again")
 
 #adjust-pos-cam1()
+rospy.loginfo("adjusting pos-cam1 again")
 
 #set-memory()
+
 
 #push_memory()
 

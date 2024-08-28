@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import rospy
 import tf
 import tf2_ros
@@ -10,10 +12,10 @@ from geometry_msgs.msg import *
 from dynamic_tf_publisher.srv import SetDynamicTF
 
 
-class SetCameraTf:
+class SetCameraTf():
 
-    def __init__(self):
-        self.camera_name = None
+    def __init__(self, camera_name):
+        self.camera_name = camera_name
         self.estimated_tf = None
         self.Rate = 3
         self.tf_hz = 10
@@ -28,7 +30,7 @@ class SetCameraTf:
         tf_listener = tf2_ros.TransformListener(tf_buffer)
         try:
             b2g = tf_buffer.lookup_transform("base_link", "l_gripper_front", rospy.Time(), rospy.Duration(3))
-            g2c = tf_buffer.lookup_transform("l_gripper_front_apriltag", "camera_link", rospy.Time(), rospy.Duration(3))
+            g2c = tf_buffer.lookup_transform("l_gripper_front_apriltag", self.camera_name + "_link", rospy.Time(), rospy.Duration(3))
             base_to_gripper = skrobot.coordinates.Coordinates([b2g.transform.translation.x,
                                                                b2g.transform.translation.y,
                                                                b2g.transform.translation.z],

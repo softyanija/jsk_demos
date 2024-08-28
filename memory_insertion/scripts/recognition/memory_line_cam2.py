@@ -46,7 +46,7 @@ class MemoryLineCam2():
         self.sub_memory_area = area.poses
         self.sub_image = self.bridge.imgmsg_to_cv2(image, "rgb8")
         self.header = image.header
-        # memory_line = LineArrayStamped()
+
 
     def run(self):
         rate = rospy.Rate(2)
@@ -61,7 +61,6 @@ class MemoryLineCam2():
 
             if (self.sub_image is not None):
                 self.result_image = self.sub_image.copy()
-
                 if ((not self.sub_memory_lines == []) and (not self.sub_memory_area == [])):
                     self.memory_line = LineArrayStamped()
         

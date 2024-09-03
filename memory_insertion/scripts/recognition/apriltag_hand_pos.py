@@ -129,7 +129,6 @@ class ApriltagHandPos():
 
                         self.hand_pos = (int(x_sum/4), int(y_sum/4))
                         self.result_image = cv2.circle(self.result_image, self.hand_pos, 3,(255,0,0),4,4,0)
-                        rospy.loginfo(f"AprilTag center in image: x={int(self.hand_pos[0])}, y={self.hand_pos[1]}")
 
             self.result_image = self.bridge.cv2_to_imgmsg(self.result_image, "rgb8")
             self.pub_image.publish(self.result_image)

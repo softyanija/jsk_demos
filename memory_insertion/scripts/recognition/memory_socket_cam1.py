@@ -28,6 +28,7 @@ class MemorySocketCam1():
         self.memory_under = None
         self.memory_angle = None
         self.socket_angle = None
+        self.y_offset = 8
         self.bridge = CvBridge()
         self.pub_under = rospy.Publisher('/timer_cam1_rec/memory/memory_under', PoseArray, queue_size=1)
         self.pub_image = rospy.Publisher('/timer_cam1_rec/memory/memory_under/debug_image', Image, queue_size=1)
@@ -63,6 +64,9 @@ class MemorySocketCam1():
             except rospy.ROSTimeMovedBackwardsException as e:
                 rospy.logwarn("cought {}".format(e))
                 pass
+
+            self.memory_under_pose = Pose()
+            self.socket_target_point = None
 
             if (self.sub_image is not None):
                 self.result_image = self.sub_image.copy()
@@ -116,29 +120,25 @@ class MemorySocketCam1():
 
                     if use_rect is not None:
                         self.socket_pose = Pose()
-                        #memory_len = max(self.sub_memory_rect.rects[use_rect].size.width, self.sub_memory_rect.rects[use_rect].size.height)
                         socket_center = self.sub_socket_rect.rects[use_rect].center
                         socket_size = self.sub_socket_rect.rects[use_rect].size
                         socket_angle = self.sub_socket_rect.rects[use_rect].angle
+
                         if socket_angle < -45:
                             socket_angle = socket_angle + 90
                              
                         self.socket_angle = socket_angle
-                        # socket_left_top = (int(socket_center.x - socket_size.width/2), int(socket_center.y - socket_size.height/2))
-                        # socket_right_bottom = (int(socket_center.x + socket_size.width/2), int(socket_center.y + socket_size.height/2))
-                        # if socket_size.height
-
                         socket_right_bottom = (int(socket_center.x - socket_size.width/2 * math.cos(math.radians(socket_angle)) - socket_size.height/2 * math.sin(math.radians(socket_angle))),
-                                           int(socket_center.y - socket_size.width/2 * math.sin(math.radians(socket_angle)) - socket_size.height/2 * math.cos(math.radians(socket_angle))))
+                                               int(socket_center.y - socket_size.width/2 * math.sin(math.radians(socket_angle)) - socket_size.height/2 * math.cos(math.radians(socket_angle))))
                         socket_left_top = (int(socket_center.x + socket_size.width/2 * math.cos(math.radians(socket_angle)) + socket_size.height/2 * math.sin(math.radians(socket_angle))),
-                                               int(socket_center.y + socket_size.width/2 * math.sin(math.radians(socket_angle)) + socket_size.height/2 * math.cos(math.radians(socket_angle))))
-                        socket_target_point = (int(socket_center.x + socket_size.width/2 * math.sin(math.radians(socket_angle))),
-                                               int(socket_center.y - socket_size.height/2 * math.cos(math.radians(socket_angle))))
+                                           int(socket_center.y + socket_size.width/2 * math.sin(math.radians(socket_angle)) + socket_size.height/2 * math.cos(math.radians(socket_angle))))
+                        self.socket_target_point = (int(socket_center.x + socket_size.width/2 * math.sin(math.radians(socket_angle))),
+                                               int(socket_center.y - socket_size.height/2 * math.cos(math.radians(socket_angle)) - self.y_offset * math.cos(math.radians(socket_angle))))
                         socket_target_line_end = (int(socket_center.x + socket_size.width * math.sin(math.radians(socket_angle))),
-                                               int(socket_center.y - socket_size.height * math.cos(math.radians(socket_angle))))
+                                                  int(socket_center.y - socket_size.height * math.cos(math.radians(socket_angle)) - self.y_offset * math.cos(math.radians(socket_angle)) ))
 
                         self.result_image = cv2.rectangle(self.result_image, socket_left_top, socket_right_bottom, (0,255,0),2)
-                        self.result_image = cv2.circle(self.result_image, socket_target_point, 2,(255,0,0),2,2,0)
+                        self.result_image = cv2.circle(self.result_image, self.socket_target_point, 2,(255,0,0),2,2,0)
                         self.result_image = cv2.line(self.result_image, socket_target_point, socket_target_line_end, (0,0,255), 2)                                       
                         
                 self.result_image = self.bridge.cv2_to_imgmsg(self.result_image, "rgb8")

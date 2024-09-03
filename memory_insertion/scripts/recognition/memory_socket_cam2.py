@@ -130,33 +130,33 @@ class MemorySocketCam2():
                         self.socket_target_point_b.header = self.header
                         self.socket_pose = Pose()
                         #memory_len = max(self.sub_memory_rect.rects[use_rect].size.width, self.sub_memory_rect.rects[use_rect].size.height)
-                        socket_center = self.sub_socket_rect.rects[use_rect].center
-                        socket_size = self.sub_socket_rect.rects[use_rect].size
+                        self.socket_center = self.sub_socket_rect.rects[use_rect].center
+                        self.socket_size = self.sub_socket_rect.rects[use_rect].size
                         socket_angle = self.sub_socket_rect.rects[use_rect].angle
 
                         self.socket_angle = socket_angle
 
                         if self.sub_socket_rect.rects[use_rect].size.width > self.sub_socket_rect.rects[use_rect].size.height:
                             self.socket_angle = socket_angle + 90
-                            socket_right_bottom = (int(socket_center.x - socket_size.width/2 * math.sin(math.radians(self.socket_angle)) + socket_size.height/2 * math.cos(math.radians(self.socket_angle))),
-                                                   int(socket_center.y + socket_size.width/2 * math.cos(math.radians(self.socket_angle)) + socket_size.height/2 * math.cos(math.radians(self.socket_angle))))
-                            socket_left_top = (int(socket_center.x + socket_size.width/2 * math.sin(math.radians(self.socket_angle)) - socket_size.height/2 * math.cos(math.radians(self.socket_angle))),
-                                               int(socket_center.y - socket_size.width/2 * math.cos(math.radians(self.socket_angle)) - socket_size.height/2 * math.cos(math.radians(self.socket_angle))))
+                            socket_right_bottom = (int(self.socket_center.x - self.socket_size.width/2 * math.sin(math.radians(self.socket_angle)) + self.socket_size.height/2 * math.cos(math.radians(self.socket_angle))),
+                                                   int(self.socket_center.y + self.socket_size.width/2 * math.cos(math.radians(self.socket_angle)) + self.socket_size.height/2 * math.cos(math.radians(self.socket_angle))))
+                            socket_left_top = (int(self.socket_center.x + self.socket_size.width/2 * math.sin(math.radians(self.socket_angle)) - self.socket_size.height/2 * math.cos(math.radians(self.socket_angle))),
+                                               int(self.socket_center.y - self.socket_size.width/2 * math.cos(math.radians(self.socket_angle)) - self.socket_size.height/2 * math.cos(math.radians(self.socket_angle))))
                             
                         else:
                             self.socket_angle = socket_angle
-                            socket_right_bottom = (int(socket_center.x - socket_size.height/2 * math.sin(math.radians(self.socket_angle)) + socket_size.width/2 * math.cos(math.radians(self.socket_angle))),
-                                                   int(socket_center.y + socket_size.height/2 * math.cos(math.radians(self.socket_angle)) + socket_size.width/2 * math.cos(math.radians(self.socket_angle))))
-                            socket_left_top = (int(socket_center.x + socket_size.height/2 * math.sin(math.radians(self.socket_angle)) - socket_size.width/2 * math.cos(math.radians(self.socket_angle))),
-                                               int(socket_center.y - socket_size.height/2 * math.cos(math.radians(self.socket_angle)) - socket_size.width/2 * math.cos(math.radians(self.socket_angle))))
+                            socket_right_bottom = (int(self.socket_center.x - self.socket_size.height/2 * math.sin(math.radians(self.socket_angle)) + self.socket_size.width/2 * math.cos(math.radians(self.socket_angle))),
+                                                   int(self.socket_center.y + self.socket_size.height/2 * math.cos(math.radians(self.socket_angle)) + self.socket_size.width/2 * math.cos(math.radians(self.socket_angle))))
+                            socket_left_top = (int(self.socket_center.x + self.socket_size.height/2 * math.sin(math.radians(self.socket_angle)) - self.socket_size.width/2 * math.cos(math.radians(self.socket_angle))),
+                                               int(self.socket_center.y - self.socket_size.height/2 * math.cos(math.radians(self.socket_angle)) - self.socket_size.width/2 * math.cos(math.radians(self.socket_angle))))
 
                         offset_vector = (- self.offset_x * math.cos(math.radians(self.socket_angle)) + self.offset_y * math.sin(math.radians(self.socket_angle)),
                                             + self.offset_x * math.sin(math.radians(self.socket_angle)) - self.offset_y * math.cos(math.radians(self.socket_angle)))
                         target_vector_scolor = 15
-                        socket_target_point = (int(socket_center.x + offset_vector[0]),
-                                               int(socket_center.y + offset_vector[1]))
-                        socket_target_line_end = (int(socket_target_point[0] - target_vector_scolor * math.sin(math.radians(self.socket_angle))),
-                                                  int(socket_target_point[1] - target_vector_scolor * math.cos(math.radians(self.socket_angle))))
+                        self.socket_target_point = (int(self.socket_center.x + offset_vector[0]),
+                                                    int(self.socket_center.y + offset_vector[1]))
+                        socket_target_line_end = (int(self.socket_target_point[0] - target_vector_scolor * math.sin(math.radians(self.socket_angle))),
+                                                  int(self.socket_target_point[1] - target_vector_scolor * math.cos(math.radians(self.socket_angle))))
 
 
                         self.socket_pose.position.x = socket_left_top[0]
@@ -169,8 +169,8 @@ class MemorySocketCam2():
                         self.socket_target_point_b.poses.append(self.socket_pose)
 
                         self.result_image = cv2.rectangle(self.result_image, socket_left_top, socket_right_bottom, (0,255,0),2)
-                        self.result_image = cv2.line(self.result_image, socket_target_point, socket_target_line_end, (0,255,0), 2)
-                        self.result_image = cv2.circle(self.result_image, socket_target_point, 3,(255,0,0),-1,2,0)
+                        self.result_image = cv2.line(self.result_image, self.socket_target_point, socket_target_line_end, (0,255,0), 2)
+                        self.result_image = cv2.circle(self.result_image, self.socket_target_point, 3,(255,0,0),-1,2,0)
                      
 
                 self.result_image = self.bridge.cv2_to_imgmsg(self.result_image, "rgb8")

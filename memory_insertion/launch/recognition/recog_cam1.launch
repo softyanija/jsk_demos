@@ -8,11 +8,11 @@
       <include file="$(find opencv_apps)/launch/hsv_color_filter.launch">
 		<arg name="image" value="$(arg INPUT)"/>
 		<arg name="h_limit_max" default="27"/>
-		<arg name="h_limit_min" default="345"/>
-		<arg name="s_limit_max" default="215"/>
-		<arg name="s_limit_min" default="26"/>
-		<arg name="v_limit_max" default="200"/>
-		<arg name="v_limit_min" default="0"/>
+		<arg name="h_limit_min" default="340"/>
+		<arg name="s_limit_max" default="160"/>
+		<arg name="s_limit_min" default="31"/>
+		<arg name="v_limit_max" default="204"/>
+		<arg name="v_limit_min" default="97"/>
       </include>
 
       <include file="$(find opencv_apps)/launch/general_contours.launch">
@@ -77,7 +77,4 @@
       </include>
     </group>
   </group>
-
-  <node name="check_lever_cam1" pkg="memory_insertion" type="check_lever_cam1.py" />
-  <node name="indicate_memory_line_cam1" pkg="assemble_table_pr2" type="indicate_memory_edge_cam1.py" />
 </launch>

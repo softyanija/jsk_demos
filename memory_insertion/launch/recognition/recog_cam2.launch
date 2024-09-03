@@ -10,10 +10,10 @@
 		<arg name="image" value="$(arg INPUT)"/>
 		<arg name="h_limit_max" default="84"/>
 		<arg name="h_limit_min" default="14"/>
-		<arg name="s_limit_max" default="256"/>
-		<arg name="s_limit_min" default="15"/>
-		<arg name="v_limit_max" default="256"/>
-		<arg name="v_limit_min" default="44"/>
+		<arg name="s_limit_max" default="70"/>
+		<arg name="s_limit_min" default="25"/>
+		<arg name="v_limit_max" default="160"/>
+		<arg name="v_limit_min" default="80"/>
 	  </include>
 
 	  <include file="$(find opencv_apps)/launch/general_contours.launch">
@@ -29,9 +29,6 @@
         <arg name="minLineLength" value="95" />
         <arg name="maxLineGrap" value="50" />
 	  </include>
-
-      <node name="pub_memory_edge" pkg="memory_insertion" type="pub_memory_edge.py" />
-      <node name="pub_memory_line" pkg="memory_insertion" type="memory_line.py" />
 
 	  <group if="$(arg gui)">
 		<node name="image_view_fg"
@@ -120,10 +117,5 @@
 		<arg name="debug_view" value="$(arg debug_view)"/>
       </include>
     </group>
-    
   </group>
-  <node name="pub_socket_line" pkg="memory_insertion" type="socket_line.py" />
-  <node name="check_lever" pkg="memory_insertion" type="check_lever.py" />
-  <node name="aruco_hand" pkg="memory_insertion" type="aruco_hand.py" />
-  
 </launch>

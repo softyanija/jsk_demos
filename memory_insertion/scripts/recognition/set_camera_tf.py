@@ -29,8 +29,8 @@ class SetCameraTf():
         tf_buffer = tf2_ros.Buffer()
         tf_listener = tf2_ros.TransformListener(tf_buffer)
         try:
-            b2g = tf_buffer.lookup_transform("base_link", "l_gripper_front", rospy.Time(), rospy.Duration(3))
-            g2c = tf_buffer.lookup_transform("l_gripper_front_apriltag", self.camera_name + "_link", rospy.Time(), rospy.Duration(3))
+            b2g = tf_buffer.lookup_transform("base_link", "r_gripper_front", rospy.Time(), rospy.Duration(3))
+            g2c = tf_buffer.lookup_transform(self.camera_name + "_r_gripper_front_apriltag", self.camera_name + "_color_optical_frame", rospy.Time(), rospy.Duration(3))
             base_to_gripper = skrobot.coordinates.Coordinates([b2g.transform.translation.x,
                                                                b2g.transform.translation.y,
                                                                b2g.transform.translation.z],
@@ -51,7 +51,7 @@ class SetCameraTf():
             
             new_tf = TransformStamped()
             new_tf.header.frame_id = "base_link"
-            new_tf.child_frame_id = self.camera_name + "_color_optical_frame"
+            new_tf.child_frame_id = self.camera_name + "_estimated_camera_frame"
             new_tf.transform.translation.x = base_to_camera.translation[0]
             new_tf.transform.translation.y = base_to_camera.translation[1]
             new_tf.transform.translation.z = base_to_camera.translation[2]

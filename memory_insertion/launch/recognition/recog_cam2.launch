@@ -12,7 +12,7 @@
 		<arg name="h_limit_min" default="14"/>
 		<arg name="s_limit_max" default="70"/>
 		<arg name="s_limit_min" default="25"/>
-		<arg name="v_limit_max" default="160"/>
+		<arg name="v_limit_max" default="230"/>
 		<arg name="v_limit_min" default="80"/>
 	  </include>
 
@@ -59,9 +59,12 @@
 		<arg name="hough_type" value="1" />
 		<arg name="threshold" value="100"/>
 		<arg name="rho" value="4.0"/>
-        <arg name="minLineLength" value="110"/>
+        <arg name="minLineLength" value="70"/>
         <arg name="maxLineGrap" value="20" />
 	  </include>
+
+      
+
 	</group>
 
 	<node name="add_mask_image"
@@ -86,7 +89,8 @@
     
     <group ns="lever">
       <include file="$(find opencv_apps)/launch/hsv_color_filter.launch">
-		<arg name="image" value="around_image"/>
+		<!-- <arg name="image" value="around_image"/> -->
+        <arg name="image" value="$(arg INPUT)"/>
 		<arg name="h_limit_max" default="295"/>
 		<arg name="h_limit_min" default="196"/>
 		<arg name="s_limit_max" default="256"/>
@@ -118,4 +122,7 @@
       </include>
     </group>
   </group>
+
+  <node name="detect_lines_cam2" pkg="memory_insertion" type="detect_lines_cam2.py" />
+  <node name="memory_socket_cam2_background" pkg="memory_insertion" type="memory_socket_cam2.py" />
 </launch>

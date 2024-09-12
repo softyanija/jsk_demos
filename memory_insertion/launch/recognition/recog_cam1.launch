@@ -77,4 +77,6 @@
       </include>
     </group>
   </group>
+
+   <node name="memory_socket_cam1" pkg="memory_insertion" type="memory_socket_cam1.py" />
 </launch>

@@ -59,33 +59,25 @@ class ApriltagHandPos():
         self.sub_tags = tags.detections
 
 
-    def run(self):
-        rate = rospy.Rate(2)
+    def oneshot(self):
+        self.hand_pos = None
+        # if self.camera_matrix is None:
+        #     rospy.logwarn("Camera_catrix is not yet availabe")
+        #     continue
 
-        while not rospy.is_shutdown():
-            try:
-                rate.sleep()
-            except rospy.ROSTimeMovedBackwardsException as e:
-                rospy.logwarn("cought {}".format(e))
-                pass
+        # if self.dist_coeffs is None:
+        #     rospy.logwarn("Dist_coeffs is not yet availabe")
+        #     continue
 
-            self.hand_pos = None
-            if self.camera_matrix is None:
-                rospy.logwarn("Camera_catrix is not yet availabe")
-                continue
+        # if self.sub_image is None :
+        #     rospy.logwarn("Camera image is not yet availabe")
+        #     continue
 
-            if self.dist_coeffs is None:
-                rospy.logwarn("Dist_coeffs is not yet availabe")
-                continue
+        # if self.sub_tags is None:
+        #     rospy.logwarn("Tag is not yet availabe")
+        #     continue
 
-            if self.sub_image is None :
-                rospy.logwarn("Camera image is not yet availabe")
-                continue
-
-            if self.sub_tags is None:
-                rospy.logwarn("Tag is not yet availabe")
-                continue
-
+        if (self.camera_matrix is not None) and (self.dist_coeffs is not None) and (self.sub_image is not None) and (self.sub_tags is not None):
             self.hand_pos = PoseArray()
             self.hand_pos.header = self.header
             self.result_image = self.sub_image.copy()
@@ -132,11 +124,26 @@ class ApriltagHandPos():
 
             self.result_image = self.bridge.cv2_to_imgmsg(self.result_image, "rgb8")
             self.pub_image.publish(self.result_image)
+        else:
+            rospy.logwarn("didn't get some topics")
+
+
+    def loop(self):
+        rate = rospy.Rate(2)
+
+        while not rospy.is_shutdown():
+            try:
+                rate.sleep()
+            except rospy.ROSTimeMovedBackwardsException as e:
+                rospy.logwarn("cought {}".format(e))
+                pass
+            
+            self.oneshot()
         
 
 if __name__ == '__main__':
     rospy.init_node('apriltag_hand_pos')
     apriltag_hand_pos = ApriltagHandPos()
-    apriltag_hand_pos.run()
+    apriltag_hand_pos.loop()
     
 

@@ -8,7 +8,7 @@ import rospkg
 rospack = rospkg.RosPack()
 
 sys.path.append(rospack.get_path("memory_insertion") + "/scripts")
-from recognition import *
+from recognition import MemorySocketCam1,MemorySocketCam2,MemoryEdgeCam2,MemoryLineCam2,SocketLineCam2,DetectLinesCam2,CheckLeverCam1,CheckLeverCam2,ApriltagHandPos,SetCameraTf
 from demo import *
 
 import numpy as np

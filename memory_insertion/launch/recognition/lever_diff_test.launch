@@ -1,0 +1,40 @@
+<launch>
+  <arg name="INPUT" default="/timer_cam2_rec/lever/around_image"/>
+  <arg name="gui" default="true" />
+  <param name="/use_sim_time" value="true" />
+  
+
+  <include file="$(find opencv_apps)/launch/hsv_color_filter.launch">
+		<arg name="image" value="$(arg INPUT)"/>
+		<arg name="h_limit_max" default="327"/>
+		<arg name="h_limit_min" default="213"/>
+		<arg name="s_limit_max" default="198"/>
+		<arg name="s_limit_min" default="0"/>
+		<arg name="v_limit_max" default="256"/>
+		<arg name="v_limit_min" default="119"/>
+  </include>
+  
+  <node name="background_subtraction"
+		pkg="jsk_perception" type="background_substraction">
+	<!-- <remap from="~image" to="$(arg INPUT)" /> -->
+    <remap from="~image" to="/hsv_color_filter/image" />
+  </node>
+
+  <include file="$(find opencv_apps)/launch/threshold.launch">
+    <arg name="image" value="background_subtraction/output"/>
+    <arg name="threshold" value="100"/>
+  </include>
+
+  <!-- <include file="$(find opencv_apps)/launch/smoothing.launch"> -->
+  <!--   <arg name="image" value="threshold/image"/> -->
+  <!--   <arg name="kernel_size" value="3"/> -->
+  <!-- </include> -->
+  
+  <group if="$(arg gui)">
+	<node name="image_view_fg"
+		  pkg="image_view" type="image_view">
+	  <remap from="image" to="background_subtraction/output"/>
+	</node>
+  </group>
+
+</launch>

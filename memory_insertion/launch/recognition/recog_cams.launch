@@ -1,0 +1,4 @@
+<launch>
+  <include file="$(find memory_insertion)/launch/recognition/recog_cam1.launch" />
+  <include file="$(find memory_insertion)/launch/recognition/recog_cam2.launch" />
+</launch>

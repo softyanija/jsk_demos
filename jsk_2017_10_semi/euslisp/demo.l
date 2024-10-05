@@ -1,2 +1,0 @@
-;;
-(print ";; (demo) start demo")

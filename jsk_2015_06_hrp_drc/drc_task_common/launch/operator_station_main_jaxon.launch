@@ -1,6 +1,0 @@
-<launch>
-  <arg name="ik_server_launch" default="jaxon-ik-server.launch" />
-  <include file="$(find drc_task_common)/launch/operator_station_main.launch" >
-    <arg name="ik_server_launch" value="$(arg ik_server_launch)" />
-  </include>
-</launch>

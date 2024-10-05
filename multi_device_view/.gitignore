@@ -1,0 +1,6 @@
+scripts/debug_image/
+
+# *.jpg
+# *.png
+
+!scripts/template_image/

@@ -1,5 +1,0 @@
-apps:
-  - app: detect_cans_in_fridge_201202/pr2_fridge_demo
-    display: PR2 fetches can from fridge
-  - app: detect_cans_in_fridge_201202/pick_object
-    display: PR2 fetches a can from fridge with voice command
